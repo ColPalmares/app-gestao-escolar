@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Gestão Escolar</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { color: #1a73e8; margin-top: 0; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background-color: #1557b0; }
+        .hidden { display: none; }
+        .loading { text-align: center; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- TELA DE LOGIN SIMULADA (MVP) -->
+    <div id="tela-login">
+        <h2>Acesso de Funcionários</h2>
+        <p style="text-align: center; color: #666; font-size: 14px;">(Simulação de SSO - Digite seu e-mail institucional)</p>
+        <div class="form-group">
+            <input type="email" id="email-login" placeholder="seu.nome@colegio.com.br" required>
+        </div>
+        <button onclick="fazerLogin()">Entrar</button>
+    </div>
+
+    <!-- TELA DO APLICATIVO -->
+    <div id="tela-app" class="hidden">
+        <h2>Autorização de Saída</h2>
+        <p id="msg-bem-vindo" style="color: #666; font-size: 14px; text-align: center;"></p>
+        
+        <div id="carregando" class="loading">Carregando lista de alunos...</div>
+
+        <div id="formulario" class="hidden">
+            <div class="form-group">
+                <label>Data da Saída:</label>
+                <input type="date" id="campo-data" required>
+            </div>
+
+            <div class="form-group">
+                <label>Aluno:</label>
+                <select id="campo-aluno" onchange="preencherRA()">
+                    <option value="">Selecione um aluno...</option>
+                    <!-- Os alunos virão da planilha via API -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>RA:</label>
+                <input type="text" id="campo-ra" readonly style="background-color: #e9ecef;">
+            </div>
+
+            <div class="form-group">
+                <label>Série/Ano:</label>
+                <select id="campo-serie">
+                    <option value="">Selecione...</option>
+                    <option value="Maternal 1">Maternal 1</option><option value="Maternal 2">Maternal 2</option><option value="Maternal 3">Maternal 3</option>
+                    <option value="Pré 1">Pré 1</option><option value="Pré 2">Pré 2</option>
+                    <option value="1º Ano">1º Ano</option><option value="2º Ano">2º Ano</option><option value="3º Ano">3º Ano</option><option value="4º Ano">4º Ano</option><option value="5º Ano">5º Ano</option>
+                    <option value="6º Ano">6º Ano</option><option value="7º Ano">7º Ano</option><option value="8º Ano">8º Ano</option><option value="9º Ano">9º Ano</option>
+                    <option value="1ª Série">1ª Série (EM)</option><option value="2ª Série">2ª Série (EM)</option><option value="3ª Série">3ª Série (EM)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tipo de Autorização:</label>
+                <select id="campo-tipo">
+                    <option value="Pontual">Pontual</option>
+                    <option value="Permanente">Permanente</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Descrição / Motivo:</label>
+                <textarea id="campo-descricao" rows="3" placeholder="Digite os detalhes da saída..."></textarea>
+            </div>
+
+            <button onclick="enviarDados()" id="btn-salvar">Salvar Registro</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // === COLOQUE O SEU URL DO GOOGLE APPS SCRIPT ABAIXO ===
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwT6wFmQ2qXiaHus3QpWghtrvUS5Gw1U1tmAeSGKONp7PdA3G6No3ntgW7UgQrKKt5W1g/exec';
+    
+    let usuarioLogado = "";
+    let listaDeAlunos = [];
+
+    // 1. Simula o Login
+    function fazerLogin() {
+        const email = document.getElementById('email-login').value;
+        if (!email.includes('@')) { alert("Digite um e-mail válido."); return; }
+        
+        usuarioLogado = email;
+        document.getElementById('tela-login').classList.add('hidden');
+        document.getElementById('tela-app').classList.remove('hidden');
+        document.getElementById('msg-bem-vindo').innerText = "Logado como: " + usuarioLogado;
+        
+        buscarAlunos();
+    }
+
+    // 2. Busca a lista de alunos da sua planilha Base_Alunos
+    function buscarAlunos() {
+        fetch(API_URL + '?acao=buscarAlunos')
+            .then(response => response.json())
+            .then(alunos => {
+                listaDeAlunos = alunos;
+                const select = document.getElementById('campo-aluno');
+                alunos.forEach(aluno => {
+                    const option = document.createElement('option');
+                    option.value = aluno.nome;
+                    option.text = aluno.nome;
+                    select.appendChild(option);
+                });
+                document.getElementById('carregando').classList.add('hidden');
+                document.getElementById('formulario').classList.remove('hidden');
+            })
+            .catch(error => {
+                document.getElementById('carregando').innerText = "Erro ao carregar alunos. Verifique o URL da API.";
+                console.error(error);
+            });
+    }
+
+    // 3. Puxa o RA automaticamente quando o nome é selecionado
+    function preencherRA() {
+        const nomeSelecionado = document.getElementById('campo-aluno').value;
+        const aluno = listaDeAlunos.find(a => a.nome === nomeSelecionado);
+        document.getElementById('campo-ra').value = aluno ? aluno.ra : "";
+    }
+
+    // 4. Envia os dados para a planilha
+    function enviarDados() {
+        const btn = document.getElementById('btn-salvar');
+        btn.innerText = "Salvando...";
+        btn.disabled = true;
+
+        const dados = {
+            modulo: 'autorizacao_saida',
+            emailUsuario: usuarioLogado,
+            dataSaida: document.getElementById('campo-data').value,
+            nome: document.getElementById('campo-aluno').value,
+            ra: document.getElementById('campo-ra').value,
+            serie: document.getElementById('campo-serie').value,
+            tipo: document.getElementById('campo-tipo').value,
+            descricao: document.getElementById('campo-descricao').value
+        };
+
+        // Validação básica
+        if(!dados.dataSaida || !dados.nome || !dados.serie) {
+            alert("Preencha os campos obrigatórios (Data, Aluno e Série).");
+            btn.innerText = "Salvar Registro";
+            btn.disabled = false;
+            return;
+        }
+
+        fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Evita bloqueios de segurança do navegador no Google
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        }).then(() => {
+            alert("Registro salvo com sucesso na planilha!");
+            // Limpa o formulário
+            document.getElementById('campo-data').value = "";
+            document.getElementById('campo-aluno').value = "";
+            document.getElementById('campo-ra').value = "";
+            document.getElementById('campo-serie').value = "";
+            document.getElementById('campo-descricao').value = "";
+            
+            btn.innerText = "Salvar Registro";
+            btn.disabled = false;
+        }).catch(error => {
+            alert("Erro ao salvar. Tente novamente.");
+            console.error(error);
+            btn.innerText = "Salvar Registro";
+            btn.disabled = false;
+        });
+    }
+</script>
+</body>
+</html>

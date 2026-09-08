@@ -66,7 +66,7 @@
             <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirMenuSaida()">Autorização de Saída</button>
             <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirMenuFrequencia()">Controle de Frequência / Faltas</button>
             <button id="btn-mod-ocorrencias" class="menu-btn hidden" onclick="abrirMenuOcorrencias()">Registro de Ocorrências</button>
-            <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Lançamento de Notas</button>
+            <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Módulo de Notas</button>
             <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
         </div>
     </div>
@@ -93,6 +93,7 @@
     <div id="submenu-notas" class="hidden">
         <h2>Módulo de Notas</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaNotas()">📋 Consultar / Editar Notas</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
@@ -149,7 +150,7 @@
             <button onclick="validarPesosEAvancar()" id="btn-avancar-notas">Avançar para Lançamento de Notas</button>
         </div>
 
-        <!-- PASSO 2: TABELA DE LANÇAMENTO EM LOTE (0 a 100) -->
+        <!-- PASSO 2: TABELA DE LANÇAMENTO EM LOTE (0 a 100) COM VALORES JÁ LANÇADOS -->
         <div id="container-tabela-notas" class="hidden" style="margin-top: 20px;">
             <h3 id="titulo-turma-notas" style="color: #016552; text-align: center; font-size: 16px;"></h3>
             <div style="overflow-x: auto; max-height: 400px;">
@@ -165,33 +166,53 @@
                     <tbody id="corpo-tabela-notas"></tbody>
                 </table>
             </div>
-            <button onclick="salvarNotasEmLote()" id="btn-salvar-notas" style="background-color: #016552; margin-top: 15px;">Salvar Notas da Turma</button>
+            <button onclick="salvarNotasEmLote()" id="btn-salvar-notas" style="background-color: #016552; margin-top: 15px;">Salvar / Atualizar Notas</button>
             <button class="voltar-btn" onclick="voltarParaConfigPesos()">Voltar para Configuração de Pesos</button>
         </div>
 
-        <button class="voltar-btn" onclick="voltarAoSubmenuNotas()">Voltar ao Menu</button>
+        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu</button>
     </div>
 
-    <!-- MÓDULOS ANTERIORES MANTIDOS ÍNTEGROS -->
+    <!-- MÓDULO DE CONSULTA / EDIÇÃO DE NOTAS -->
+    <div id="modulo-consulta-notas" class="hidden">
+        <h2>Consultar Notas Lançadas</h2>
+        <div id="carregando-consulta-notas" class="loading">Buscando notas na planilha...</div>
+        <div style="overflow-x: auto; max-height: 450px;">
+            <table id="tabela-notas-lancadas" class="hidden">
+                <thead>
+                    <tr>
+                        <th>Bimestre</th>
+                        <th>Série / Turma</th>
+                        <th>Disciplina</th>
+                        <th>Aluno (RA)</th>
+                        <th>Instrumento</th>
+                        <th>Nota</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela-notas-lancadas"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu de Notas</button>
+    </div>
+
+    <!-- MÓDULOS ANTERIORES MANTIDOS -->
     <div id="modulo-saida" class="hidden">
         <h2>Nova Autorização de Saída</h2>
-        <div id="carregando-alunos-saida" class="loading">Carregando lista de alunos...</div>
+        <div id="carregando-alunos-saida" class="loading">Carregando...</div>
         <div id="formulario-saida" class="hidden">
-            <div class="form-group"><label>Data da Saída:</label><input type="date" id="campo-data-saida"></div>
-            <div class="form-group"><label>Série/Ano:</label><select id="campo-serie-saida" onchange="filtrarAlunosPorSerie('saida')"><option value="">Selecione a série...</option></select></div>
-            <div class="form-group"><label>Aluno:</label><select id="campo-aluno-saida" onchange="preencherRASAIDA()"><option value="">Primeiro selecione a série...</option></select></div>
+            <div class="form-group"><label>Data:</label><input type="date" id="campo-data-saida"></div>
+            <div class="form-group"><label>Série:</label><select id="campo-serie-saida" onchange="filtrarAlunosPorSerie('saida')"><option value="">Selecione...</option></select></div>
+            <div class="form-group"><label>Aluno:</label><select id="campo-aluno-saida" onchange="preencherRASAIDA()"><option value="">Selecione...</option></select></div>
             <div class="form-group"><label>RA:</label><input type="text" id="campo-ra-saida" readonly style="background-color: #e9ecef;"></div>
             <div class="form-group"><label>Tipo:</label><select id="campo-tipo-saida"><option value="Pontual">Pontual</option><option value="Permanente">Permanente</option></select></div>
-            <div class="form-group"><label>Descrição:</label><textarea id="campo-descricao-saida" rows="3"></textarea></div>
-            <button onclick="enviarDadosSaida()" id="btn-salvar-saida">Salvar Registro</button>
+            <div class="form-group"><label>Descrição:</label><textarea id="campo-descricao-saida" rows="2"></textarea></div>
+            <button onclick="enviarDadosSaida()">Salvar</button>
             <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
         </div>
     </div>
     <div id="modulo-consulta-saida" class="hidden">
         <h2>Consultar Autorizações</h2>
-        <div class="filtros-container"><button id="filtro-hoje" onclick="filtrarRegistrosSaida('hoje')">Saídas de Hoje</button><button id="filtro-permanente" onclick="filtrarRegistrosSaida('permanente')">Permanentes</button><button id="filtro-todos" class="ativo" onclick="filtrarRegistrosSaida('todos')">Exibir Todos</button></div>
-        <div id="carregando-consulta-saida" class="loading">Buscando...</div>
-        <div style="overflow-x: auto;"><table id="tabela-registros-saida" class="hidden"><thead><tr><th>Data Saída</th><th>Aluno (RA)</th><th>Série</th><th>Tipo</th><th>Descrição</th></tr></thead><tbody id="corpo-tabela-saida"></tbody></table></div>
+        <div style="overflow-x: auto;"><table id="tabela-registros-saida"><thead><tr><th>Data</th><th>Aluno</th><th>Série</th><th>Tipo</th><th>Descrição</th></tr></thead><tbody id="corpo-tabela-saida"></tbody></table></div>
         <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
     </div>
     <div id="modulo-frequencia" class="hidden">
@@ -202,18 +223,15 @@
             <div class="form-group"><label>Série:</label><select id="freq-serie" onchange="filtrarAlunosPorSerie('freq')"><option value="">Selecione...</option></select></div>
             <div class="form-group"><label>Aluno:</label><select id="freq-aluno" onchange="preencherRAFreq()"><option value="">Selecione...</option></select></div>
             <div class="form-group"><label>RA:</label><input type="text" id="freq-ra" readonly style="background-color: #e9ecef;"></div>
-            <div class="form-group"><label>Status:</label><select id="freq-status"><option value="Faltou">Faltou</option><option value="Entrou na 2ª">Entrou na 2ª</option><option value="Entrou na 3ª">Entrou na 3ª</option><option value="Entrou na 4ª">Entrou na 4ª</option><option value="Entrou na 5ª">Entrou na 5ª</option><option value="Entrou na 6ª">Entrou na 6ª</option><option value="Entrou na 7ª">Entrou na 7ª</option><option value="Suspenso">Suspenso</option></select></div>
+            <div class="form-group"><label>Status:</label><select id="freq-status"><option value="Faltou">Faltou</option><option value="Suspenso">Suspenso</option></select></div>
             <div class="form-group"><label>Justificativa *:</label><textarea id="freq-justificativa" rows="2"></textarea></div>
-            <div class="form-group"><label>Observações:</label><textarea id="freq-observacoes" rows="2"></textarea></div>
-            <button onclick="enviarDadosFrequencia()" id="btn-salvar-freq">Salvar Frequência</button>
+            <button onclick="enviarDadosFrequencia()">Salvar</button>
             <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
         </div>
     </div>
     <div id="modulo-consulta-frequencia" class="hidden">
         <h2>Consultar Frequências</h2>
-        <div class="filtros-container"><button id="freq-filtro-hoje" class="ativo" onclick="filtrarRegistrosFreq('hoje')">Faltas de Hoje</button><button id="freq-filtro-todos" onclick="filtrarRegistrosFreq('todos')">Exibir Todos</button></div>
-        <div id="carregando-consulta-freq" class="loading">Buscando...</div>
-        <div style="overflow-x: auto;"><table id="tabela-registros-freq" class="hidden"><thead><tr><th>Data</th><th>Aluno (RA)</th><th>Série</th><th>Status</th><th>Justificativa / Obs</th></tr></thead><tbody id="corpo-tabela-freq"></tbody></table></div>
+        <div style="overflow-x: auto;"><table id="tabela-registros-freq"><thead><tr><th>Data</th><th>Aluno</th><th>Série</th><th>Status</th><th>Justificativa</th></tr></thead><tbody id="corpo-tabela-freq"></tbody></table></div>
         <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
     </div>
     <div id="modulo-ocorrencia" class="hidden">
@@ -224,17 +242,15 @@
             <div class="form-group"><label>Série:</label><select id="ocorrencia-serie" onchange="filtrarAlunosPorSerie('ocorrencia')"><option value="">Selecione...</option></select></div>
             <div class="form-group"><label>Aluno:</label><select id="ocorrencia-aluno" onchange="preencherRAOcorrencia()"><option value="">Selecione...</option></select></div>
             <div class="form-group"><label>RA:</label><input type="text" id="ocorrencia-ra" readonly style="background-color: #e9ecef;"></div>
-            <div class="form-group"><label>Tipo *:</label><select id="ocorrencia-tipo"><option value="">Selecione...</option><option value="Saúde">Saúde</option><option value="Indisciplina">Indisciplina</option><option value="Atraso">Atraso</option><option value="Falta de material">Falta de material</option><option value="Celular">Celular</option><option value="Outros">Outros</option></select></div>
+            <div class="form-group"><label>Tipo *:</label><select id="ocorrencia-tipo"><option value="">Selecione...</option><option value="Indisciplina">Indisciplina</option><option value="Atraso">Atraso</option></select></div>
             <div class="form-group"><label>Relato:</label><textarea id="ocorrencia-relato" rows="2"></textarea></div>
-            <div class="form-group"><label>Sanção:</label><select id="ocorrencia-sancao"><option value="">Nenhuma / Em branco</option><option value="Advertencia verbal">Advertência verbal</option><option value="Notificacao via Classapp">Notificação via Classapp</option><option value="Advertencia formal">Advertência formal</option><option value="Suspensao">Suspensão</option><option value="Acompanhado pela assessoria">Acompanhado pela assessoria</option><option value="Coordenador de segmento conversou com o aluno">Coordenador de segmento conversou com o aluno</option></select></div>
-            <button onclick="enviarDadosOcorrencia()" id="btn-salvar-ocorrencia">Salvar Ocorrência</button>
+            <button onclick="enviarDadosOcorrencia()">Salvar</button>
             <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
         </div>
     </div>
     <div id="modulo-consulta-ocorrencia" class="hidden">
         <h2>Consultar Ocorrências</h2>
-        <div id="carregando-consulta-ocorrencia" class="loading">Buscando...</div>
-        <div style="overflow-x: auto;"><table id="tabela-registros-ocorrencia" class="hidden"><thead><tr><th>Data</th><th>Aluno (RA)</th><th>Série</th><th>Tipo / Sanção</th><th>Relato</th></tr></thead><tbody id="corpo-tabela-ocorrencia"></tbody></table></div>
+        <div style="overflow-x: auto;"><table id="tabela-registros-ocorrencia"><thead><tr><th>Data</th><th>Aluno</th><th>Série</th><th>Tipo</th><th>Relato</th></tr></thead><tbody id="corpo-tabela-ocorrencia"></tbody></table></div>
         <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
     </div>
 
@@ -247,19 +263,11 @@
     let usuarioLogado = "";
     let dadosEscopoUsuario = {};
     let listaDeAlunos = [];
-    let todosRegistrosSaida = [];
-    let todosRegistrosFreq = [];
-    let todosRegistrosOcorrencias = [];
+    let notasJaLancadasGlobal = [];
 
     window.onload = function () {
-        google.accounts.id.initialize({
-            client_id: CLIENT_ID,
-            callback: tratarRespostaLogin
-        });
-        google.accounts.id.renderButton(
-            document.getElementById("buttonDiv"),
-            { theme: "outline", size: "large", text: "continue_with" }
-        );
+        google.accounts.id.initialize({ client_id: CLIENT_ID, callback: tratarRespostaLogin });
+        google.accounts.id.renderButton(document.getElementById("buttonDiv"), { theme: "outline", size: "large", text: "continue_with" });
     };
 
     function tratarRespostaLogin(resposta) {
@@ -309,6 +317,7 @@
         document.getElementById('modulo-ocorrencia').classList.add('hidden');
         document.getElementById('modulo-consulta-ocorrencia').classList.add('hidden');
         document.getElementById('modulo-notas').classList.add('hidden');
+        document.getElementById('modulo-consulta-notas').classList.add('hidden');
         document.getElementById('tela-menu').classList.remove('hidden');
     }
 
@@ -329,15 +338,13 @@
     function abrirTelaConsultaOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden'); }
 
     function abrirMenuNotas() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
-    function voltarAoSubmenuNotas() { document.getElementById('modulo-notas').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
-    function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarAlunosGeralNotas(); }
+    function voltarSubmenuNotas() { document.getElementById('modulo-notas').classList.add('hidden'); document.getElementById('modulo-consulta-notas').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
+    function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarDadosParaNotas(); }
+    function abrirTelaConsultaNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-consulta-notas').classList.remove('hidden'); carregarNotasLancadasConsulta(); }
 
     function carregarAlunosGeral() {
         if (listaDeAlunos.length > 0) { popularSelectsSeries(); return; }
-        fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
-            listaDeAlunos = alunos;
-            popularSelectsSeries();
-        });
+        fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => { listaDeAlunos = alunos; popularSelectsSeries(); });
     }
 
     function popularSelectsSeries() {
@@ -348,35 +355,37 @@
                 seriesUnicas.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; sel.appendChild(o); });
             }
         });
-        document.getElementById('carregando-alunos-saida').classList.add('hidden');
-        document.getElementById('formulario-saida').classList.remove('hidden');
-        document.getElementById('carregando-alunos-freq').classList.add('hidden');
-        document.getElementById('formulario-frequencia').classList.remove('hidden');
-        document.getElementById('carregando-alunos-ocorrencia').classList.add('hidden');
-        document.getElementById('formulario-ocorrencia').classList.remove('hidden');
+        document.getElementById('carregando-alunos-saida').classList.add('hidden'); document.getElementById('formulario-saida').classList.remove('hidden');
+        document.getElementById('carregando-alunos-freq').classList.add('hidden'); document.getElementById('formulario-frequencia').classList.remove('hidden');
+        document.getElementById('carregando-alunos-ocorrencia').classList.add('hidden'); document.getElementById('formulario-ocorrencia').classList.remove('hidden');
     }
 
     function filtrarAlunosPorSerie(mod) {
         let serie = document.getElementById(mod === 'saida' ? 'campo-serie-saida' : mod === 'freq' ? 'freq-serie' : 'ocorrencia-serie').value;
         let selAlu = document.getElementById(mod === 'saida' ? 'campo-aluno-saida' : mod === 'freq' ? 'freq-aluno' : 'ocorrencia-aluno');
         let inRA = document.getElementById(mod === 'saida' ? 'campo-ra-saida' : mod === 'freq' ? 'freq-ra' : 'ocorrencia-ra');
-        selAlu.innerHTML = '<option value="">Selecione o aluno...</option>';
-        inRA.value = "";
+        selAlu.innerHTML = '<option value="">Selecione o aluno...</option>'; inRA.value = "";
         if(!serie) return;
-        listaDeAlunos.filter(a => a.serie === serie).forEach(a => {
-            let o = document.createElement('option'); o.value = a.nome; o.text = a.nome; selAlu.appendChild(o);
-        });
+        listaDeAlunos.filter(a => a.serie === serie).forEach(a => { let o = document.createElement('option'); o.value = a.nome; o.text = a.nome; selAlu.appendChild(o); });
     }
 
     function preencherRASAIDA() { let a = listaDeAlunos.find(x => x.nome === document.getElementById('campo-aluno-saida').value); document.getElementById('campo-ra-saida').value = a ? a.ra : ""; }
     function preencherRAFreq() { let a = listaDeAlunos.find(x => x.nome === document.getElementById('freq-aluno').value); document.getElementById('freq-ra').value = a ? a.ra : ""; }
     function preencherRAOcorrencia() { let a = listaDeAlunos.find(x => x.nome === document.getElementById('ocorrencia-aluno').value); document.getElementById('ocorrencia-ra').value = a ? a.ra : ""; }
 
-    // --- MÓDULO DE NOTAS: CONFIGURAÇÃO DE PACOTES E PESOS ---
-    function carregarAlunosGeralNotas() {
-        if (listaDeAlunos.length > 0) { configurarFormNotas(); return; }
-        fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
+    // --- MÓDULO DE NOTAS ---
+    function carregarDadosParaNotas() {
+        if (listaDeAlunos.length > 0 && notasJaLancadasGlobal.length > 0) { configurarFormNotas(); return; }
+        
+        document.getElementById('carregando-alunos-notas').classList.remove('hidden');
+        document.getElementById('form-config-notas').classList.add('hidden');
+
+        Promise.all([
+            fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()),
+            fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json())
+        ]).then(([alunos, notas]) => {
             listaDeAlunos = alunos;
+            notasJaLancadasGlobal = notas;
             configurarFormNotas();
         });
     }
@@ -409,45 +418,29 @@
         const eixo = document.getElementById('nota-eixo').value;
         const container = document.getElementById('container-pacotes');
         container.innerHTML = "";
-
-        let pacotes = [];
-        if (eixo === 'continuas') pacotes = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'];
-        else if (eixo === 'bimestrais') pacotes = ['B1', 'B2', 'B3', 'B4'];
-        else if (eixo === 'recuperacao') pacotes = ['R1', 'R2'];
+        let pacotes = eixo === 'continuas' ? ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'] : eixo === 'bimestrais' ? ['B1', 'B2', 'B3', 'B4'] : ['R1', 'R2'];
 
         pacotes.forEach((p, idx) => {
             let div = document.createElement('div');
             div.className = 'pacote-box';
-            div.innerHTML = `
-                <label><strong>${p}</strong> (Peso %):</label>
-                <input type="number" min="0" max="100" value="${idx === 0 ? '100' : '0'}" class="input-peso-pacote" data-pacote="${p}" oninput="calcularSomaPesos()" style="width: 100px; text-align: center;">
-            `;
+            div.innerHTML = `<label><strong>${p}</strong> (Peso %):</label><input type="number" min="0" max="100" value="${idx === 0 ? '100' : '0'}" class="input-peso-pacote" data-pacote="${p}" oninput="calcularSomaPesos()" style="width: 100px; text-align: center;">`;
             container.appendChild(div);
         });
         calcularSomaPesos();
     }
 
     function calcularSomaPesos() {
-        const inputs = document.querySelectorAll('.input-peso-pacote');
         let soma = 0;
-        inputs.forEach(inp => {
-            let val = parseFloat(inp.value) || 0;
-            soma += val;
-        });
-
+        document.querySelectorAll('.input-peso-pacote').forEach(inp => { soma += parseFloat(inp.value) || 0; });
         const aviso = document.getElementById('aviso-soma-pesos');
         const btnAvancar = document.getElementById('btn-avancar-notas');
 
         if (soma === 100) {
-            aviso.innerText = "Soma correta (100%). Pronto para prosseguir!";
-            aviso.style.color = "#016552";
-            btnAvancar.disabled = false;
-            btnAvancar.style.opacity = "1";
+            aviso.innerText = "Soma correta (100%). Pronto para prosseguir!"; aviso.style.color = "#016552";
+            btnAvancar.disabled = false; btnAvancar.style.opacity = "1";
         } else {
-            aviso.innerText = `Atenção: A soma atual dos pesos é ${soma}%. O total deve ser obrigatoriamente 100%.`;
-            aviso.style.color = "#d9534f";
-            btnAvancar.disabled = true;
-            btnAvancar.style.opacity = "0.5";
+            aviso.innerText = `Atenção: A soma atual dos pesos é ${soma}%. O total deve ser obrigatoriamente 100%.`; aviso.style.color = "#d9534f";
+            btnAvancar.disabled = true; btnAvancar.style.opacity = "0.5";
         }
     }
 
@@ -458,59 +451,44 @@
         const bimestre = document.getElementById('nota-bimestre').value;
         const eixo = document.getElementById('nota-eixo').value;
 
-        if(!serie || !turma || !disciplina) {
-            alert("Preencha todos os campos de configuração (Série, Turma e Disciplina).");
-            return;
-        }
+        if(!serie || !turma || !disciplina) { alert("Preencha todos os campos de configuração."); return; }
 
-        const inputsPesos = document.querySelectorAll('.input-peso-pacote');
-        let pesosConfigurados = {};
-        let soma = 0;
-
-        inputsPesos.forEach(inp => {
-            let p = inp.getAttribute('data-pacote');
-            let v = parseFloat(inp.value) || 0;
-            if(v > 0) {
-                pesosConfigurados[p] = v;
-                soma += v;
-            }
+        let pesosConfigurados = {}; let soma = 0;
+        document.querySelectorAll('.input-peso-pacote').forEach(inp => {
+            let p = inp.getAttribute('data-pacote'); let v = parseFloat(inp.value) || 0;
+            if(v > 0) { pesosConfigurados[p] = v; soma += v; }
         });
 
-        if (soma !== 100) {
-            alert("A soma dos pesos dos pacotes ativos deve ser exatamente 100%.");
-            return;
-        }
-
+        if (soma !== 100) { alert("A soma dos pesos deve ser exatamente 100%."); return; }
         gerarTabelaLancamentoNotas(bimestre, serie, turma, disciplina, eixo, pesosConfigurados);
     }
 
     function gerarTabelaLancamentoNotas(bimestre, serie, turma, disciplina, eixo, pesosConfigurados) {
         const alunosTurma = listaDeAlunos.filter(a => a.serie === serie);
-        if(alunosTurma.length === 0) {
-            alert("Nenhum aluno encontrado para esta série.");
-            return;
-        }
+        if(alunosTurma.length === 0) { alert("Nenhum aluno encontrado."); return; }
 
         let pacotesAtivos = Object.keys(pesosConfigurados);
-        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Eixo: ${eixo.toUpperCase()}`;
+        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma})`;
         
         const theadTr = document.querySelector('#container-tabela-notas thead tr');
         let thHtml = `<th>RA</th><th>Nome do Aluno</th><th>Série / Turma</th>`;
-        pacotesAtivos.forEach(p => {
-            thHtml += `<th>${p} (${pesosConfigurados[p]}%)</th>`;
-        });
+        pacotesAtivos.forEach(p => { thHtml += `<th>${p} (${pesosConfigurados[p]}%)</th>`; });
         theadTr.innerHTML = thHtml;
 
         const corpo = document.getElementById('corpo-tabela-notas');
         corpo.innerHTML = "";
 
-        // Mantém a ordem exata da planilha base e trata notas de 0 a 100 com validação
         alunosTurma.forEach(aluno => {
             const tr = document.createElement('tr');
             let tdHtml = `<td>${aluno.ra}</td><td><strong>${aluno.nome}</strong></td><td>${aluno.serie} (${turma})</td>`;
             
             pacotesAtivos.forEach(p => {
-                tdHtml += `<td><input type="number" min="0" max="100" step="1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${p}" placeholder="0 a 100" oninput="validarNotaLimite(this)"></td>`;
+                // Procura se já existe nota lançada para preencher automaticamente (Permite Edição/Correção!)
+                let notaExistente = "";
+                let encontrada = notasJaLancadasGlobal.find(n => n.bimestre === bimestre && n.serie === serie && n.turma === turma && n.disciplina === disciplina && String(n.ra) === String(aluno.ra) && n.instrumento === p);
+                if (encontrada) notaExistente = encontrada.nota;
+
+                tdHtml += `<td><input type="number" min="0" max="100" step="1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${p}" value="${notaExistente}" placeholder="0-100" oninput="validarNotaLimite(this)"></td>`;
             });
             tr.innerHTML = tdHtml;
             corpo.appendChild(tr);
@@ -522,13 +500,8 @@
 
     function validarNotaLimite(input) {
         let val = parseFloat(input.value);
-        if (val < 0) {
-            alert("Não são permitidas notas negativas.");
-            input.value = 0;
-        } else if (val > 100) {
-            alert("A nota máxima permitida é 100.");
-            input.value = 100;
-        }
+        if (val < 0) { alert("Notas não podem ser negativas."); input.value = 0; }
+        else if (val > 100) { alert("A nota máxima é 100."); input.value = 100; }
     }
 
     function voltarParaConfigPesos() {
@@ -538,60 +511,72 @@
 
     function salvarNotasEmLote() {
         const btn = document.getElementById('btn-salvar-notas');
-        btn.innerText = "Salvando notas...";
-        btn.disabled = true;
+        btn.innerText = "Salvando / Atualizando..."; btn.disabled = true;
 
         const bimestre = document.getElementById('nota-bimestre').value;
         const serie = document.getElementById('nota-serie').value;
         const turma = document.getElementById('nota-turma').value;
         const disciplina = document.getElementById('nota-disciplina').value;
 
-        const inputs = document.querySelectorAll('.input-nota');
         let lancamentos = [];
-
-        inputs.forEach(inp => {
+        document.querySelectorAll('.input-nota').forEach(inp => {
             let notaVal = inp.value.trim();
             if(notaVal !== "") {
                 lancamentos.push({
-                    bimestre: bimestre,
-                    serie: serie,
-                    turma: turma,
-                    disciplina: disciplina,
-                    nome: inp.getAttribute('data-nome'),
-                    ra: inp.getAttribute('data-ra'),
-                    instrumento: inp.getAttribute('data-pacote'),
-                    nota: parseFloat(notaVal)
+                    bimestre: bimestre, serie: serie, turma: turma, disciplina: disciplina,
+                    nome: inp.getAttribute('data-nome'), ra: inp.getAttribute('data-ra'),
+                    instrumento: inp.getAttribute('data-pacote'), nota: parseFloat(notaVal)
                 });
             }
         });
 
-        if(lancamentos.length === 0) {
-            alert("Insira ao menos uma nota antes de salvar.");
-            btn.innerText = "Salvar Notas da Turma"; btn.disabled = false;
-            return;
-        }
-
-        const payload = {
-            modulo: 'notas',
-            emailUsuario: usuarioLogado,
-            lancamentos: lancamentos
-        };
+        if(lancamentos.length === 0) { alert("Insira ao menos uma nota."); btn.innerText = "Salvar / Atualizar Notas"; btn.disabled = false; return; }
 
         fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modulo: 'notas', emailUsuario: usuarioLogado, lancamentos: lancamentos })
         }).then(() => {
-            alert("Notas salvas com sucesso na planilha geral!");
-            btn.innerText = "Salvar Notas da Turma";
-            btn.disabled = false;
-            voltarParaConfigPesos();
+            alert("Notas salvas/atualizadas com sucesso na planilha geral!");
+            btn.innerText = "Salvar / Atualizar Notas"; btn.disabled = false;
+            // Atualiza cache local
+            carregarDadosParaNotas();
         }).catch(() => {
-            alert("Erro ao salvar notas.");
-            btn.innerText = "Salvar Notas da Turma";
-            btn.disabled = false;
+            alert("Erro ao salvar."); btn.innerText = "Salvar / Atualizar Notas"; btn.disabled = false;
         });
+    }
+
+    function carregarNotasLancadasConsulta() {
+        document.getElementById('carregando-consulta-notas').style.display = 'block';
+        document.getElementById('tabela-notas-lancadas').classList.add('hidden');
+
+        fetch(API_URL + '?acao=buscarNotasLancadas')
+            .then(res => res.json())
+            .then(notas => {
+                notasJaLancadasGlobal = notas;
+                document.getElementById('carregando-consulta-notas').style.display = 'none';
+                document.getElementById('tabela-notas-lancadas').classList.remove('hidden');
+                
+                const corpo = document.getElementById('corpo-tabela-notas-lancadas');
+                corpo.innerHTML = "";
+
+                if (notas.length === 0) {
+                    corpo.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #666;">Nenhuma nota lançada até o momento.</td></tr>`;
+                    return;
+                }
+
+                notas.forEach(n => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${n.bimestre}</td>
+                        <td>${n.serie} (${n.turma})</td>
+                        <td>${n.disciplina}</td>
+                        <td><strong>${n.nome}</strong><br><small>RA: ${n.ra}</small></td>
+                        <td><span style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${n.instrumento}</span></td>
+                        <td><strong>${n.nota}</strong></td>
+                    `;
+                    corpo.appendChild(tr);
+                });
+            });
     }
 </script>
 </body>

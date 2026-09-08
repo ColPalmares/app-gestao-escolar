@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Gestão Escolar</title>
-    <!-- Biblioteca Oficial de Login do Google -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
@@ -15,31 +14,45 @@
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         button:hover { background-color: #1557b0; }
+        .menu-btn { background-color: #28a745; margin-bottom: 10px; display: none; }
+        .menu-btn:hover { background-color: #218838; }
         .hidden { display: none; }
         .loading { text-align: center; color: #666; font-style: italic; margin-bottom: 15px; }
+        .voltar-btn { background-color: #6c757d; margin-top: 15px; }
+        .voltar-btn:hover { background-color: #5a6268; }
     </style>
 </head>
 <body>
 
 <div class="container">
 
-    <!-- TELA DE LOGIN OFICIAL -->
+    <!-- TELA DE LOGIN -->
     <div id="tela-login">
         <h2>Acesso de Funcionários</h2>
         <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 25px;">Utilize sua conta institucional</p>
-        
-        <!-- Este é o espaço onde o botão do Google será renderizado -->
         <div id="buttonDiv" style="display: flex; justify-content: center;"></div>
     </div>
 
-    <!-- TELA DO APLICATIVO -->
-    <div id="tela-app" class="hidden">
-        <h2>Autorização de Saída</h2>
-        <p id="msg-bem-vindo" style="color: #666; font-size: 14px; text-align: center; font-weight: bold;"></p>
+    <!-- TELA DO MENU PRINCIPAL (Diz o que o usuário pode ver) -->
+    <div id="tela-menu" class="hidden">
+        <h2>Portal de Ocorrências</h2>
+        <p id="msg-bem-vindo" style="color: #666; font-size: 14px; text-align: center; font-weight: bold; margin-bottom: 20px;"></p>
+        <div id="carregando-permissoes" class="loading">Verificando permissões de acesso...</div>
         
-        <div id="carregando" class="loading">Autenticando e carregando dados...</div>
+        <div id="lista-modulos" class="hidden">
+            <p style="font-size: 14px; color: #444; margin-bottom: 15px;">Selecione o módulo desejado:</p>
+            <!-- Botão do módulo de saída (só aparece se autorizado) -->
+            <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirModulo('modulo-saida')">Autorização de Saída</button>
+            <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
+        </div>
+    </div>
 
-        <div id="formulario" class="hidden">
+    <!-- MÓDULO 1: AUTORIZAÇÃO DE SAÍDA -->
+    <div id="modulo-saida" class="hidden">
+        <h2>Autorização de Saída</h2>
+        <div id="carregando-alunos" class="loading">Carregando lista de alunos...</div>
+
+        <div id="formulario-saida" class="hidden">
             <div class="form-group">
                 <label>Data da Saída:</label>
                 <input type="date" id="campo-data" required>
@@ -77,20 +90,19 @@
                 <textarea id="campo-descricao" rows="3" placeholder="Digite os detalhes da saída..."></textarea>
             </div>
             <button onclick="enviarDados()" id="btn-salvar">Salvar Registro</button>
+            <button class="voltar-btn" onclick="voltarAoMenu()">Voltar ao Menu</button>
         </div>
     </div>
 
 </div>
 
 <script>
-    // === COLOQUE SUAS CHAVES AQUI ===
     const CLIENT_ID = '293823202125-glofclf9sgueb5vc079v8fas105i1b57.apps.googleusercontent.com'; 
     const API_URL = 'https://script.google.com/macros/s/AKfycbwT6wFmQ2qXiaHus3QpWghtrvUS5Gw1U1tmAeSGKONp7PdA3G6No3ntgW7UgQrKKt5W1g/exec';
     
     let usuarioLogado = "";
     let listaDeAlunos = [];
 
-    // 1. Inicializa o botão do Google ao carregar a página
     window.onload = function () {
         google.accounts.id.initialize({
             client_id: CLIENT_ID,
@@ -102,22 +114,17 @@
         );
     };
 
-    // 2. Recebe a resposta segura do Google e decodifica os dados do usuário
     function tratarRespostaLogin(resposta) {
-        // O Google devolve um Token JWT. Precisamos decodificá-lo para ler o e-mail.
         const payloadDecodificado = decodificarJWT(resposta.credential);
+        usuarioLogado = payloadDecodificado.email;
         
-        usuarioLogado = payloadDecodificado.email; // Pegamos o e-mail oficial validado!
-        
-        // Esconde o login e mostra o app
         document.getElementById('tela-login').classList.add('hidden');
-        document.getElementById('tela-app').classList.remove('hidden');
+        document.getElementById('tela-menu').classList.remove('hidden');
         document.getElementById('msg-bem-vindo').innerText = "Logado como: " + usuarioLogado;
         
-        buscarAlunos();
+        verificarPermissoes(usuarioLogado);
     }
 
-    // Função auxiliar para traduzir o token de segurança do Google
     function decodificarJWT(token) {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -127,8 +134,46 @@
         return JSON.parse(jsonPayload);
     }
 
-    // 3. Busca a lista de alunos da sua planilha
-    function buscarAlunos() {
+    // Consulta a Planilha Mestre para ver o que o usuário pode acessar
+    function verificarPermissoes(email) {
+        fetch(API_URL + '?acao=buscarPermissoes&email=' + encodeURIComponent(email))
+            .then(response => response.json())
+            .then(resultado => {
+                document.getElementById('carregando-permissoes').classList.add('hidden');
+                document.getElementById('lista-modulos').classList.remove('hidden');
+
+                const modulos = resultado.modulos || [];
+                
+                if (modulos.includes("autorizacao_saida")) {
+                    document.getElementById('btn-mod-saida').style.display = 'block';
+                }
+
+                if (modulos.length === 0) {
+                    document.getElementById('sem-acesso').classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                document.getElementById('carregando-permissoes').innerText = "Erro ao carregar permissões.";
+                console.error(error);
+            });
+    }
+
+    function abrirModulo(idModulo) {
+        document.getElementById('tela-menu').classList.add('hidden');
+        if (idModulo === 'modulo-saida') {
+            document.getElementById('modulo-saida').classList.remove('hidden');
+            carregarAlunos();
+        }
+    }
+
+    function voltarAoMenu() {
+        document.getElementById('modulo-saida').classList.add('hidden');
+        document.getElementById('tela-menu').classList.remove('hidden');
+    }
+
+    function carregarAlunos() {
+        if (listaDeAlunos.length > 0) return; // Se já carregou, não puxa de novo
+
         fetch(API_URL + '?acao=buscarAlunos')
             .then(response => response.json())
             .then(alunos => {
@@ -140,23 +185,21 @@
                     option.text = aluno.nome;
                     select.appendChild(option);
                 });
-                document.getElementById('carregando').classList.add('hidden');
-                document.getElementById('formulario').classList.remove('hidden');
+                document.getElementById('carregando-alunos').classList.add('hidden');
+                document.getElementById('formulario-saida').classList.remove('hidden');
             })
             .catch(error => {
-                document.getElementById('carregando').innerText = "Erro ao carregar alunos.";
+                document.getElementById('carregando-alunos').innerText = "Erro ao carregar alunos.";
                 console.error(error);
             });
     }
 
-    // 4. Puxa o RA automaticamente
     function preencherRA() {
         const nomeSelecionado = document.getElementById('campo-aluno').value;
         const aluno = listaDeAlunos.find(a => a.nome === nomeSelecionado);
         document.getElementById('campo-ra').value = aluno ? aluno.ra : "";
     }
 
-    // 5. Envia os dados para a planilha
     function enviarDados() {
         const btn = document.getElementById('btn-salvar');
         btn.innerText = "Salvando...";
@@ -164,7 +207,7 @@
 
         const dados = {
             modulo: 'autorizacao_saida',
-            emailUsuario: usuarioLogado, // Agora esse e-mail é 100% autêntico
+            emailUsuario: usuarioLogado,
             dataSaida: document.getElementById('campo-data').value,
             nome: document.getElementById('campo-aluno').value,
             ra: document.getElementById('campo-ra').value,

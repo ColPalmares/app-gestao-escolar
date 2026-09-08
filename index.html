@@ -7,7 +7,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #F2F2F2; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(1,101,82,0.15); width: 100%; max-width: 950px; border-top: 6px solid #016552; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(1,101,82,0.15); width: 100%; max-width: 1000px; border-top: 6px solid #016552; }
         
         .logo-container { text-align: center; margin-bottom: 20px; }
         .logo-container img { max-width: 180px; height: auto; }
@@ -21,10 +21,7 @@
         button:hover { background-color: #014d3e; }
         
         .menu-btn { background-color: #016552; margin-bottom: 10px; display: none; }
-        .menu-btn:hover { background-color: #014d3e; }
-        
         .sub-menu-btn { background-color: #004D93; margin-bottom: 10px; }
-        .sub-menu-btn:hover { background-color: #003366; }
         
         .hidden { display: none; }
         .loading { text-align: center; color: #666; font-style: italic; margin-bottom: 15px; }
@@ -32,9 +29,12 @@
         .voltar-btn { background-color: #6c757d; margin-top: 15px; }
         .voltar-btn:hover { background-color: #5a6268; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: center; }
         th { background-color: #016552; color: white; }
+        td:nth-child(2) { text-align: left; } /* Alinha nome do aluno à esquerda */
+        
+        .nota-abaixo { color: #d9534f; font-weight: bold; } /* Abaixo de 50 aparece em vermelho */
         
         .pacote-box { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .pacote-box label { margin-bottom: 0; font-weight: normal; }
@@ -66,7 +66,7 @@
             <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirMenuSaida()">Autorização de Saída</button>
             <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirMenuFrequencia()">Controle de Frequência / Faltas</button>
             <button id="btn-mod-ocorrencias" class="menu-btn hidden" onclick="abrirMenuOcorrencias()">Registro de Ocorrências</button>
-            <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Módulo de Notas</button>
+            <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Módulo de Notas & Boletim</button>
             <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
         </div>
     </div>
@@ -78,31 +78,28 @@
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaSaida()">📋 Consultar Autorizações</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
-    
     <div id="submenu-frequencia" class="hidden">
         <h2>Controle de Frequência</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioFrequencia()">➕ Registrar Frequência</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaFrequencia()">📋 Consultar Frequências</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
-    
     <div id="submenu-ocorrencias" class="hidden">
         <h2>Registro de Ocorrências</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioOcorrencia()">➕ Nova Ocorrência</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaOcorrencia()">📋 Consultar Ocorrências</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
-    
     <div id="submenu-notas" class="hidden">
         <h2>Módulo de Notas</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas</button>
-        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaNotas()">📋 Consultar Notas & Média Bimestral</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaFiltroConsultaNotas()">📊 Visualizar Boletim / Médias por Turma</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULO DE NOTAS: CONFIGURAÇÃO E PESOS DOS PACOTES -->
+    <!-- PASSO 1: CONFIGURAÇÃO DE LANÇAMENTO DE NOTAS -->
     <div id="modulo-notas" class="hidden">
-        <h2>Configuração de Notas e Pesos</h2>
+        <h2>Configuração de Lançamento</h2>
         <div id="carregando-alunos-notas" class="loading">Carregando dados estruturais...</div>
 
         <div id="form-config-notas" class="hidden">
@@ -117,15 +114,14 @@
             </div>
             <div class="form-group">
                 <label>Série / Ano:</label>
-                <select id="nota-serie" onchange="atualizarPainelPacotes()">
+                <select id="nota-serie" onchange="atualizarTurmasPermitidas(); atualizarPainelPacotes();">
                     <option value="">Selecione a série...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Turma / Sala:</label>
                 <select id="nota-turma" onchange="atualizarPainelPacotes()">
-                    <option value="Turma 1">Turma 1</option>
-                    <option value="Turma 2">Turma 2</option>
+                    <option value="">Selecione a turma...</option>
                 </select>
             </div>
             <div class="form-group">
@@ -143,17 +139,17 @@
                 </select>
             </div>
 
-            <!-- PAINEL DE CONFIGURAÇÃO DE PESOS DOS PACOTES -->
+            <!-- PAINEL DE PESOS DOS PACOTES -->
             <div style="background: #f1f8f6; border: 1px solid #016552; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes (Soma deve ser exata a 100%)</h3>
+                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes (Soma exata a 100%)</h3>
                 <div id="container-pacotes"></div>
                 <p id="aviso-soma-pesos" style="font-weight: bold; color: #d9534f; margin-top: 10px; font-size: 14px; text-align: center;"></p>
             </div>
 
-            <button onclick="validarPesosEAvancar()" id="btn-avancar-notas">Avançar para Lançamento de Notas</button>
+            <button onclick="validarPesosEAvancar()" id="btn-avancar-notas">Avançar para Lançamento</button>
         </div>
 
-        <!-- TABELA DE LANÇAMENTO EM LOTE -->
+        <!-- PASSO 2: TABELA DE LANÇAMENTO -->
         <div id="container-tabela-notas" class="hidden" style="margin-top: 20px;">
             <h3 id="titulo-turma-notas" style="color: #016552; text-align: center; font-size: 16px;"></h3>
             <div style="overflow-x: auto; max-height: 400px;">
@@ -170,36 +166,61 @@
                 </table>
             </div>
             <button onclick="salvarNotasEmLote()" id="btn-salvar-notas" style="background-color: #016552; margin-top: 15px;">Salvar / Atualizar Notas</button>
-            <button class="voltar-btn" onclick="voltarParaConfigPesos()">Voltar para Configuração de Pesos</button>
+            <button class="voltar-btn" onclick="voltarParaConfigPesos()">Voltar para Configuração</button>
         </div>
 
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu</button>
     </div>
 
-    <!-- MÓDULO DE CONSULTA / MÉDIA BIMESTRAL PONDERADA -->
-    <div id="modulo-consulta-notas" class="hidden">
-        <h2>Consulta de Notas & Média Bimestral</h2>
-        <div id="carregando-consulta-notas" class="loading">Calculando médias bimestrais...</div>
-        <div style="overflow-x: auto; max-height: 450px;">
-            <table id="tabela-notas-lancadas" class="hidden">
-                <thead>
-                    <tr>
-                        <th>Bimestre</th>
-                        <th>Série / Turma</th>
-                        <th>Disciplina</th>
-                        <th>Aluno (RA)</th>
-                        <th>Nota Contínuas (Média Ponderada)</th>
-                        <th>Nota Bimestrais (Média Ponderada)</th>
-                        <th>Média Bimestral Final</th>
-                    </tr>
-                </thead>
-                <tbody id="corpo-tabela-notas-lancadas"></tbody>
-            </table>
+    <!-- TELA DE FILTRO PARA VISUALIZAÇÃO DO BOLETIM -->
+    <div id="modulo-filtro-boletim" class="hidden">
+        <h2>Selecionar Turma para Visualização</h2>
+        <div class="form-group">
+            <label>Série / Ano:</label>
+            <select id="filtro-serie-boletim" onchange="atualizarTurmasFiltroBoletim()">
+                <option value="">Selecione a série...</option>
+            </select>
         </div>
-        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu de Notas</button>
+        <div class="form-group">
+            <label>Turma / Sala:</label>
+            <select id="filtro-turma-boletim">
+                <option value="">Selecione a turma...</option>
+            </select>
+        </div>
+        <button onclick="gerarVisualizacaoBoletimTurma()">Exibir Boletim da Turma</button>
+        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
     </div>
 
-    <!-- OUTROS MÓDULOS (SAÍDA, FREQUÊNCIA, OCORRÊNCIAS) -->
+    <!-- TELA DE VISUALIZAÇÃO DO BOLETIM DA TURMA -->
+    <div id="modulo-visualizacao-boletim" class="hidden">
+        <h2 id="titulo-boletim-turma">Boletim Escolar 2026</h2>
+        <div id="carregando-boletim" class="loading">Gerando boletins...</div>
+        <div style="overflow-x: auto; max-height: 500px;">
+            <table id="tabela-boletim-turma" class="hidden">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Componente Curricular</th>
+                        <th rowspan="2">Estudante (RA)</th>
+                        <th colspan="2">1º Bimestre</th>
+                        <th colspan="2">2º Bimestre</th>
+                        <th colspan="2">3º Bimestre</th>
+                        <th colspan="2">4º Bimestre</th>
+                        <th rowspan="2">Média Anual</th>
+                    </tr>
+                    <tr>
+                        <th>MB</th><th>R</th>
+                        <th>MB</th><th>R</th>
+                        <th>MB</th><th>R</th>
+                        <th>MB</th><th>R</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela-boletim"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="abrirTelaFiltroConsultaNotas()">Escolher Outra Turma</button>
+    </div>
+
+    <!-- OUTROS MÓDULOS -->
     <div id="modulo-saida" class="hidden"><h2>Saída</h2><button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button></div>
     <div id="modulo-consulta-saida" class="hidden"><h2>Consulta Saída</h2><button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button></div>
     <div id="modulo-frequencia" class="hidden"><h2>Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
@@ -219,25 +240,33 @@
     let notasJaLancadasGlobal = [];
     let pesosSalvosGlobal = [];
 
+    // Tabela oficial de pesos mapeados (Prova Bimestral vs Contínuas)
+    const MATRIZ_PESOS_OFICIAL = {
+        '1º Ano': { prova: 0, cont: 100 },
+        '2º Ano': { prova: 0, cont: 100 },
+        '3º Ano': { prova: 0, cont: 100 },
+        '4º Ano': { prova: 30, cont: 70 },
+        '5º Ano': { prova: 30, cont: 70 },
+        '6º Ano': { prova: 35, cont: 65 },
+        '7º Ano': { prova: 35, cont: 65 },
+        '8º Ano': { prova: 35, cont: 65 },
+        '9º Ano': { prova: 35, cont: 65 },
+        '1ª Série': { prova: 40, cont: 60 },
+        '2ª Série': { prova: 40, cont: 60 },
+        '3ª Série': { prova: 40, cont: 60 }
+    };
+
     window.onload = function () {
-        google.accounts.id.initialize({
-            client_id: CLIENT_ID,
-            callback: tratarRespostaLogin
-        });
-        google.accounts.id.renderButton(
-            document.getElementById("buttonDiv"),
-            { theme: "outline", size: "large", text: "continue_with" }
-        );
+        google.accounts.id.initialize({ client_id: CLIENT_ID, callback: tratarRespostaLogin });
+        google.accounts.id.renderButton(document.getElementById("buttonDiv"), { theme: "outline", size: "large", text: "continue_with" });
     };
 
     function tratarRespostaLogin(resposta) {
-        const payloadDecodificado = decodificarJWT(resposta.credential);
-        usuarioLogado = payloadDecodificado.email;
-        
+        const payload = decodificarJWT(resposta.credential);
+        usuarioLogado = payload.email;
         document.getElementById('tela-login').classList.add('hidden');
         document.getElementById('tela-menu').classList.remove('hidden');
         document.getElementById('msg-bem-vindo').innerText = "Logado como: " + usuarioLogado;
-        
         verificarPermissoes(usuarioLogado);
     }
 
@@ -256,55 +285,53 @@
             .then(resultado => {
                 document.getElementById('carregando-permissoes').classList.add('hidden');
                 document.getElementById('lista-modulos').classList.remove('hidden');
-
                 dadosEscopoUsuario = resultado;
                 const modulos = resultado.modulos || [];
-
                 if (modulos.includes("autorizacao_saida")) document.getElementById('btn-mod-saida').style.display = 'block';
                 if (modulos.includes("frequencia")) document.getElementById('btn-mod-frequencia').style.display = 'block';
                 if (modulos.includes("ocorrencias")) document.getElementById('btn-mod-ocorrencias').style.display = 'block';
                 if (modulos.includes("notas")) document.getElementById('btn-mod-notas').style.display = 'block';
-                
-                if (modulos.length === 0) {
-                    document.getElementById('sem-acesso').classList.remove('hidden');
-                }
-            })
-            .catch(error => {
-                document.getElementById('carregando-permissoes').innerText = "Erro ao carregar permissões.";
-                console.error(error);
             });
     }
 
     function voltarAoMenuPrincipal() {
-        ['submenu-saida', 'submenu-frequencia', 'submenu-ocorrencias', 'submenu-notas', 'modulo-saida', 'modulo-consulta-saida', 'modulo-frequencia', 'modulo-consulta-frequencia', 'modulo-ocorrencia', 'modulo-consulta-ocorrencia', 'modulo-notas', 'modulo-consulta-notas'].forEach(id => {
+        ['submenu-saida', 'submenu-frequencia', 'submenu-ocorrencias', 'submenu-notas', 'modulo-saida', 'modulo-consulta-saida', 'modulo-frequencia', 'modulo-consulta-frequencia', 'modulo-ocorrencia', 'modulo-consulta-ocorrencia', 'modulo-notas', 'modulo-filtro-boletim', 'modulo-visualizacao-boletim'].forEach(id => {
             let el = document.getElementById(id);
             if(el) el.classList.add('hidden');
         });
         document.getElementById('tela-menu').classList.remove('hidden');
     }
 
-    // Menus
-    function abrirMenuSaida() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
-    function voltarAoSubmenuSaida() { document.getElementById('modulo-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
-    function abrirFormularioSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-saida').classList.remove('hidden'); }
-    function abrirTelaConsultaSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.remove('hidden'); }
-
-    function abrirMenuFrequencia() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
-    function voltarAoSubmenuFrequencia() { document.getElementById('modulo-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
-    function abrirFormularioFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-frequencia').classList.remove('hidden'); }
-    function abrirTelaConsultaFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.remove('hidden'); }
-
-    function abrirMenuOcorrencias() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
-    function voltarAoSubmenuOcorrencias() { document.getElementById('modulo-ocorrencia').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
-    function abrirFormularioOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-ocorrencia').classList.remove('hidden'); }
-    function abrirTelaConsultaOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden'); }
-
     function abrirMenuNotas() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
-    function voltarSubmenuNotas() { document.getElementById('modulo-notas').classList.add('hidden'); document.getElementById('modulo-consulta-notas').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
+    function voltarSubmenuNotas() { 
+        ['modulo-notas', 'modulo-filtro-boletim', 'modulo-visualizacao-boletim'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById('submenu-notas').classList.remove('hidden'); 
+    }
     function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarDadosParaNotas(); }
-    function abrirTelaConsultaNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-consulta-notas').classList.remove('hidden'); carregarNotasLancadasConsulta(); }
+    
+    function abrirTelaFiltroConsultaNotas() {
+        document.getElementById('submenu-notas').classList.add('hidden');
+        document.getElementById('modulo-visualizacao-boletim').classList.add('hidden');
+        document.getElementById('modulo-filtro-boletim').classList.remove('hidden');
+        
+        fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
+            listaDeAlunos = alunos;
+            const seriesUnicas = [...new Set(alunos.map(a => a.serie))].filter(Boolean);
+            const selSerie = document.getElementById('filtro-serie-boletim');
+            selSerie.innerHTML = '<option value="">Selecione a série...</option>';
+            seriesUnicas.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+        });
+    }
 
-    // --- MÓDULO DE NOTAS ---
+    function atualizarTurmasFiltroBoletim() {
+        const serie = document.getElementById('filtro-serie-boletim').value;
+        const selTurma = document.getElementById('filtro-turma-boletim');
+        selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+        if(!serie) return;
+        ['Turma 1', 'Turma 2'].forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+    }
+
+    // --- CARREGAMENTO DE DADOS DO PROFESSOR ---
     function carregarDadosParaNotas() {
         document.getElementById('carregando-alunos-notas').classList.remove('hidden');
         document.getElementById('form-config-notas').classList.add('hidden');
@@ -328,6 +355,7 @@
 
         const selSerie = document.getElementById('nota-serie');
         selSerie.innerHTML = '<option value="">Selecione a série...</option>';
+        
         let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
         if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo !== 'Todas') {
             seriesDisponiveis = [dadosEscopoUsuario.serieEscopo];
@@ -336,13 +364,21 @@
 
         const selDisc = document.getElementById('nota-disciplina');
         selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
-        let discDisponiveis = ["Língua Portuguesa", "Matemática", "Ciências da Natureza", "Ciências Humanas", "Inglês", "Educação Física", "Artes integradas", "Música", "Tecnologia e suas aplicações", "História", "Geografia", "Biologia", "Física", "Química", "Filosofia", "Sociologia: Ética, Cidadania e Atualidades"];
+        let discDisponiveis = ["Língua Portuguesa", "Matemática", "Ciências da Natureza", "Ciências Humanas", "Inglês", "Educação Física", "Artes integradas", "Música", "Tecnologia e suas aplicações", "História", "Geografia", "Biologia", "Física", "Química", "Filosofia", "Sociologia: Ética, Cidadania e Atualidades", "Lingua Portuguesa (Escrita)", "Língua Portuguesa (Leitura)", "Lingua Portuguesa (Lingua)", "Matemática - Geometria", "Matemática - Algebra", "Incubadora de projetos"];
+        
         if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
             discDisponiveis = [dadosEscopoUsuario.materiaEscopo];
         }
         discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
 
+        atualizarTurmasPermitidas();
         atualizarPainelPacotes();
+    }
+
+    function atualizarTurmasPermitidas() {
+        const selTurma = document.getElementById('nota-turma');
+        selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+        ['Turma 1', 'Turma 2'].forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
     }
 
     function atualizarPainelPacotes() {
@@ -491,10 +527,19 @@
         });
     }
 
-    // --- CONSULTA COM MÉDIA BIMESTRAL PONDERADA ---
-    function carregarNotasLancadasConsulta() {
-        document.getElementById('carregando-consulta-notas').style.display = 'block';
-        document.getElementById('tabela-notas-lancadas').classList.add('hidden');
+    // --- VISUALIZAÇÃO ESPELHADA NO MODELO DE BOLETIM ---
+    function gerarVisualizacaoBoletimTurma() {
+        const serie = document.getElementById('filtro-serie-boletim').value;
+        const turma = document.getElementById('filtro-turma-boletim').value;
+
+        if(!serie || !turma) { alert("Selecione a série e a turma."); return; }
+
+        document.getElementById('modulo-filtro-boletim').classList.add('hidden');
+        document.getElementById('modulo-visualizacao-boletim').classList.remove('hidden');
+        document.getElementById('carregando-boletim').classList.remove('hidden');
+        document.getElementById('tabela-boletim-turma').classList.add('hidden');
+
+        document.getElementById('titulo-boletim-turma').innerText = `BOLETIM ESCOLAR 2026 - ${serie} (${turma})`;
 
         Promise.all([
             fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
@@ -502,72 +547,89 @@
         ]).then(([notas, pesos]) => {
             notasJaLancadasGlobal = notas;
             pesosSalvosGlobal = pesos;
-            document.getElementById('carregando-consulta-notas').style.display = 'none';
-            document.getElementById('tabela-notas-lancadas').classList.remove('hidden');
 
-            const corpo = document.getElementById('corpo-tabela-notas-lancadas');
+            document.getElementById('carregando-boletim').classList.add('hidden');
+            document.getElementById('tabela-boletim-turma').classList.remove('hidden');
+
+            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie);
+            const corpo = document.getElementById('corpo-tabela-boletim');
             corpo.innerHTML = "";
 
-            if (notas.length === 0) {
-                corpo.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #666;">Nenhuma nota lançada até o momento.</td></tr>`;
+            if (alunosTurma.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="11" style="text-align: center; color: #666;">Nenhum aluno encontrado para esta turma.</td></tr>`;
                 return;
             }
 
-            let agrupado = {};
-            notas.forEach(n => {
-                let chave = `${n.bimestre}_${n.serie}_${n.turma}_${n.disciplina}_${n.ra}`;
-                if (!agrupado[chave]) {
-                    agrupado[chave] = { bimestre: n.bimestre, serie: n.serie, turma: n.turma, disciplina: n.disciplina, nome: n.nome, ra: n.ra, instrumentos: {} };
-                }
-                agrupado[chave].instrumentos[n.instrumento] = n.nota;
-            });
+            const disciplinasPadrao = ["Língua Portuguesa", "Matemática", "Ciências da Natureza", "Ciências Humanas", "Inglês", "Educação Física", "Artes integradas", "Música", "Tecnologia e suas aplicações", "História", "Geografia", "Biologia", "Física", "Química", "Filosofia", "Sociologia: Ética, Cidadania e Atualidades", "Lingua Portuguesa (Escrita)", "Língua Portuguesa (Leitura)", "Lingua Portuguesa (Lingua)", "Matemática - Geometria", "Matemática - Algebra", "Incubadora de projetos"];
+            const bimestres = ["1º Bimestre", "2º Bimestre", "3º Bimestre", "4º Bimestre"];
 
-            Object.values(agrupado).forEach(item => {
-                let configC = pesosSalvosGlobal.find(p => p.bimestre === item.bimestre && p.serie === item.serie && p.turma === item.turma && p.disciplina === item.disciplina && p.eixo === 'continuas');
-                let configB = pesosSalvosGlobal.find(p => p.bimestre === item.bimestre && p.serie === item.serie && p.turma === item.turma && p.disciplina === item.disciplina && p.eixo === 'bimestrais');
+            // Regras de peso oficial da série
+            let regraSerie = MATRIZ_PESOS_OFICIAL[serie] || { prova: 0, cont: 100 };
 
-                let pesosC = configC ? JSON.parse(configC.pesosJson) : { 'C1': 100 };
-                let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
+            alunosTurma.forEach(aluno => {
+                disciplinasPadrao.forEach(disc => {
+                    let temLancamento = notas.some(n => n.serie === serie && n.turma === turma && n.disciplina === disc && String(n.ra) === String(aluno.ra));
+                    if (!temLancamento) return; // Oculta disciplinas sem nota lançada para manter o boletim limpo
 
-                let somaPonderadaC = 0;
-                let temNotaC = false;
-                Object.keys(pesosC).forEach(p => {
-                    if (item.instrumentos[p] !== undefined) {
-                        somaPonderadaC += (item.instrumentos[p] * (pesosC[p] / 100));
-                        temNotaC = true;
-                    }
+                    const tr = document.createElement('tr');
+                    let htmlLinha = `<td><strong>${disc}</strong></td><td>${aluno.nome}<br><small>RA: ${aluno.ra}</small></td>`;
+                    
+                    let somatoriaMediasBimestrais = 0;
+                    let bimestresValidos = 0;
+
+                    bimestres.forEach(bim => {
+                        let configC = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'continuas');
+                        let configB = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'bimestrais');
+                        let configR = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'recuperacao');
+
+                        let pesosC = configC ? JSON.parse(configC.pesosJson) : { 'C1': 100 };
+                        let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
+                        let pesosR = configR ? JSON.parse(configR.pesosJson) : { 'R1': 100 };
+
+                        let notasAlunoBim = notas.filter(n => n.bimestre === bim && n.serie === serie && n.turma === turma && n.disciplina === disc && String(n.ra) === String(aluno.ra));
+
+                        let mapaNotas = {};
+                        notasAlunoBim.forEach(n => { mapaNotas[n.instrumento] = n.nota; });
+
+                        // Média Contínuas
+                        let somaC = 0, temC = false;
+                        Object.keys(pesosC).forEach(p => {
+                            if (mapaNotas[p] !== undefined) { somaC += (mapaNotas[p] * (pesosC[p] / 100)); temC = true; }
+                        });
+
+                        // Média Bimestrais
+                        let somaB = 0, temB = false;
+                        Object.keys(pesosB).forEach(p => {
+                            if (mapaNotas[p] !== undefined) { somaB += (mapaNotas[p] * (pesosB[p] / 100)); temB = true; }
+                        });
+
+                        // Média Recuperação
+                        let notaR = "-";
+                        Object.keys(pesosR).forEach(p => {
+                            if (mapaNotas[p] !== undefined) notaR = mapaNotas[p];
+                        });
+
+                        let mb = "-";
+                        if (temC || temB) {
+                            let calculada = (somaC * (regraSerie.cont / 100)) + (somaB * (regraSerie.prova / 100));
+                            mb = calculada.toFixed(1);
+                            somatoriaMediasBimestrais += calculada;
+                            bimestresValidos++;
+                        }
+
+                        let classeMb = (mb !== "-" && parseFloat(mb) < 50) ? "nota-abaixo" : "";
+                        let classeR = (notaR !== "-" && parseFloat(notaR) < 50) ? "nota-abaixo" : "";
+
+                        htmlLinha += `<td class="${classeMb}">${mb}</td><td class="${classeR}">${notaR}</td>`;
+                    });
+
+                    let mediaAnual = bimestresValidos > 0 ? (somatoriaMediasBimestrais / bimestresValidos).toFixed(1) : "-";
+                    let classeAnual = (mediaAnual !== "-" && parseFloat(mediaAnual) < 50) ? "nota-abaixo" : "";
+
+                    htmlLinha += `<td class="${classeAnual}"><strong>${mediaAnual}</strong></td>`;
+                    tr.innerHTML = htmlLinha;
+                    corpo.appendChild(tr);
                 });
-
-                let somaPonderadaB = 0;
-                let temNotaB = false;
-                Object.keys(pesosB).forEach(p => {
-                    if (item.instrumentos[p] !== undefined) {
-                        somaPonderadaB += (item.instrumentos[p] * (pesosB[p] / 100));
-                        temNotaB = true;
-                    }
-                });
-
-                let pesoProva = 35;
-                let pesoCont = 65;
-                if (item.serie.includes('Maternal') || item.serie.includes('Pré') || item.serie.includes('1º Ano') || item.serie.includes('2º Ano') || item.serie.includes('3º Ano')) {
-                    pesoProva = 0; pesoCont = 100;
-                } else if (item.serie.includes('Série')) {
-                    pesoProva = 40; pesoCont = 60;
-                }
-
-                let mediaBimestralFinal = (somaPonderadaC * (pesoCont / 100)) + (somaPonderadaB * (pesoProva / 100));
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item.bimestre}</td>
-                    <td>${item.serie} (${item.turma})</td>
-                    <td>${item.disciplina}</td>
-                    <td><strong>${item.nome}</strong><br><small>RA: ${item.ra}</small></td>
-                    <td><strong>${temNotaC ? somaPonderadaC.toFixed(1) : '-'}</strong> <small>(${pesoCont}% do peso)</small></td>
-                    <td><strong>${temNotaB ? somaPonderadaB.toFixed(1) : '-'}</strong> <small>(${pesoProva}% do peso)</small></td>
-                    <td><strong style="color: #016552; font-size: 16px;">${mediaBimestralFinal.toFixed(1)}</strong></td>
-                `;
-                corpo.appendChild(tr);
             });
         });
     }

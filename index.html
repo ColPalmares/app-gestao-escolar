@@ -32,7 +32,7 @@
         .voltar-btn { background-color: #6c757d; margin-top: 15px; }
         .voltar-btn:hover { background-color: #5a6268; }
         
-        /* Tabela de Consulta */
+        /* Tabelas e Filtros */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background-color: #016552; color: white; }
@@ -67,7 +67,7 @@
         <div id="lista-modulos" class="hidden">
             <p style="font-size: 14px; color: #444; margin-bottom: 15px;">Selecione o módulo desejado:</p>
             <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirMenuSaida()">Autorização de Saída</button>
-            <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirModuloFrequencia()">Controle de Frequência / Faltas</button>
+            <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirMenuFrequencia()">Controle de Frequência / Faltas</button>
             <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
         </div>
     </div>
@@ -76,11 +76,19 @@
     <div id="submenu-saida" class="hidden">
         <h2>Autorização de Saída</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioSaida()">➕ Nova Autorização</button>
-        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsulta()">📋 Consultar Autorizações</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaSaida()">📋 Consultar Autorizações</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULO 1: FORMULÁRIO DE CADASTRO DE SAÍDA -->
+    <!-- SUBMENU DO MÓDULO DE FREQUÊNCIA -->
+    <div id="submenu-frequencia" class="hidden">
+        <h2>Controle de Frequência</h2>
+        <button class="sub-menu-btn" onclick="abrirFormularioFrequencia()">➕ Registrar Frequência</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaFrequencia()">📋 Consultar Frequências</button>
+        <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+    </div>
+
+    <!-- MÓDULO 1: FORMULÁRIO DE SAÍDA -->
     <div id="modulo-saida" class="hidden">
         <h2>Nova Autorização de Saída</h2>
         <div id="carregando-alunos-saida" class="loading">Carregando lista de alunos...</div>
@@ -127,20 +135,17 @@
         </div>
     </div>
 
-    <!-- MÓDULO 1: TELA DE CONSULTA DE SAÍDA -->
-    <div id="modulo-consulta" class="hidden">
+    <!-- MÓDULO 1: CONSULTA DE SAÍDA -->
+    <div id="modulo-consulta-saida" class="hidden">
         <h2>Consultar Autorizações</h2>
-        
         <div class="filtros-container">
-            <button id="filtro-hoje" onclick="filtrarRegistros('hoje')">Saídas de Hoje</button>
-            <button id="filtro-permanente" onclick="filtrarRegistros('permanente')">Permanentes</button>
-            <button id="filtro-todos" class="ativo" onclick="filtrarRegistros('todos')">Exibir Todos</button>
+            <button id="filtro-hoje" onclick="filtrarRegistrosSaida('hoje')">Saídas de Hoje</button>
+            <button id="filtro-permanente" onclick="filtrarRegistrosSaida('permanente')">Permanentes</button>
+            <button id="filtro-todos" class="ativo" onclick="filtrarRegistrosSaida('todos')">Exibir Todos</button>
         </div>
-
-        <div id="carregando-consulta" class="loading">Buscando registros na planilha...</div>
-
+        <div id="carregando-consulta-saida" class="loading">Buscando registros...</div>
         <div style="overflow-x: auto;">
-            <table id="tabela-registros" class="hidden">
+            <table id="tabela-registros-saida" class="hidden">
                 <thead>
                     <tr>
                         <th>Data Saída</th>
@@ -150,16 +155,15 @@
                         <th>Descrição</th>
                     </tr>
                 </thead>
-                <tbody id="corpo-tabela"></tbody>
+                <tbody id="corpo-tabela-saida"></tbody>
             </table>
         </div>
-
         <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
     </div>
 
-    <!-- MÓDULO 2: CONTROLE DE FREQUÊNCIA / FALTAS -->
+    <!-- MÓDULO 2: FORMULÁRIO DE FREQUÊNCIA -->
     <div id="modulo-frequencia" class="hidden">
-        <h2>Controle de Frequência</h2>
+        <h2>Registrar Frequência</h2>
         <div id="carregando-alunos-freq" class="loading">Carregando lista de alunos...</div>
 
         <div id="formulario-frequencia" class="hidden">
@@ -210,8 +214,33 @@
                 <textarea id="freq-observacoes" rows="2" placeholder="Detalhes adicionais..."></textarea>
             </div>
             <button onclick="enviarDadosFrequencia()" id="btn-salvar-freq">Salvar Frequência</button>
-            <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+            <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
         </div>
+    </div>
+
+    <!-- MÓDULO 2: CONSULTA DE FREQUÊNCIA -->
+    <div id="modulo-consulta-frequencia" class="hidden">
+        <h2>Consultar Frequências</h2>
+        <div class="filtros-container">
+            <button id="freq-filtro-hoje" class="ativo" onclick="filtrarRegistrosFreq('hoje')">Faltas de Hoje</button>
+            <button id="freq-filtro-todos" onclick="filtrarRegistrosFreq('todos')">Exibir Todos</button>
+        </div>
+        <div id="carregando-consulta-freq" class="loading">Buscando registros...</div>
+        <div style="overflow-x: auto;">
+            <table id="tabela-registros-freq" class="hidden">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Aluno (RA)</th>
+                        <th>Série</th>
+                        <th>Status</th>
+                        <th>Justificativa / Obs</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela-freq"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
     </div>
 
 </div>
@@ -223,6 +252,7 @@
     let usuarioLogado = "";
     let listaDeAlunos = [];
     let todosRegistrosSaida = [];
+    let todosRegistrosFreq = [];
 
     window.onload = function () {
         google.accounts.id.initialize({
@@ -279,10 +309,13 @@
             });
     }
 
-    // Navegação Geral
     function voltarAoMenuPrincipal() {
         document.getElementById('submenu-saida').classList.add('hidden');
+        document.getElementById('submenu-frequencia').classList.add('hidden');
+        document.getElementById('modulo-saida').classList.add('hidden');
+        document.getElementById('modulo-consulta-saida').classList.add('hidden');
         document.getElementById('modulo-frequencia').classList.add('hidden');
+        document.getElementById('modulo-consulta-frequencia').classList.add('hidden');
         document.getElementById('tela-menu').classList.remove('hidden');
     }
 
@@ -291,33 +324,44 @@
         document.getElementById('tela-menu').classList.add('hidden');
         document.getElementById('submenu-saida').classList.remove('hidden');
     }
-
     function voltarAoSubmenuSaida() {
         document.getElementById('modulo-saida').classList.add('hidden');
-        document.getElementById('modulo-consulta').classList.add('hidden');
+        document.getElementById('modulo-consulta-saida').classList.add('hidden');
         document.getElementById('submenu-saida').classList.remove('hidden');
     }
-
     function abrirFormularioSaida() {
         document.getElementById('submenu-saida').classList.add('hidden');
         document.getElementById('modulo-saida').classList.remove('hidden');
         carregarAlunosGeral();
     }
-
-    function abrirTelaConsulta() {
+    function abrirTelaConsultaSaida() {
         document.getElementById('submenu-saida').classList.add('hidden');
-        document.getElementById('modulo-consulta').classList.remove('hidden');
-        carregarRegistrosConsulta();
+        document.getElementById('modulo-consulta-saida').classList.remove('hidden');
+        carregarRegistrosConsultaSaida();
     }
 
     // Navegação Frequência
-    function abrirModuloFrequencia() {
+    function abrirMenuFrequencia() {
         document.getElementById('tela-menu').classList.add('hidden');
+        document.getElementById('submenu-frequencia').classList.remove('hidden');
+    }
+    function voltarAoSubmenuFrequencia() {
+        document.getElementById('modulo-frequencia').classList.add('hidden');
+        document.getElementById('modulo-consulta-frequencia').classList.add('hidden');
+        document.getElementById('submenu-frequencia').classList.remove('hidden');
+    }
+    function abrirFormularioFrequencia() {
+        document.getElementById('submenu-frequencia').classList.add('hidden');
         document.getElementById('modulo-frequencia').classList.remove('hidden');
         carregarAlunosGeral();
     }
+    function abrirTelaConsultaFrequencia() {
+        document.getElementById('submenu-frequencia').classList.add('hidden');
+        document.getElementById('modulo-consulta-frequencia').classList.remove('hidden');
+        carregarRegistrosConsultaFreq();
+    }
 
-    // Carregamento centralizado de Alunos (reaproveitado para ambos os módulos)
+    // Carregamento de Alunos
     function carregarAlunosGeral() {
         if (listaDeAlunos.length > 0) {
             liberarFormulariosAlunos();
@@ -328,10 +372,7 @@
             .then(response => response.json())
             .then(alunos => {
                 listaDeAlunos = alunos;
-                
-                // Preenche Select de Saída
                 const selectSaida = document.getElementById('campo-aluno-saida');
-                // Preenche Select de Frequência
                 const selectFreq = document.getElementById('freq-aluno');
 
                 alunos.forEach(aluno => {
@@ -346,15 +387,12 @@
 
                 liberarFormulariosAlunos();
             })
-            .catch(error => {
-                console.error("Erro ao carregar alunos:", error);
-            });
+            .catch(error => console.error("Erro ao carregar alunos:", error));
     }
 
     function liberarFormulariosAlunos() {
         document.getElementById('carregando-alunos-saida').classList.add('hidden');
         document.getElementById('formulario-saida').classList.remove('hidden');
-        
         document.getElementById('carregando-alunos-freq').classList.add('hidden');
         document.getElementById('formulario-frequencia').classList.remove('hidden');
     }
@@ -371,7 +409,7 @@
         document.getElementById('freq-ra').value = aluno ? aluno.ra : "";
     }
 
-    // Salvar Saída
+    // Envio Saída
     function enviarDadosSaida() {
         const btn = document.getElementById('btn-salvar-saida');
         btn.innerText = "Salvando...";
@@ -389,35 +427,26 @@
         };
 
         if(!dados.dataSaida || !dados.nome || !dados.serie) {
-            alert("Preencha os campos obrigatórios (Data, Aluno e Série).");
-            btn.innerText = "Salvar Registro";
-            btn.disabled = false;
-            return;
+            alert("Preencha os campos obrigatórios.");
+            btn.innerText = "Salvar Registro"; btn.disabled = false; return;
         }
 
-        fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        }).then(() => {
-            alert("Autorização de saída salva com sucesso!");
+        fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
+        .then(() => {
+            alert("Autorização salva com sucesso!");
             document.getElementById('campo-data-saida').value = "";
             document.getElementById('campo-aluno-saida').value = "";
             document.getElementById('campo-ra-saida').value = "";
             document.getElementById('campo-serie-saida').value = "";
             document.getElementById('campo-descricao-saida').value = "";
-            
-            btn.innerText = "Salvar Registro";
-            btn.disabled = false;
-        }).catch(error => {
-            alert("Erro ao salvar. Tente novamente.");
-            btn.innerText = "Salvar Registro";
-            btn.disabled = false;
+            btn.innerText = "Salvar Registro"; btn.disabled = false;
+        }).catch(() => {
+            alert("Erro ao salvar.");
+            btn.innerText = "Salvar Registro"; btn.disabled = false;
         });
     }
 
-    // Salvar Frequência (Com validação obrigatória da justificativa)
+    // Envio Frequência
     function enviarDadosFrequencia() {
         const btn = document.getElementById('btn-salvar-freq');
         const justificativa = document.getElementById('freq-justificativa').value.trim();
@@ -426,9 +455,8 @@
             alert("Preencha os campos obrigatórios (Data, Aluno e Série).");
             return;
         }
-
         if (!justificativa) {
-            alert("O campo 'Justificativa' é obrigatório para o registro de frequência/falta.");
+            alert("O campo 'Justificativa' é obrigatório.");
             document.getElementById('freq-justificativa').focus();
             return;
         }
@@ -448,93 +476,122 @@
             observacoes: document.getElementById('freq-observacoes').value
         };
 
-        fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        }).then(() => {
-            alert("Registro de frequência salvo com sucesso na planilha!");
+        fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
+        .then(() => {
+            alert("Frequência salva com sucesso na planilha!");
             document.getElementById('freq-data').value = "";
             document.getElementById('freq-aluno').value = "";
             document.getElementById('freq-ra').value = "";
             document.getElementById('freq-serie').value = "";
             document.getElementById('freq-justificativa').value = "";
             document.getElementById('freq-observacoes').value = "";
-            
-            btn.innerText = "Salvar Frequência";
-            btn.disabled = false;
-        }).catch(error => {
-            alert("Erro ao salvar. Tente novamente.");
-            btn.innerText = "Salvar Frequência";
-            btn.disabled = false;
+            btn.innerText = "Salvar Frequência"; btn.disabled = false;
+        }).catch(() => {
+            alert("Erro ao salvar.");
+            btn.innerText = "Salvar Frequência"; btn.disabled = false;
         });
     }
 
-    // Consulta de Saída
-    function carregarRegistrosConsulta() {
-        document.getElementById('carregando-consulta').style.display = 'block';
-        document.getElementById('tabela-registros').classList.add('hidden');
+    // Consulta Saída
+    function carregarRegistrosConsultaSaida() {
+        document.getElementById('carregando-consulta-saida').style.display = 'block';
+        document.getElementById('tabela-registros-saida').classList.add('hidden');
 
         fetch(API_URL + '?acao=buscarRegistrosSaida')
-            .then(response => response.json())
-            .then(registros => {
-                todosRegistrosSaida = registros;
-                document.getElementById('carregando-consulta').style.display = 'none';
-                document.getElementById('tabela-registros').classList.remove('hidden');
-                filtrarRegistros('todos');
-            })
-            .catch(error => {
-                document.getElementById('carregando-consulta').innerText = "Erro ao carregar registros.";
-                console.error(error);
+            .then(res => res.json())
+            .then(regs => {
+                todosRegistrosSaida = regs;
+                document.getElementById('carregando-consulta-saida').style.display = 'none';
+                document.getElementById('tabela-registros-saida').classList.remove('hidden');
+                filtrarRegistrosSaida('todos');
             });
     }
 
-    function filtrarRegistros(tipoFiltro) {
+    function filtrarRegistrosSaida(tipoFiltro) {
         document.getElementById('filtro-hoje').classList.remove('ativo');
         document.getElementById('filtro-permanente').classList.remove('ativo');
         document.getElementById('filtro-todos').classList.remove('ativo');
-        
         if(tipoFiltro === 'hoje') document.getElementById('filtro-hoje').classList.add('ativo');
         if(tipoFiltro === 'permanente') document.getElementById('filtro-permanente').classList.add('ativo');
         if(tipoFiltro === 'todos') document.getElementById('filtro-todos').classList.add('ativo');
 
-        const corpoTabela = document.getElementById('corpo-tabela');
-        corpoTabela.innerHTML = "";
-
+        const corpo = document.getElementById('corpo-tabela-saida');
+        corpo.innerHTML = "";
         const hojeIso = new Date().toISOString().split('T')[0];
 
-        const registrosFiltrados = todosRegistrosSaida.filter(reg => {
-            let dataFormatada = "";
-            if(reg.dataSaida) {
-                dataFormatada = reg.dataSaida.split('T')[0];
-            }
-
-            if (tipoFiltro === 'hoje') {
-                return dataFormatada === hojeIso;
-            } else if (tipoFiltro === 'permanente') {
-                return reg.tipo && reg.tipo.toLowerCase() === 'permanente';
-            }
+        const filtrados = todosRegistrosSaida.filter(reg => {
+            let dt = reg.dataSaida ? reg.dataSaida.split('T')[0] : '';
+            if (tipoFiltro === 'hoje') return dt === hojeIso;
+            if (tipoFiltro === 'permanente') return reg.tipo && reg.tipo.toLowerCase() === 'permanente';
             return true;
         });
 
-        if (registrosFiltrados.length === 0) {
-            corpoTabela.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum registro encontrado para este filtro.</td></tr>`;
+        if (filtrados.length === 0) {
+            corpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`;
             return;
         }
 
-        registrosFiltrados.forEach(reg => {
-            let exibicaoData = reg.dataSaida ? reg.dataSaida.split('T')[0].split('-').reverse().join('/') : '';
-            
-            const linha = document.createElement('tr');
-            linha.innerHTML = `
-                <td>${exibicaoData}</td>
-                <td><strong>${reg.nome}</strong><br><small style="color: #666;">RA: ${reg.ra}</small></td>
+        filtrados.forEach(reg => {
+            let dtExibe = reg.dataSaida ? reg.dataSaida.split('T')[0].split('-').reverse().join('/') : '';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${dtExibe}</td>
+                <td><strong>${reg.nome}</strong><br><small>RA: ${reg.ra}</small></td>
                 <td>${reg.serie}</td>
-                <td><span style="padding: 3px 8px; border-radius: 4px; font-size: 12px; background: ${reg.tipo === 'Permanente' ? '#d4edda' : '#fff3cd'}; color: ${reg.tipo === 'Permanente' ? '#155724' : '#856404'}">${reg.tipo}</span></td>
+                <td>${reg.tipo}</td>
                 <td>${reg.descricao || '-'}</td>
             `;
-            corpoTabela.appendChild(linha);
+            corpo.appendChild(tr);
+        });
+    }
+
+    // Consulta Frequência
+    function carregarRegistrosConsultaFreq() {
+        document.getElementById('carregando-consulta-freq').style.display = 'block';
+        document.getElementById('tabela-registros-freq').classList.add('hidden');
+
+        fetch(API_URL + '?acao=buscarRegistrosFrequencia')
+            .then(res => res.json())
+            .then(regs => {
+                todosRegistrosFreq = regs;
+                document.getElementById('carregando-consulta-freq').style.display = 'none';
+                document.getElementById('tabela-registros-freq').classList.remove('hidden');
+                filtrarRegistrosFreq('hoje');
+            });
+    }
+
+    function filtrarRegistrosFreq(tipoFiltro) {
+        document.getElementById('freq-filtro-hoje').classList.remove('ativo');
+        document.getElementById('freq-filtro-todos').classList.remove('ativo');
+        if(tipoFiltro === 'hoje') document.getElementById('freq-filtro-hoje').classList.add('ativo');
+        if(tipoFiltro === 'todos') document.getElementById('freq-filtro-todos').classList.add('ativo');
+
+        const corpo = document.getElementById('corpo-tabela-freq');
+        corpo.innerHTML = "";
+        const hojeIso = new Date().toISOString().split('T')[0];
+
+        const filtrados = todosRegistrosFreq.filter(reg => {
+            let dt = reg.dataFrequencia ? reg.dataFrequencia.split('T')[0] : '';
+            if (tipoFiltro === 'hoje') return dt === hojeIso;
+            return true;
+        });
+
+        if (filtrados.length === 0) {
+            corpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`;
+            return;
+        }
+
+        filtrados.forEach(reg => {
+            let dtExibe = reg.dataFrequencia ? reg.dataFrequencia.split('T')[0].split('-').reverse().join('/') : '';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${dtExibe}</td>
+                <td><strong>${reg.nome}</strong><br><small>RA: ${reg.ra}</small></td>
+                <td>${reg.serie}</td>
+                <td><span style="padding: 3px 8px; border-radius: 4px; font-size: 12px; background: #fff3cd; color: #856404">${reg.frequencia}</span></td>
+                <td><strong>Justificativa:</strong> ${reg.justificativa}<br><small style="color: #666;">Obs: ${reg.observacoes || '-'}</small></td>
+            `;
+            corpo.appendChild(tr);
         });
     }
 </script>

@@ -78,18 +78,21 @@
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaSaida()">📋 Consultar Autorizações</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
+    
     <div id="submenu-frequencia" class="hidden">
         <h2>Controle de Frequência</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioFrequencia()">➕ Registrar Frequência</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaFrequencia()">📋 Consultar Frequências</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
+    
     <div id="submenu-ocorrencias" class="hidden">
         <h2>Registro de Ocorrências</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioOcorrencia()">➕ Nova Ocorrência</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaOcorrencia()">📋 Consultar Ocorrências</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
+    
     <div id="submenu-notas" class="hidden">
         <h2>Módulo de Notas</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas</button>
@@ -97,7 +100,7 @@
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULO DE NOTAS: PASSO 1 - CONFIGURAÇÃO E PESOS DOS PACOTES -->
+    <!-- MÓDULO DE NOTAS: CONFIGURAÇÃO E PESOS DOS PACOTES -->
     <div id="modulo-notas" class="hidden">
         <h2>Configuração de Notas e Pesos</h2>
         <div id="carregando-alunos-notas" class="loading">Carregando dados estruturais...</div>
@@ -150,7 +153,7 @@
             <button onclick="validarPesosEAvancar()" id="btn-avancar-notas">Avançar para Lançamento de Notas</button>
         </div>
 
-        <!-- PASSO 2: TABELA DE LANÇAMENTO EM LOTE -->
+        <!-- TABELA DE LANÇAMENTO EM LOTE -->
         <div id="container-tabela-notas" class="hidden" style="margin-top: 20px;">
             <h3 id="titulo-turma-notas" style="color: #016552; text-align: center; font-size: 16px;"></h3>
             <div style="overflow-x: auto; max-height: 400px;">
@@ -196,7 +199,7 @@
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu de Notas</button>
     </div>
 
-    <!-- MÓDULOS ANTERIORES MANTIDOS -->
+    <!-- OUTROS MÓDULOS (SAÍDA, FREQUÊNCIA, OCORRÊNCIAS) -->
     <div id="modulo-saida" class="hidden"><h2>Saída</h2><button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button></div>
     <div id="modulo-consulta-saida" class="hidden"><h2>Consulta Saída</h2><button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button></div>
     <div id="modulo-frequencia" class="hidden"><h2>Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
@@ -217,16 +220,24 @@
     let pesosSalvosGlobal = [];
 
     window.onload = function () {
-        google.accounts.id.initialize({ client_id: CLIENT_ID, callback: tratarRespostaLogin });
-        google.accounts.id.renderButton(document.getElementById("buttonDiv"), { theme: "outline", size: "large", text: "continue_with" });
+        google.accounts.id.initialize({
+            client_id: CLIENT_ID,
+            callback: tratarRespostaLogin
+        });
+        google.accounts.id.renderButton(
+            document.getElementById("buttonDiv"),
+            { theme: "outline", size: "large", text: "continue_with" }
+        );
     };
 
     function tratarRespostaLogin(resposta) {
-        const payload = decodificarJWT(resposta.credential);
-        usuarioLogado = payload.email;
+        const payloadDecodificado = decodificarJWT(resposta.credential);
+        usuarioLogado = payloadDecodificado.email;
+        
         document.getElementById('tela-login').classList.add('hidden');
         document.getElementById('tela-menu').classList.remove('hidden');
         document.getElementById('msg-bem-vindo').innerText = "Logado como: " + usuarioLogado;
+        
         verificarPermissoes(usuarioLogado);
     }
 
@@ -245,25 +256,55 @@
             .then(resultado => {
                 document.getElementById('carregando-permissoes').classList.add('hidden');
                 document.getElementById('lista-modulos').classList.remove('hidden');
+
                 dadosEscopoUsuario = resultado;
                 const modulos = resultado.modulos || [];
+
                 if (modulos.includes("autorizacao_saida")) document.getElementById('btn-mod-saida').style.display = 'block';
                 if (modulos.includes("frequencia")) document.getElementById('btn-mod-frequencia').style.display = 'block';
                 if (modulos.includes("ocorrencias")) document.getElementById('btn-mod-ocorrencias').style.display = 'block';
                 if (modulos.includes("notas")) document.getElementById('btn-mod-notas').style.display = 'block';
+                
+                if (modulos.length === 0) {
+                    document.getElementById('sem-acesso').classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                document.getElementById('carregando-permissoes').innerText = "Erro ao carregar permissões.";
+                console.error(error);
             });
     }
 
     function voltarAoMenuPrincipal() {
-        ['submenu-saida', 'submenu-frequencia', 'submenu-ocorrencias', 'submenu-notas', 'modulo-saida', 'modulo-consulta-saida', 'modulo-frequencia', 'modulo-consulta-frequencia', 'modulo-ocorrencia', 'modulo-consulta-ocorrencia', 'modulo-notas', 'modulo-consulta-notas'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        ['submenu-saida', 'submenu-frequencia', 'submenu-ocorrencias', 'submenu-notas', 'modulo-saida', 'modulo-consulta-saida', 'modulo-frequencia', 'modulo-consulta-frequencia', 'modulo-ocorrencia', 'modulo-consulta-ocorrencia', 'modulo-notas', 'modulo-consulta-notas'].forEach(id => {
+            let el = document.getElementById(id);
+            if(el) el.classList.add('hidden');
+        });
         document.getElementById('tela-menu').classList.remove('hidden');
     }
+
+    // Menus
+    function abrirMenuSaida() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
+    function voltarAoSubmenuSaida() { document.getElementById('modulo-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
+    function abrirFormularioSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-saida').classList.remove('hidden'); }
+    function abrirTelaConsultaSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.remove('hidden'); }
+
+    function abrirMenuFrequencia() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
+    function voltarAoSubmenuFrequencia() { document.getElementById('modulo-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
+    function abrirFormularioFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-frequencia').classList.remove('hidden'); }
+    function abrirTelaConsultaFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.remove('hidden'); }
+
+    function abrirMenuOcorrencias() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
+    function voltarAoSubmenuOcorrencias() { document.getElementById('modulo-ocorrencia').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
+    function abrirFormularioOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-ocorrencia').classList.remove('hidden'); }
+    function abrirTelaConsultaOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden'); }
 
     function abrirMenuNotas() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
     function voltarSubmenuNotas() { document.getElementById('modulo-notas').classList.add('hidden'); document.getElementById('modulo-consulta-notas').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
     function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarDadosParaNotas(); }
     function abrirTelaConsultaNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-consulta-notas').classList.remove('hidden'); carregarNotasLancadasConsulta(); }
 
+    // --- MÓDULO DE NOTAS ---
     function carregarDadosParaNotas() {
         document.getElementById('carregando-alunos-notas').classList.remove('hidden');
         document.getElementById('form-config-notas').classList.add('hidden');
@@ -450,7 +491,7 @@
         });
     }
 
-    // --- CONSULTA COM ÁRVORE DE CÁLCULO DA MÉDIA BIMESTRAL ---
+    // --- CONSULTA COM MÉDIA BIMESTRAL PONDERADA ---
     function carregarNotasLancadasConsulta() {
         document.getElementById('carregando-consulta-notas').style.display = 'block';
         document.getElementById('tabela-notas-lancadas').classList.add('hidden');
@@ -472,7 +513,6 @@
                 return;
             }
 
-            // Agrupa por Aluno + Bimestre + Série + Turma + Disciplina
             let agrupado = {};
             notas.forEach(n => {
                 let chave = `${n.bimestre}_${n.serie}_${n.turma}_${n.disciplina}_${n.ra}`;
@@ -483,14 +523,12 @@
             });
 
             Object.values(agrupado).forEach(item => {
-                // 1. Recupera pesos salvos para Contínuas (C1-C6) e Bimestrais (B1-B4)
                 let configC = pesosSalvosGlobal.find(p => p.bimestre === item.bimestre && p.serie === item.serie && p.turma === item.turma && p.disciplina === item.disciplina && p.eixo === 'continuas');
                 let configB = pesosSalvosGlobal.find(p => p.bimestre === item.bimestre && p.serie === item.serie && p.turma === item.turma && p.disciplina === item.disciplina && p.eixo === 'bimestrais');
 
                 let pesosC = configC ? JSON.parse(configC.pesosJson) : { 'C1': 100 };
                 let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
 
-                // 2. Calcula Média Ponderada das Contínuas
                 let somaPonderadaC = 0;
                 let temNotaC = false;
                 Object.keys(pesosC).forEach(p => {
@@ -500,29 +538,23 @@
                     }
                 });
 
-                // 3. Calcula Média Ponderada das Bimestrais
                 let somaPonderadaB = 0;
                 let temNotaB = false;
                 Object.keys(pesosB).forEach(p => {
-                    if (item.instrumentos[p] !== isValid = item.instrumentos[p] !== undefined) {
-                        // safe check
-                    }
                     if (item.instrumentos[p] !== undefined) {
                         somaPonderadaB += (item.instrumentos[p] * (pesosB[p] / 100));
                         temNotaB = true;
                     }
                 });
 
-                // 4. Define o peso da Prova Bimestral vs Contínuas conforme a série mapeada
-                let pesoProva = 35; // Padrão Fundamental II
+                let pesoProva = 35;
                 let pesoCont = 65;
                 if (item.serie.includes('Maternal') || item.serie.includes('Pré') || item.serie.includes('1º Ano') || item.serie.includes('2º Ano') || item.serie.includes('3º Ano')) {
                     pesoProva = 0; pesoCont = 100;
-                } else if (item.serie.includes('Série')) { // Ensino Médio
+                } else if (item.serie.includes('Série')) {
                     pesoProva = 40; pesoCont = 60;
                 }
 
-                // 5. Calcula a Média Bimestral Final cruzando os dois eixos
                 let mediaBimestralFinal = (somaPonderadaC * (pesoCont / 100)) + (somaPonderadaB * (pesoProva / 100));
 
                 const tr = document.createElement('tr');

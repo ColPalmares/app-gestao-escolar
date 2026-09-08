@@ -67,6 +67,7 @@
         <div id="lista-modulos" class="hidden">
             <p style="font-size: 14px; color: #444; margin-bottom: 15px;">Selecione o módulo desejado:</p>
             <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirMenuSaida()">Autorização de Saída</button>
+            <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirModuloFrequencia()">Controle de Frequência / Faltas</button>
             <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
         </div>
     </div>
@@ -79,29 +80,29 @@
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULO 1: FORMULÁRIO DE CADASTRO -->
+    <!-- MÓDULO 1: FORMULÁRIO DE CADASTRO DE SAÍDA -->
     <div id="modulo-saida" class="hidden">
         <h2>Nova Autorização de Saída</h2>
-        <div id="carregando-alunos" class="loading">Carregando lista de alunos...</div>
+        <div id="carregando-alunos-saida" class="loading">Carregando lista de alunos...</div>
 
         <div id="formulario-saida" class="hidden">
             <div class="form-group">
                 <label>Data da Saída:</label>
-                <input type="date" id="campo-data" required>
+                <input type="date" id="campo-data-saida" required>
             </div>
             <div class="form-group">
                 <label>Aluno:</label>
-                <select id="campo-aluno" onchange="preencherRA()">
+                <select id="campo-aluno-saida" onchange="preencherRASAIDA()">
                     <option value="">Selecione um aluno...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>RA:</label>
-                <input type="text" id="campo-ra" readonly style="background-color: #e9ecef;">
+                <input type="text" id="campo-ra-saida" readonly style="background-color: #e9ecef;">
             </div>
             <div class="form-group">
                 <label>Série/Ano:</label>
-                <select id="campo-serie">
+                <select id="campo-serie-saida">
                     <option value="">Selecione...</option>
                     <option value="Maternal 1">Maternal 1</option><option value="Maternal 2">Maternal 2</option><option value="Maternal 3">Maternal 3</option>
                     <option value="Pré 1">Pré 1</option><option value="Pré 2">Pré 2</option>
@@ -112,21 +113,21 @@
             </div>
             <div class="form-group">
                 <label>Tipo de Autorização:</label>
-                <select id="campo-tipo">
+                <select id="campo-tipo-saida">
                     <option value="Pontual">Pontual</option>
                     <option value="Permanente">Permanente</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Descrição / Motivo:</label>
-                <textarea id="campo-descricao" rows="3" placeholder="Digite os detalhes da saída..."></textarea>
+                <textarea id="campo-descricao-saida" rows="3" placeholder="Digite os detalhes da saída..."></textarea>
             </div>
-            <button onclick="enviarDados()" id="btn-salvar">Salvar Registro</button>
+            <button onclick="enviarDadosSaida()" id="btn-salvar-saida">Salvar Registro</button>
             <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
         </div>
     </div>
 
-    <!-- MÓDULO 1: TELA DE CONSULTA E FILTROS -->
+    <!-- MÓDULO 1: TELA DE CONSULTA DE SAÍDA -->
     <div id="modulo-consulta" class="hidden">
         <h2>Consultar Autorizações</h2>
         
@@ -149,13 +150,68 @@
                         <th>Descrição</th>
                     </tr>
                 </thead>
-                <tbody id="corpo-tabela">
-                    <!-- Dados carregados via JS -->
-                </tbody>
+                <tbody id="corpo-tabela"></tbody>
             </table>
         </div>
 
         <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
+    </div>
+
+    <!-- MÓDULO 2: CONTROLE DE FREQUÊNCIA / FALTAS -->
+    <div id="modulo-frequencia" class="hidden">
+        <h2>Controle de Frequência</h2>
+        <div id="carregando-alunos-freq" class="loading">Carregando lista de alunos...</div>
+
+        <div id="formulario-frequencia" class="hidden">
+            <div class="form-group">
+                <label>Data da Ocorrência:</label>
+                <input type="date" id="freq-data" required>
+            </div>
+            <div class="form-group">
+                <label>Aluno:</label>
+                <select id="freq-aluno" onchange="preencherRAFreq()">
+                    <option value="">Selecione um aluno...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>RA:</label>
+                <input type="text" id="freq-ra" readonly style="background-color: #e9ecef;">
+            </div>
+            <div class="form-group">
+                <label>Série/Ano:</label>
+                <select id="freq-serie">
+                    <option value="">Selecione...</option>
+                    <option value="Maternal 1">Maternal 1</option><option value="Maternal 2">Maternal 2</option><option value="Maternal 3">Maternal 3</option>
+                    <option value="Pré 1">Pré 1</option><option value="Pré 2">Pré 2</option>
+                    <option value="1º Ano">1º Ano</option><option value="2º Ano">2º Ano</option><option value="3º Ano">3º Ano</option><option value="4º Ano">4º Ano</option><option value="5º Ano">5º Ano</option>
+                    <option value="6º Ano">6º Ano</option><option value="7º Ano">7º Ano</option><option value="8º Ano">8º Ano</option><option value="9º Ano">9º Ano</option>
+                    <option value="1ª Série">1ª Série (EM)</option><option value="2ª Série">2ª Série (EM)</option><option value="3ª Série">3ª Série (EM)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Frequência / Ocorrência:</label>
+                <select id="freq-status">
+                    <option value="Faltou">Faltou</option>
+                    <option value="Entrou na 2ª">Entrou na 2ª</option>
+                    <option value="Entrou na 3ª">Entrou na 3ª</option>
+                    <option value="Entrou na 4ª">Entrou na 4ª</option>
+                    <option value="Entrou na 5ª">Entrou na 5ª</option>
+                    <option value="Entrou na 6ª">Entrou na 6ª</option>
+                    <option value="Entrou na 7ª">Entrou na 7ª</option>
+                    <option value="Suspenso">Suspenso</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Justificativa <span style="color: red;">*</span>:</label>
+                <textarea id="freq-justificativa" rows="3" placeholder="Digite a justificativa obrigatória..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Observações (Opcional):</label>
+                <textarea id="freq-observacoes" rows="2" placeholder="Detalhes adicionais..."></textarea>
+            </div>
+            <button onclick="enviarDadosFrequencia()" id="btn-salvar-freq">Salvar Frequência</button>
+            <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+        </div>
     </div>
 
 </div>
@@ -210,6 +266,9 @@
                 if (modulos.includes("autorizacao_saida")) {
                     document.getElementById('btn-mod-saida').style.display = 'block';
                 }
+                if (modulos.includes("frequencia")) {
+                    document.getElementById('btn-mod-frequencia').style.display = 'block';
+                }
                 if (modulos.length === 0) {
                     document.getElementById('sem-acesso').classList.remove('hidden');
                 }
@@ -220,14 +279,17 @@
             });
     }
 
+    // Navegação Geral
+    function voltarAoMenuPrincipal() {
+        document.getElementById('submenu-saida').classList.add('hidden');
+        document.getElementById('modulo-frequencia').classList.add('hidden');
+        document.getElementById('tela-menu').classList.remove('hidden');
+    }
+
+    // Navegação Saída
     function abrirMenuSaida() {
         document.getElementById('tela-menu').classList.add('hidden');
         document.getElementById('submenu-saida').classList.remove('hidden');
-    }
-
-    function voltarAoMenuPrincipal() {
-        document.getElementById('submenu-saida').classList.add('hidden');
-        document.getElementById('tela-menu').classList.remove('hidden');
     }
 
     function voltarAoSubmenuSaida() {
@@ -239,7 +301,7 @@
     function abrirFormularioSaida() {
         document.getElementById('submenu-saida').classList.add('hidden');
         document.getElementById('modulo-saida').classList.remove('hidden');
-        carregarAlunos();
+        carregarAlunosGeral();
     }
 
     function abrirTelaConsulta() {
@@ -248,49 +310,82 @@
         carregarRegistrosConsulta();
     }
 
-    function carregarAlunos() {
-        if (listaDeAlunos.length > 0) return;
+    // Navegação Frequência
+    function abrirModuloFrequencia() {
+        document.getElementById('tela-menu').classList.add('hidden');
+        document.getElementById('modulo-frequencia').classList.remove('hidden');
+        carregarAlunosGeral();
+    }
+
+    // Carregamento centralizado de Alunos (reaproveitado para ambos os módulos)
+    function carregarAlunosGeral() {
+        if (listaDeAlunos.length > 0) {
+            liberarFormulariosAlunos();
+            return;
+        }
 
         fetch(API_URL + '?acao=buscarAlunos')
             .then(response => response.json())
             .then(alunos => {
                 listaDeAlunos = alunos;
-                const select = document.getElementById('campo-aluno');
+                
+                // Preenche Select de Saída
+                const selectSaida = document.getElementById('campo-aluno-saida');
+                // Preenche Select de Frequência
+                const selectFreq = document.getElementById('freq-aluno');
+
                 alunos.forEach(aluno => {
-                    const option = document.createElement('option');
-                    option.value = aluno.nome;
-                    option.text = aluno.nome;
-                    select.appendChild(option);
+                    let opt1 = document.createElement('option');
+                    opt1.value = aluno.nome; opt1.text = aluno.nome;
+                    selectSaida.appendChild(opt1);
+
+                    let opt2 = document.createElement('option');
+                    opt2.value = aluno.nome; opt2.text = aluno.nome;
+                    selectFreq.appendChild(opt2);
                 });
-                document.getElementById('carregando-alunos').classList.add('hidden');
-                document.getElementById('formulario-saida').classList.remove('hidden');
+
+                liberarFormulariosAlunos();
             })
             .catch(error => {
-                document.getElementById('carregando-alunos').innerText = "Erro ao carregar alunos.";
-                console.error(error);
+                console.error("Erro ao carregar alunos:", error);
             });
     }
 
-    function preencherRA() {
-        const nomeSelecionado = document.getElementById('campo-aluno').value;
-        const aluno = listaDeAlunos.find(a => a.nome === nomeSelecionado);
-        document.getElementById('campo-ra').value = aluno ? aluno.ra : "";
+    function liberarFormulariosAlunos() {
+        document.getElementById('carregando-alunos-saida').classList.add('hidden');
+        document.getElementById('formulario-saida').classList.remove('hidden');
+        
+        document.getElementById('carregando-alunos-freq').classList.add('hidden');
+        document.getElementById('formulario-frequencia').classList.remove('hidden');
     }
 
-    function enviarDados() {
-        const btn = document.getElementById('btn-salvar');
+    function preencherRASAIDA() {
+        const nome = document.getElementById('campo-aluno-saida').value;
+        const aluno = listaDeAlunos.find(a => a.nome === nome);
+        document.getElementById('campo-ra-saida').value = aluno ? aluno.ra : "";
+    }
+
+    function preencherRAFreq() {
+        const nome = document.getElementById('freq-aluno').value;
+        const aluno = listaDeAlunos.find(a => a.nome === nome);
+        document.getElementById('freq-ra').value = aluno ? aluno.ra : "";
+    }
+
+    // Salvar Saída
+    function enviarDadosSaida() {
+        const btn = document.getElementById('btn-salvar-saida');
         btn.innerText = "Salvando...";
         btn.disabled = true;
 
         const dados = {
             modulo: 'autorizacao_saida',
             emailUsuario: usuarioLogado,
-            dataSaida: document.getElementById('campo-data').value,
-            nome: document.getElementById('campo-aluno').value,
-            ra: document.getElementById('campo-ra').value,
-            serie: document.getElementById('campo-serie').value,
-            tipo: document.getElementById('campo-tipo').value,
-            descricao: document.getElementById('campo-descricao').value
+            dataSaida: document.getElementById('campo-data-saida').value,
+            nome: document.getElementById('campo-aluno-saida').value,
+            ra: document.getElementById('campo-ra-saida').value,
+            serie: document.getElementById('campo-serie-saida').value,
+            tipo: document.getElementById('campo-tipo-saida').value,
+            descricao: document.getElementById('campo-descricao-saida').value
         };
 
         if(!dados.dataSaida || !dados.nome || !dados.serie) {
@@ -306,12 +401,12 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
         }).then(() => {
-            alert("Registro salvo com sucesso na planilha!");
-            document.getElementById('campo-data').value = "";
-            document.getElementById('campo-aluno').value = "";
-            document.getElementById('campo-ra').value = "";
-            document.getElementById('campo-serie').value = "";
-            document.getElementById('campo-descricao').value = "";
+            alert("Autorização de saída salva com sucesso!");
+            document.getElementById('campo-data-saida').value = "";
+            document.getElementById('campo-aluno-saida').value = "";
+            document.getElementById('campo-ra-saida').value = "";
+            document.getElementById('campo-serie-saida').value = "";
+            document.getElementById('campo-descricao-saida').value = "";
             
             btn.innerText = "Salvar Registro";
             btn.disabled = false;
@@ -322,6 +417,61 @@
         });
     }
 
+    // Salvar Frequência (Com validação obrigatória da justificativa)
+    function enviarDadosFrequencia() {
+        const btn = document.getElementById('btn-salvar-freq');
+        const justificativa = document.getElementById('freq-justificativa').value.trim();
+
+        if (!document.getElementById('freq-data').value || !document.getElementById('freq-aluno').value || !document.getElementById('freq-serie').value) {
+            alert("Preencha os campos obrigatórios (Data, Aluno e Série).");
+            return;
+        }
+
+        if (!justificativa) {
+            alert("O campo 'Justificativa' é obrigatório para o registro de frequência/falta.");
+            document.getElementById('freq-justificativa').focus();
+            return;
+        }
+
+        btn.innerText = "Salvando...";
+        btn.disabled = true;
+
+        const dados = {
+            modulo: 'frequencia',
+            emailUsuario: usuarioLogado,
+            dataFrequencia: document.getElementById('freq-data').value,
+            nome: document.getElementById('freq-aluno').value,
+            ra: document.getElementById('freq-ra').value,
+            serie: document.getElementById('freq-serie').value,
+            frequencia: document.getElementById('freq-status').value,
+            justificativa: justificativa,
+            observacoes: document.getElementById('freq-observacoes').value
+        };
+
+        fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        }).then(() => {
+            alert("Registro de frequência salvo com sucesso na planilha!");
+            document.getElementById('freq-data').value = "";
+            document.getElementById('freq-aluno').value = "";
+            document.getElementById('freq-ra').value = "";
+            document.getElementById('freq-serie').value = "";
+            document.getElementById('freq-justificativa').value = "";
+            document.getElementById('freq-observacoes').value = "";
+            
+            btn.innerText = "Salvar Frequência";
+            btn.disabled = false;
+        }).catch(error => {
+            alert("Erro ao salvar. Tente novamente.");
+            btn.innerText = "Salvar Frequência";
+            btn.disabled = false;
+        });
+    }
+
+    // Consulta de Saída
     function carregarRegistrosConsulta() {
         document.getElementById('carregando-consulta').style.display = 'block';
         document.getElementById('tabela-registros').classList.add('hidden');

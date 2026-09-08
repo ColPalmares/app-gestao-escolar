@@ -3,38 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Gestão Escolar</title>
+    <title>Portal de Gestão Escolar - Colégio Palmares</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 700px; }
-        h2 { color: #1a73e8; margin-top: 0; text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #F2F2F2; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(1,101,82,0.15); width: 100%; max-width: 700px; border-top: 6px solid #016552; }
+        
+        .logo-container { text-align: center; margin-bottom: 20px; }
+        .logo-container img { max-width: 180px; height: auto; }
+
+        h2 { color: #016552; margin-top: 0; text-align: center; font-size: 22px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        button:hover { background-color: #1557b0; }
-        .menu-btn { background-color: #28a745; margin-bottom: 10px; display: none; }
-        .menu-btn:hover { background-color: #218838; }
-        .sub-menu-btn { background-color: #17a2b8; margin-bottom: 10px; }
-        .sub-menu-btn:hover { background-color: #138496; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 12px; background-color: #016552; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: background 0.3s; }
+        button:hover { background-color: #014d3e; }
+        
+        .menu-btn { background-color: #016552; margin-bottom: 10px; display: none; }
+        .menu-btn:hover { background-color: #014d3e; }
+        
+        .sub-menu-btn { background-color: #004D93; margin-bottom: 10px; }
+        .sub-menu-btn:hover { background-color: #003366; }
+        
         .hidden { display: none; }
         .loading { text-align: center; color: #666; font-style: italic; margin-bottom: 15px; }
+        
         .voltar-btn { background-color: #6c757d; margin-top: 15px; }
         .voltar-btn:hover { background-color: #5a6268; }
         
-        /* Estilos da Tabela de Consulta */
+        /* Tabela de Consulta */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; color: #333; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #016552; color: white; }
+        
         .filtros-container { display: flex; gap: 10px; margin-bottom: 15px; }
         .filtros-container button { margin-top: 0; padding: 8px; font-size: 14px; background-color: #6c757d; }
-        .filtros-container button.ativo { background-color: #1a73e8; }
+        .filtros-container button.ativo { background-color: #016552; }
     </style>
 </head>
 <body>
 
 <div class="container">
+
+    <!-- LOGO INSTITUCIONAL DO COLÉGIO PALMARES -->
+    <div class="logo-container">
+        <img src="logo-palmares.png" alt="Colégio Palmares">
+    </div>
 
     <!-- TELA DE LOGIN -->
     <div id="tela-login">
@@ -56,15 +71,15 @@
         </div>
     </div>
 
-    <!-- SUBMENU DO MÓDULO DE SAÍDA (Escolher entre Cadastrar ou Consultar) -->
+    <!-- SUBMENU DO MÓDULO DE SAÍDA -->
     <div id="submenu-saida" class="hidden">
         <h2>Autorização de Saída</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioSaida()">➕ Nova Autorização</button>
-        <button class="sub-menu-btn" style="background-color: #ffc107; color: #000;" onclick="abrirTelaConsulta()">📋 Consultar Autorizações</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsulta()">📋 Consultar Autorizações</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULO 1: FORMULÁRIO DE CADASTRO (INTACTO) -->
+    <!-- MÓDULO 1: FORMULÁRIO DE CADASTRO -->
     <div id="modulo-saida" class="hidden">
         <h2>Nova Autorização de Saída</h2>
         <div id="carregando-alunos" class="loading">Carregando lista de alunos...</div>
@@ -135,7 +150,7 @@
                     </tr>
                 </thead>
                 <tbody id="corpo-tabela">
-                    <!-- Os dados entram aqui via JavaScript -->
+                    <!-- Dados carregados via JS -->
                 </tbody>
             </table>
         </div>
@@ -151,7 +166,7 @@
     
     let usuarioLogado = "";
     let listaDeAlunos = [];
-    let todosRegistrosSaida = []; // Guarda a lista bruta para filtrar sem relogar
+    let todosRegistrosSaida = [];
 
     window.onload = function () {
         google.accounts.id.initialize({
@@ -205,7 +220,6 @@
             });
     }
 
-    // Navegação de Telas
     function abrirMenuSaida() {
         document.getElementById('tela-menu').classList.add('hidden');
         document.getElementById('submenu-saida').classList.remove('hidden');
@@ -234,7 +248,6 @@
         carregarRegistrosConsulta();
     }
 
-    // Carregamento de Alunos (Mantido intacto)
     function carregarAlunos() {
         if (listaDeAlunos.length > 0) return;
 
@@ -264,7 +277,6 @@
         document.getElementById('campo-ra').value = aluno ? aluno.ra : "";
     }
 
-    // Envio de Dados (Mantido intacto)
     function enviarDados() {
         const btn = document.getElementById('btn-salvar');
         btn.innerText = "Salvando...";
@@ -310,7 +322,6 @@
         });
     }
 
-    // Lógica da Tela de Consulta e Filtros
     function carregarRegistrosConsulta() {
         document.getElementById('carregando-consulta').style.display = 'block';
         document.getElementById('tabela-registros').classList.add('hidden');
@@ -321,7 +332,7 @@
                 todosRegistrosSaida = registros;
                 document.getElementById('carregando-consulta').style.display = 'none';
                 document.getElementById('tabela-registros').classList.remove('hidden');
-                filtrarRegistros('todos'); // Mostra todos por padrão
+                filtrarRegistros('todos');
             })
             .catch(error => {
                 document.getElementById('carregando-consulta').innerText = "Erro ao carregar registros.";
@@ -330,7 +341,6 @@
     }
 
     function filtrarRegistros(tipoFiltro) {
-        // Atualiza estilo dos botões de filtro
         document.getElementById('filtro-hoje').classList.remove('ativo');
         document.getElementById('filtro-permanente').classList.remove('ativo');
         document.getElementById('filtro-todos').classList.remove('ativo');
@@ -342,11 +352,9 @@
         const corpoTabela = document.getElementById('corpo-tabela');
         corpoTabela.innerHTML = "";
 
-        // Data de hoje no formato YYYY-MM-DD para comparar com o input date
         const hojeIso = new Date().toISOString().split('T')[0];
 
         const registrosFiltrados = todosRegistrosSaida.filter(reg => {
-            // Ajusta a data que vem do Google para comparar o dia
             let dataFormatada = "";
             if(reg.dataSaida) {
                 dataFormatada = reg.dataSaida.split('T')[0];
@@ -357,7 +365,7 @@
             } else if (tipoFiltro === 'permanente') {
                 return reg.tipo && reg.tipo.toLowerCase() === 'permanente';
             }
-            return true; // 'todos'
+            return true;
         });
 
         if (registrosFiltrados.length === 0) {
@@ -366,7 +374,6 @@
         }
 
         registrosFiltrados.forEach(reg => {
-            // Formata a data para padrão brasileiro (DD/MM/AAAA) se possível
             let exibicaoData = reg.dataSaida ? reg.dataSaida.split('T')[0].split('-').reverse().join('/') : '';
             
             const linha = document.createElement('tr');

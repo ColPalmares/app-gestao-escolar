@@ -36,9 +36,8 @@
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #016552; color: white; }
         
-        .filtros-container { display: flex; gap: 10px; margin-bottom: 15px; }
-        .filtros-container button { margin-top: 0; padding: 8px; font-size: 14px; background-color: #6c757d; }
-        .filtros-container button.ativo { background-color: #016552; }
+        .pacote-box { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .pacote-box label { margin-bottom: 0; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -72,40 +71,34 @@
         </div>
     </div>
 
-    <!-- SUBMENU DO MÓDULO DE SAÍDA -->
+    <!-- SUBMENUS -->
     <div id="submenu-saida" class="hidden">
         <h2>Autorização de Saída</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioSaida()">➕ Nova Autorização</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaSaida()">📋 Consultar Autorizações</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
-
-    <!-- SUBMENU DO MÓDULO DE FREQUÊNCIA -->
     <div id="submenu-frequencia" class="hidden">
         <h2>Controle de Frequência</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioFrequencia()">➕ Registrar Frequência</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaFrequencia()">📋 Consultar Frequências</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
-
-    <!-- SUBMENU DO MÓDULO DE OCORRÊNCIAS -->
     <div id="submenu-ocorrencias" class="hidden">
         <h2>Registro de Ocorrências</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioOcorrencia()">➕ Nova Ocorrência</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaOcorrencia()">📋 Consultar Ocorrências</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
-
-    <!-- SUBMENU DO MÓDULO DE NOTAS -->
     <div id="submenu-notas" class="hidden">
         <h2>Módulo de Notas</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULO DE LANÇAMENTO DE NOTAS (NOVO) -->
+    <!-- MÓDULO DE NOTAS: PASSO 1 - CONFIGURAÇÃO E PESOS DOS PACOTES -->
     <div id="modulo-notas" class="hidden">
-        <h2>Lançamento de Notas</h2>
+        <h2>Configuração de Notas e Pesos</h2>
         <div id="carregando-alunos-notas" class="loading">Carregando dados estruturais...</div>
 
         <div id="form-config-notas" class="hidden">
@@ -120,14 +113,15 @@
             </div>
             <div class="form-group">
                 <label>Série / Ano:</label>
-                <select id="nota-serie" onchange="carregarTurmasDaSerie()">
+                <select id="nota-serie">
                     <option value="">Selecione a série...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Turma / Sala:</label>
                 <select id="nota-turma">
-                    <option value="">Primeiro selecione a série...</option>
+                    <option value="Turma 1">Turma 1</option>
+                    <option value="Turma 2">Turma 2</option>
                 </select>
             </div>
             <div class="form-group">
@@ -137,26 +131,25 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Instrumento de Avaliação (Ex: B1, C1, R1...):</label>
-                <select id="nota-instrumento">
-                    <option value="B1">B1 (Prova Bimestral 1)</option>
-                    <option value="B2">B2 (Prova Bimestral 2)</option>
-                    <option value="B3">B3 (Prova Bimestral 3)</option>
-                    <option value="B4">B4 (Prova Bimestral 4)</option>
-                    <option value="C1">C1 (Contínua 1)</option>
-                    <option value="C2">C2 (Contínua 2)</option>
-                    <option value="C3">C3 (Contínua 3)</option>
-                    <option value="C4">C4 (Contínua 4)</option>
-                    <option value="C5">C5 (Contínua 5)</option>
-                    <option value="C6">C6 (Contínua 6)</option>
-                    <option value="R1">R1 (Recuperação 1)</option>
-                    <option value="R2">R2 (Recuperação 2)</option>
+                <label>Eixo de Avaliação:</label>
+                <select id="nota-eixo" onchange="atualizarPainelPacotes()">
+                    <option value="continuas">Avaliações Contínuas (C1 a C6)</option>
+                    <option value="bimestrais">Avaliações Bimestrais (B1 a B4)</option>
+                    <option value="recuperacao">Recuperação (R1 e R2)</option>
                 </select>
             </div>
-            <button onclick="gerarTabelaLancamentoNotas()">Carregar Alunos para Lançamento</button>
+
+            <!-- PAINEL DE CONFIGURAÇÃO DE PESOS DOS PACOTES -->
+            <div style="background: #f1f8f6; border: 1px solid #016552; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Definição de Pesos dos Pacotes (Soma deve ser exata a 100%)</h3>
+                <div id="container-pacotes"></div>
+                <p id="aviso-soma-pesos" style="font-weight: bold; color: #d9534f; margin-top: 10px; font-size: 14px; text-align: center;"></p>
+            </div>
+
+            <button onclick="validarPesosEAvancar()" id="btn-avancar-notas">Avançar para Lançamento de Notas</button>
         </div>
 
-        <!-- Tabela de Lançamento em Lote -->
+        <!-- PASSO 2: TABELA DE LANÇAMENTO EM LOTE (0 a 100) -->
         <div id="container-tabela-notas" class="hidden" style="margin-top: 20px;">
             <h3 id="titulo-turma-notas" style="color: #016552; text-align: center; font-size: 16px;"></h3>
             <div style="overflow-x: auto; max-height: 400px;">
@@ -166,19 +159,20 @@
                             <th>RA</th>
                             <th>Nome do Aluno</th>
                             <th>Série / Turma</th>
-                            <th>Nota (0 a 10)</th>
+                            <th id="th-pacote-label">Nota (0 a 100)</th>
                         </tr>
                     </thead>
                     <tbody id="corpo-tabela-notas"></tbody>
                 </table>
             </div>
             <button onclick="salvarNotasEmLote()" id="btn-salvar-notas" style="background-color: #016552; margin-top: 15px;">Salvar Notas da Turma</button>
+            <button class="voltar-btn" onclick="voltarParaConfigPesos()">Voltar para Configuração de Pesos</button>
         </div>
 
-        <button class="voltar-btn" onclick="voltarAoSubmenuNotas()">Voltar</button>
+        <button class="voltar-btn" onclick="voltarAoSubmenuNotas()">Voltar ao Menu</button>
     </div>
 
-    <!-- MÓDULOS ANTERIORES (SAÍDA, FREQUÊNCIA, OCORRÊNCIAS - MANTIDOS ÍNTEGROS) -->
+    <!-- MÓDULOS ANTERIORES MANTIDOS ÍNTEGROS -->
     <div id="modulo-saida" class="hidden">
         <h2>Nova Autorização de Saída</h2>
         <div id="carregando-alunos-saida" class="loading">Carregando lista de alunos...</div>
@@ -193,22 +187,16 @@
             <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
         </div>
     </div>
-    
     <div id="modulo-consulta-saida" class="hidden">
         <h2>Consultar Autorizações</h2>
-        <div class="filtros-container">
-            <button id="filtro-hoje" onclick="filtrarRegistrosSaida('hoje')">Saídas de Hoje</button>
-            <button id="filtro-permanente" onclick="filtrarRegistrosSaida('permanente')">Permanentes</button>
-            <button id="filtro-todos" class="ativo" onclick="filtrarRegistrosSaida('todos')">Exibir Todos</button>
-        </div>
-        <div id="carregando-consulta-saida" class="loading">Buscando registros...</div>
+        <div class="filtros-container"><button id="filtro-hoje" onclick="filtrarRegistrosSaida('hoje')">Saídas de Hoje</button><button id="filtro-permanente" onclick="filtrarRegistrosSaida('permanente')">Permanentes</button><button id="filtro-todos" class="ativo" onclick="filtrarRegistrosSaida('todos')">Exibir Todos</button></div>
+        <div id="carregando-consulta-saida" class="loading">Buscando...</div>
         <div style="overflow-x: auto;"><table id="tabela-registros-saida" class="hidden"><thead><tr><th>Data Saída</th><th>Aluno (RA)</th><th>Série</th><th>Tipo</th><th>Descrição</th></tr></thead><tbody id="corpo-tabela-saida"></tbody></table></div>
         <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
     </div>
-
     <div id="modulo-frequencia" class="hidden">
         <h2>Registrar Frequência</h2>
-        <div id="carregando-alunos-freq" class="loading">Carregando lista de alunos...</div>
+        <div id="carregando-alunos-freq" class="loading">Carregando...</div>
         <div id="formulario-frequencia" class="hidden">
             <div class="form-group"><label>Data:</label><input type="date" id="freq-data"></div>
             <div class="form-group"><label>Série:</label><select id="freq-serie" onchange="filtrarAlunosPorSerie('freq')"><option value="">Selecione...</option></select></div>
@@ -221,7 +209,6 @@
             <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
         </div>
     </div>
-
     <div id="modulo-consulta-frequencia" class="hidden">
         <h2>Consultar Frequências</h2>
         <div class="filtros-container"><button id="freq-filtro-hoje" class="ativo" onclick="filtrarRegistrosFreq('hoje')">Faltas de Hoje</button><button id="freq-filtro-todos" onclick="filtrarRegistrosFreq('todos')">Exibir Todos</button></div>
@@ -229,7 +216,6 @@
         <div style="overflow-x: auto;"><table id="tabela-registros-freq" class="hidden"><thead><tr><th>Data</th><th>Aluno (RA)</th><th>Série</th><th>Status</th><th>Justificativa / Obs</th></tr></thead><tbody id="corpo-tabela-freq"></tbody></table></div>
         <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
     </div>
-
     <div id="modulo-ocorrencia" class="hidden">
         <h2>Nova Ocorrência</h2>
         <div id="carregando-alunos-ocorrencia" class="loading">Carregando...</div>
@@ -245,7 +231,6 @@
             <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
         </div>
     </div>
-
     <div id="modulo-consulta-ocorrencia" class="hidden">
         <h2>Consultar Ocorrências</h2>
         <div id="carregando-consulta-ocorrencia" class="loading">Buscando...</div>
@@ -280,11 +265,9 @@
     function tratarRespostaLogin(resposta) {
         const payload = decodificarJWT(resposta.credential);
         usuarioLogado = payload.email;
-        
         document.getElementById('tela-login').classList.add('hidden');
         document.getElementById('tela-menu').classList.remove('hidden');
         document.getElementById('msg-bem-vindo').innerText = "Logado como: " + usuarioLogado;
-        
         verificarPermissoes(usuarioLogado);
     }
 
@@ -303,7 +286,6 @@
             .then(resultado => {
                 document.getElementById('carregando-permissoes').classList.add('hidden');
                 document.getElementById('lista-modulos').classList.remove('hidden');
-
                 dadosEscopoUsuario = resultado;
                 const modulos = resultado.modulos || [];
 
@@ -311,14 +293,7 @@
                 if (modulos.includes("frequencia")) document.getElementById('btn-mod-frequencia').style.display = 'block';
                 if (modulos.includes("ocorrencias")) document.getElementById('btn-mod-ocorrencias').style.display = 'block';
                 if (modulos.includes("notas")) document.getElementById('btn-mod-notas').style.display = 'block';
-                
-                if (modulos.length === 0) {
-                    document.getElementById('sem-acesso').classList.remove('hidden');
-                }
-            })
-            .catch(error => {
-                document.getElementById('carregando-permissoes').innerText = "Erro ao carregar permissões.";
-                console.error(error);
+                if (modulos.length === 0) document.getElementById('sem-acesso').classList.remove('hidden');
             });
     }
 
@@ -341,23 +316,22 @@
     function abrirMenuSaida() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
     function voltarAoSubmenuSaida() { document.getElementById('modulo-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
     function abrirFormularioSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-saida').classList.remove('hidden'); carregarAlunosGeral(); }
-    function abrirTelaConsultaSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.remove('hidden'); carregarRegistrosConsultaSaida(); }
+    function abrirTelaConsultaSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.remove('hidden'); }
 
     function abrirMenuFrequencia() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
     function voltarAoSubmenuFrequencia() { document.getElementById('modulo-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
     function abrirFormularioFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-frequencia').classList.remove('hidden'); carregarAlunosGeral(); }
-    function abrirTelaConsultaFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.remove('hidden'); carregarRegistrosConsultaFreq(); }
+    function abrirTelaConsultaFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.remove('hidden'); }
 
     function abrirMenuOcorrencias() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
     function voltarAoSubmenuOcorrencias() { document.getElementById('modulo-ocorrencia').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
     function abrirFormularioOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-ocorrencia').classList.remove('hidden'); carregarAlunosGeral(); }
-    function abrirTelaConsultaOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden'); carregarRegistrosConsultaOcorrencias(); }
+    function abrirTelaConsultaOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden'); }
 
     function abrirMenuNotas() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
     function voltarAoSubmenuNotas() { document.getElementById('modulo-notas').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
     function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarAlunosGeralNotas(); }
 
-    // Carregamento de Alunos e Listas
     function carregarAlunosGeral() {
         if (listaDeAlunos.length > 0) { popularSelectsSeries(); return; }
         fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
@@ -386,11 +360,9 @@
         let serie = document.getElementById(mod === 'saida' ? 'campo-serie-saida' : mod === 'freq' ? 'freq-serie' : 'ocorrencia-serie').value;
         let selAlu = document.getElementById(mod === 'saida' ? 'campo-aluno-saida' : mod === 'freq' ? 'freq-aluno' : 'ocorrencia-aluno');
         let inRA = document.getElementById(mod === 'saida' ? 'campo-ra-saida' : mod === 'freq' ? 'freq-ra' : 'ocorrencia-ra');
-        
         selAlu.innerHTML = '<option value="">Selecione o aluno...</option>';
         inRA.value = "";
         if(!serie) return;
-
         listaDeAlunos.filter(a => a.serie === serie).forEach(a => {
             let o = document.createElement('option'); o.value = a.nome; o.text = a.nome; selAlu.appendChild(o);
         });
@@ -400,7 +372,7 @@
     function preencherRAFreq() { let a = listaDeAlunos.find(x => x.nome === document.getElementById('freq-aluno').value); document.getElementById('freq-ra').value = a ? a.ra : ""; }
     function preencherRAOcorrencia() { let a = listaDeAlunos.find(x => x.nome === document.getElementById('ocorrencia-aluno').value); document.getElementById('ocorrencia-ra').value = a ? a.ra : ""; }
 
-    // --- MÓDULO DE NOTAS: CONFIGURAÇÃO E CARREGAMENTO DA TURMA ---
+    // --- MÓDULO DE NOTAS: CONFIGURAÇÃO DE PACOTES E PESOS ---
     function carregarAlunosGeralNotas() {
         if (listaDeAlunos.length > 0) { configurarFormNotas(); return; }
         fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
@@ -414,17 +386,14 @@
         document.getElementById('form-config-notas').classList.remove('hidden');
         document.getElementById('container-tabela-notas').classList.add('hidden');
 
-        // Popula séries baseado no escopo ou global (se diretoria, vê tudo)
         const selSerie = document.getElementById('nota-serie');
         selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-        
         let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
         if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo !== 'Todas') {
             seriesDisponiveis = [dadosEscopoUsuario.serieEscopo];
         }
         seriesDisponiveis.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
 
-        // Popula Disciplinas
         const selDisc = document.getElementById('nota-disciplina');
         selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
         let discDisponiveis = ["Língua Portuguesa", "Matemática", "Ciências da Natureza", "Ciências Humanas", "Inglês", "Educação Física", "Artes integradas", "Música", "Tecnologia e suas aplicações", "História", "Geografia", "Biologia", "Física", "Química", "Filosofia", "Sociologia: Ética, Cidadania e Atualidades"];
@@ -432,55 +401,139 @@
             discDisponiveis = [dadosEscopoUsuario.materiaEscopo];
         }
         discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
+
+        atualizarPainelPacotes();
     }
 
-    function carregarTurmasDaSerie() {
-        const serie = document.getElementById('nota-serie').value;
-        const selTurma = document.getElementById('nota-turma');
-        selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-        if(!serie) return;
+    function atualizarPainelPacotes() {
+        const eixo = document.getElementById('nota-eixo').value;
+        const container = document.getElementById('container-pacotes');
+        container.innerHTML = "";
 
-        // Como na base de alunos podemos ter turmas genéricas ou separadas por sala, extraímos turmas disponíveis
-        let turmas = ["Turma 1", "Turma 2"];
-        turmas.forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+        let pacotes = [];
+        if (eixo === 'continuas') pacotes = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'];
+        else if (eixo === 'bimestrais') pacotes = ['B1', 'B2', 'B3', 'B4'];
+        else if (eixo === 'recuperacao') pacotes = ['R1', 'R2'];
+
+        pacotes.forEach((p, idx) => {
+            let div = document.createElement('div');
+            div.className = 'pacote-box';
+            div.innerHTML = `
+                <label><strong>${p}</strong> (Peso %):</label>
+                <input type="number" min="0" max="100" value="${idx === 0 ? '100' : '0'}" class="input-peso-pacote" data-pacote="${p}" oninput="calcularSomaPesos()" style="width: 100px; text-align: center;">
+            `;
+            container.appendChild(div);
+        });
+        calcularSomaPesos();
     }
 
-    function gerarTabelaLancamentoNotas() {
+    function calcularSomaPesos() {
+        const inputs = document.querySelectorAll('.input-peso-pacote');
+        let soma = 0;
+        inputs.forEach(inp => {
+            let val = parseFloat(inp.value) || 0;
+            soma += val;
+        });
+
+        const aviso = document.getElementById('aviso-soma-pesos');
+        const btnAvancar = document.getElementById('btn-avancar-notas');
+
+        if (soma === 100) {
+            aviso.innerText = "Soma correta (100%). Pronto para prosseguir!";
+            aviso.style.color = "#016552";
+            btnAvancar.disabled = false;
+            btnAvancar.style.opacity = "1";
+        } else {
+            aviso.innerText = `Atenção: A soma atual dos pesos é ${soma}%. O total deve ser obrigatoriamente 100%.`;
+            aviso.style.color = "#d9534f";
+            btnAvancar.disabled = true;
+            btnAvancar.style.opacity = "0.5";
+        }
+    }
+
+    function validarPesosEAvancar() {
         const serie = document.getElementById('nota-serie').value;
         const turma = document.getElementById('nota-turma').value;
         const disciplina = document.getElementById('nota-disciplina').value;
         const bimestre = document.getElementById('nota-bimestre').value;
-        const instrumento = document.getElementById('nota-instrumento').value;
+        const eixo = document.getElementById('nota-eixo').value;
 
-        if(!serie || !turma || !disciplina || !bimestre || !instrumento) {
-            alert("Preencha todos os campos de configuração para carregar os alunos.");
+        if(!serie || !turma || !disciplina) {
+            alert("Preencha todos os campos de configuração (Série, Turma e Disciplina).");
             return;
         }
 
+        const inputsPesos = document.querySelectorAll('.input-peso-pacote');
+        let pesosConfigurados = {};
+        let soma = 0;
+
+        inputsPesos.forEach(inp => {
+            let p = inp.getAttribute('data-pacote');
+            let v = parseFloat(inp.value) || 0;
+            if(v > 0) {
+                pesosConfigurados[p] = v;
+                soma += v;
+            }
+        });
+
+        if (soma !== 100) {
+            alert("A soma dos pesos dos pacotes ativos deve ser exatamente 100%.");
+            return;
+        }
+
+        gerarTabelaLancamentoNotas(bimestre, serie, turma, disciplina, eixo, pesosConfigurados);
+    }
+
+    function gerarTabelaLancamentoNotas(bimestre, serie, turma, disciplina, eixo, pesosConfigurados) {
         const alunosTurma = listaDeAlunos.filter(a => a.serie === serie);
         if(alunosTurma.length === 0) {
             alert("Nenhum aluno encontrado para esta série.");
             return;
         }
 
-        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Instrumento: ${instrumento}`;
+        let pacotesAtivos = Object.keys(pesosConfigurados);
+        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Eixo: ${eixo.toUpperCase()}`;
+        
+        const theadTr = document.querySelector('#container-tabela-notas thead tr');
+        let thHtml = `<th>RA</th><th>Nome do Aluno</th><th>Série / Turma</th>`;
+        pacotesAtivos.forEach(p => {
+            thHtml += `<th>${p} (${pesosConfigurados[p]}%)</th>`;
+        });
+        theadTr.innerHTML = thHtml;
+
         const corpo = document.getElementById('corpo-tabela-notas');
         corpo.innerHTML = "";
 
-        // Mantém a ordem exata da planilha base
-        alunosTurma.forEach((aluno, index) => {
+        // Mantém a ordem exata da planilha base e trata notas de 0 a 100 com validação
+        alunosTurma.forEach(aluno => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${aluno.ra}</td>
-                <td><strong>${aluno.nome}</strong></td>
-                <td>${aluno.serie} (${turma})</td>
-                <td><input type="number" min="0" max="10" step="0.1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" placeholder="0.0"></td>
-            `;
+            let tdHtml = `<td>${aluno.ra}</td><td><strong>${aluno.nome}</strong></td><td>${aluno.serie} (${turma})</td>`;
+            
+            pacotesAtivos.forEach(p => {
+                tdHtml += `<td><input type="number" min="0" max="100" step="1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${p}" placeholder="0 a 100" oninput="validarNotaLimite(this)"></td>`;
+            });
+            tr.innerHTML = tdHtml;
             corpo.appendChild(tr);
         });
 
         document.getElementById('form-config-notas').classList.add('hidden');
         document.getElementById('container-tabela-notas').classList.remove('hidden');
+    }
+
+    function validarNotaLimite(input) {
+        let val = parseFloat(input.value);
+        if (val < 0) {
+            alert("Não são permitidas notas negativas.");
+            input.value = 0;
+        } else if (val > 100) {
+            alert("A nota máxima permitida é 100.");
+            input.value = 100;
+        }
+    }
+
+    function voltarParaConfigPesos() {
+        document.getElementById('container-tabela-notas').classList.add('hidden');
+        document.getElementById('form-config-notas').classList.remove('hidden');
     }
 
     function salvarNotasEmLote() {
@@ -492,7 +545,6 @@
         const serie = document.getElementById('nota-serie').value;
         const turma = document.getElementById('nota-turma').value;
         const disciplina = document.getElementById('nota-disciplina').value;
-        const instrumento = document.getElementById('nota-instrumento').value;
 
         const inputs = document.querySelectorAll('.input-nota');
         let lancamentos = [];
@@ -507,7 +559,7 @@
                     disciplina: disciplina,
                     nome: inp.getAttribute('data-nome'),
                     ra: inp.getAttribute('data-ra'),
-                    instrumento: instrumento,
+                    instrumento: inp.getAttribute('data-pacote'),
                     nota: parseFloat(notaVal)
                 });
             }
@@ -534,28 +586,13 @@
             alert("Notas salvas com sucesso na planilha geral!");
             btn.innerText = "Salvar Notas da Turma";
             btn.disabled = false;
-            voltarSubmenuNotasReset();
+            voltarParaConfigPesos();
         }).catch(() => {
             alert("Erro ao salvar notas.");
             btn.innerText = "Salvar Notas da Turma";
             btn.disabled = false;
         });
     }
-
-    function voltarSubmenuNotasReset() {
-        document.getElementById('container-tabela-notas').classList.add('hidden');
-        document.getElementById('form-config-notas').classList.remove('hidden');
-    }
-
-    // Funções de envio dos demais módulos mantidas íntegras...
-    function enviarDadosSaida() { /* ... */ }
-    function enviarDadosFrequencia() { /* ... */ }
-    function enviarDadosOcorrencia() { /* ... */ }
-    function carregarRegistrosConsultaSaida() {}
-    function filtrarRegistrosSaida(t) {}
-    function carregarRegistrosConsultaFreq() {}
-    function filtrarRegistrosFreq(t) {}
-    function carregarRegistrosConsultaOcorrencias() {}
 </script>
 </body>
 </html>

@@ -7,7 +7,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #F2F2F2; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(1,101,82,0.15); width: 100%; max-width: 1200px; border-top: 6px solid #016552; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(1,101,82,0.15); width: 100%; max-width: 1250px; border-top: 6px solid #016552; }
         
         .logo-container { text-align: center; margin-bottom: 20px; }
         .logo-container img { max-width: 180px; height: auto; }
@@ -29,10 +29,10 @@
         .voltar-btn { background-color: #6c757d; margin-top: 15px; }
         .voltar-btn:hover { background-color: #5a6268; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-        th, td { border: 1px solid #ddd; padding: 5px 6px; text-align: center; white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px; }
+        th, td { border: 1px solid #ccc; padding: 4px 5px; text-align: center; white-space: nowrap; }
         th { background-color: #016552; color: white; }
-        td:nth-child(2) { text-align: left; }
+        td:nth-child(1) { text-align: left; font-weight: bold; }
         
         .nota-abaixo { color: #d9534f; font-weight: bold; }
         
@@ -66,7 +66,7 @@
             <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirMenuSaida()">Autorização de Saída</button>
             <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirMenuFrequencia()">Controle de Frequência / Faltas</button>
             <button id="btn-mod-ocorrencias" class="menu-btn hidden" onclick="abrirMenuOcorrencias()">Registro de Ocorrências</button>
-            <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Módulo de Notas & Matriz Analítica</button>
+            <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Módulo de Notas & Boletim</button>
             <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
         </div>
     </div>
@@ -93,15 +93,15 @@
     <div id="submenu-notas" class="hidden">
         <h2>Módulo de Notas</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas por Atividade</button>
-        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaFiltroMatrizAnalitica()">📋 Matriz Analítica por Turma & Matéria</button>
-        <button class="sub-menu-btn" style="background-color: #008080; color: #fff;" onclick="abrirTelaFiltroConsultaNotas()">📊 Visualizar Boletim Escolar</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaFiltroMatrizAnalitica()">📋 Matriz Analítica por Atividade</button>
+        <button class="sub-menu-btn" style="background-color: #008080; color: #fff;" onclick="abrirTelaFiltroConsultaNotas()">📊 Visualizar Boletim Escolar (Modelo Oficial)</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- PASSO 1: CONFIGURAÇÃO DE LANÇAMENTO -->
+    <!-- TELA DE LANÇAMENTO -->
     <div id="modulo-notas" class="hidden">
         <h2>Configuração de Atividade e Pesos</h2>
-        <div id="carregando-alunos-notas" class="loading">Carregando dados estruturais...</div>
+        <div id="carregando-alunos-notas" class="loading">Carregando dados...</div>
 
         <div id="form-config-notas" class="hidden">
             <div class="form-group">
@@ -153,7 +153,7 @@
                     <select id="atividade-pacote-alvo"></select>
                 </div>
                 <div class="form-group">
-                    <label>Nome da Atividade (Ex: Redação 1, Leitura, Lição):</label>
+                    <label>Nome da Atividade (Ex: Redação 1, Leitura, Prova Bimestral):</label>
                     <input type="text" id="atividade-nome" placeholder="Digite o nome da atividade...">
                 </div>
                 <div class="form-group">
@@ -187,7 +187,7 @@
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu</button>
     </div>
 
-    <!-- TELA DE FILTRO PARA MATRIZ ANALÍTICA DETALHADA -->
+    <!-- TELA DE FILTRO PARA MATRIZ ANALÍTICA -->
     <div id="modulo-filtro-matriz" class="hidden">
         <h2>Matriz Analítica Detalhada por Atividade</h2>
         <div class="form-group">
@@ -217,14 +217,13 @@
                 <option value="">Selecione a disciplina...</option>
             </select>
         </div>
-        <button onclick="gerarMatrizAnaliticaCompleta()">Exibir Matriz Analítica da Turma</button>
+        <button onclick="gerarMatrizAnaliticaCompleta()">Exibir Matriz Analítica</button>
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
     </div>
 
-    <!-- TELA DA MATRIZ ANALÍTICA EXibindo todas as atividades espelhadas -->
     <div id="modulo-exibicao-matriz" class="hidden">
         <h2 id="titulo-matriz-analitica">Matriz Analítica</h2>
-        <div id="carregando-matriz" class="loading">Carregando matriz detalhada...</div>
+        <div id="carregando-matriz" class="loading">Carregando matriz...</div>
         <div style="overflow-x: auto; max-height: 550px;">
             <table id="tabela-matriz-analitica" class="hidden">
                 <thead id="head-matriz-analitica"></thead>
@@ -234,9 +233,9 @@
         <button class="voltar-btn" onclick="abrirTelaFiltroMatrizAnalitica()">Escolher Outra Turma / Matéria</button>
     </div>
 
-    <!-- TELA DE FILTRO PARA VISUALIZAÇÃO DO BOLETIM -->
+    <!-- TELA DE FILTRO PARA VISUALIZAÇÃO DO BOLETIM OFICIAL -->
     <div id="modulo-filtro-boletim" class="hidden">
-        <h2>Visualizar Boletim Escolar por Turma</h2>
+        <h2>Visualizar Boletim Escolar (Modelo Oficial)</h2>
         <div class="form-group">
             <label>Série / Ano:</label>
             <select id="filtro-serie-boletim" onchange="atualizarTurmasFiltroBoletim()">
@@ -249,31 +248,33 @@
                 <option value="">Selecione a turma...</option>
             </select>
         </div>
-        <button onclick="gerarVisualizacaoBoletimTurma()">Exibir Boletim da Turma</button>
+        <button onclick="gerarVisualizacaoBoletimTurma()">Exibir Boletim Oficial da Turma</button>
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
     </div>
 
-    <!-- TELA DE VISUALIZAÇÃO DO BOLETIM DA TURMA -->
+    <!-- TELA DE VISUALIZAÇÃO DO BOLETIM FIEL AO MODELO OFICIAL -->
     <div id="modulo-visualizacao-boletim" class="hidden">
-        <h2 id="titulo-boletim-turma">Boletim Escolar 2026</h2>
-        <div id="carregando-boletim" class="loading">Gerando boletins e calculando médias ponderadas...</div>
-        <div style="overflow-x: auto; max-height: 500px;">
+        <h2 id="titulo-boletim-turma">BOLETIM ESCOLAR 2026</h2>
+        <div id="carregando-boletim" class="loading">Gerando boletim com pesos oficiais...</div>
+        <div style="overflow-x: auto; max-height: 550px;">
             <table id="tabela-boletim-turma" class="hidden">
                 <thead>
                     <tr>
-                        <th rowspan="2">Componente Curricular</th>
-                        <th rowspan="2">Estudante (RA)</th>
-                        <th colspan="2">1º Bimestre</th>
-                        <th colspan="2">2º Bimestre</th>
-                        <th colspan="2">3º Bimestre</th>
-                        <th colspan="2">4º Bimestre</th>
-                        <th rowspan="2">Média Anual</th>
+                        <th rowspan="2" style="min-width: 180px;">Componente curricular</th>
+                        <th colspan="3">1º Bimestre</th>
+                        <th colspan="3">2º Bimestre</th>
+                        <th colspan="3">3º Bimestre</th>
+                        <th colspan="3">4º Bimestre</th>
+                        <th rowspan="2">Nota<br>F</th>
+                        <th rowspan="2">RF</th>
+                        <th rowspan="2">CC</th>
+                        <th rowspan="2">Média<br>anual</th>
                     </tr>
                     <tr>
-                        <th>MB</th><th>R</th>
-                        <th>MB</th><th>R</th>
-                        <th>MB</th><th>R</th>
-                        <th>MB</th><th>R</th>
+                        <th>MB</th><th>R</th><th>F</th>
+                        <th>MB</th><th>R</th><th>F</th>
+                        <th>MB</th><th>R</th><th>F</th>
+                        <th>MB</th><th>R</th><th>F</th>
                     </tr>
                 </thead>
                 <tbody id="corpo-tabela-boletim"></tbody>
@@ -302,20 +303,85 @@
     let notasJaLancadasGlobal = [];
     let pesosSalvosGlobal = [];
 
-    const MATRIZ_PESOS_OFICIAL = {
-        '1º Ano': { prova: 0, cont: 100 },
-        '2º Ano': { prova: 0, cont: 100 },
-        '3º Ano': { prova: 0, cont: 100 },
-        '4º Ano': { prova: 30, cont: 70 },
-        '5º Ano': { prova: 30, cont: 70 },
-        '6º Ano': { prova: 35, cont: 65 },
-        '7º Ano': { prova: 35, cont: 65 },
-        '8º Ano': { prova: 35, cont: 65 },
-        '9º Ano': { prova: 35, cont: 65 },
-        '1ª Série': { prova: 40, cont: 60 },
-        '2ª Série': { prova: 40, cont: 60 },
-        '3ª Série': { prova: 40, cont: 60 }
+    // Tabela exata de pesos (Prova Bimestral vs Contínuas) mapeada por Série e Disciplina
+    const MAPA_PESOS_DISCIPLINA_SERIE = {
+        // 1º ANO
+        '1º Ano': { default: { prova: 0, cont: 100 } },
+        // 2º ANO
+        '2º Ano': { default: { prova: 0, cont: 100 } },
+        // 3º ANO
+        '3º Ano': { default: { prova: 0, cont: 100 } },
+        // 4º ANO
+        '4º Ano': {
+            'Língua Portuguesa': { prova: 30, cont: 70 },
+            'Inglês': { prova: 30, cont: 70 },
+            'Ciências da Natureza': { prova: 30, cont: 70 },
+            'Matemática': { prova: 30, cont: 70 },
+            'Ciências Humanas': { prova: 30, cont: 70 },
+            'default': { prova: 0, cont: 100 }
+        },
+        // 5º ANO
+        '5º Ano': {
+            'Língua Portuguesa': { prova: 30, cont: 70 },
+            'Inglês': { prova: 30, cont: 70 },
+            'Ciências da Natureza': { prova: 30, cont: 70 },
+            'Matemática': { prova: 30, cont: 70 },
+            'Ciências Humanas': { prova: 30, cont: 70 },
+            'default': { prova: 0, cont: 100 }
+        },
+        // 6º, 7º, 8º, 9º ANO
+        '6º Ano': {
+            'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 },
+            'Tecnologia e suas aplicações': { prova: 0, cont: 100 },
+            'Educação Física': { prova: 0, cont: 100 },
+            'Artes integradas': { prova: 0, cont: 100 },
+            'default': { prova: 35, cont: 65 }
+        },
+        '7º Ano': {
+            'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 },
+            'Tecnologia e suas aplicações': { prova: 0, cont: 100 },
+            'Educação Física': { prova: 0, cont: 100 },
+            'Artes integradas': { prova: 0, cont: 100 },
+            'default': { prova: 35, cont: 65 }
+        },
+        '8º Ano': {
+            'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 },
+            'Tecnologia e suas aplicações': { prova: 0, cont: 100 },
+            'Educação Física': { prova: 0, cont: 100 },
+            'Artes integradas': { prova: 0, cont: 100 },
+            'default': { prova: 35, cont: 65 }
+        },
+        '9º Ano': {
+            'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 },
+            'Tecnologia e suas aplicações': { prova: 0, cont: 100 },
+            'Educação Física': { prova: 0, cont: 100 },
+            'Artes integradas': { prova: 0, cont: 100 },
+            'default': { prova: 35, cont: 65 }
+        },
+        // ENSINO MÉDIO (1ª, 2ª e 3ª SÉRIE)
+        '1ª Série': {
+            'Educação Física': { prova: 0, cont: 100 },
+            'Incubadora de projetos': { prova: 0, cont: 100 },
+            'default': { prova: 40, cont: 60 }
+        },
+        '2ª Série': {
+            'Educação Física': { prova: 0, cont: 100 },
+            'Incubadora de projetos': { prova: 0, cont: 100 },
+            'default': { prova: 40, cont: 60 }
+        },
+        '3ª Série': {
+            'Educação Física': { prova: 0, cont: 100 },
+            'Incubadora de projetos': { prova: 0, cont: 100 },
+            'default': { prova: 40, cont: 60 }
+        }
     };
+
+    function obterRegraPesos(serie, disciplina) {
+        let serieConfig = MAPA_PESOS_DISCIPLINA_SERIE[serie];
+        if (!serieConfig) return { prova: 0, cont: 100 };
+        if (serieConfig[disciplina]) return serieConfig[disciplina];
+        return serieConfig['default'] || { prova: 0, cont: 100 };
+    }
 
     window.onload = function () {
         google.accounts.id.initialize({ client_id: CLIENT_ID, callback: tratarRespostaLogin });
@@ -370,7 +436,6 @@
     }
     function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarDadosParaNotas(); }
     
-    // --- ROTAS DA MATRIZ ANALÍTICA DETALHADA ---
     function abrirTelaFiltroMatrizAnalitica() {
         document.getElementById('submenu-notas').classList.add('hidden');
         document.getElementById('modulo-exibicao-matriz').classList.add('hidden');
@@ -427,7 +492,6 @@
             const alunosTurma = listaDeAlunos.filter(a => a.serie === serie);
             const notasBimTurma = notas.filter(n => n.bimestre === bimestre && n.serie === serie && n.turma === turma && n.disciplina === disciplina);
 
-            // Mapeia todas as atividades unicas lançadas nesta turma/disciplina/bimestre
             let atividadesUnicas = [];
             notasBimTurma.forEach(n => {
                 let idAtiv = `${n.pacote}_${n.nomeAtividade}`;
@@ -446,7 +510,6 @@
                 return;
             }
 
-            // Monta cabeçalho hierárquico igual à planilha de Química do Palmares
             let tr1 = `<tr><th>Nº Sala</th><th>RA</th><th>Estudante</th><th>Situação</th>`;
             let tr2 = `<tr><th></th><th></th><th></th><th></th>`;
 
@@ -459,7 +522,7 @@
 
             head.innerHTML = tr1 + tr2;
 
-            let regraSerie = MATRIZ_PESOS_OFICIAL[serie] || { prova: 0, cont: 100 };
+            let regraSerieDisc = obterRegraPesos(serie, disciplina);
 
             alunosTurma.forEach((aluno, index) => {
                 let htmlLinha = `<td>${index + 1}</td><td>${aluno.ra}</td><td><strong>${aluno.nome}</strong></td><td>Cursando</td>`;
@@ -468,7 +531,6 @@
                 let mapaNotasAluno = {};
                 notasAluno.forEach(n => { mapaNotasAluno[`${n.pacote}_${n.nomeAtividade}`] = n.nota; });
 
-                // Agrupamento para cálculo
                 let pacotesAlocados = {};
                 notasAluno.forEach(n => {
                     let pkg = n.pacote;
@@ -501,7 +563,7 @@
 
                 let mediaBimestralFinal = "-";
                 if(temC || temB) {
-                    let calc = (somaC * (regraSerie.cont / 100)) + (somaB * (regraSerie.prova / 100));
+                    let calc = (somaC * (regraSerieDisc.cont / 100)) + (somaB * (regraSerieDisc.prova / 100));
                     mediaBimestralFinal = calc.toFixed(1);
                 }
 
@@ -521,7 +583,6 @@
         });
     }
 
-    // --- ROTAS DO BOLETIM ESCOLAR ---
     function abrirTelaFiltroConsultaNotas() {
         document.getElementById('submenu-notas').classList.add('hidden');
         document.getElementById('modulo-visualizacao-boletim').classList.add('hidden');
@@ -755,6 +816,7 @@
         });
     }
 
+    // --- RENDERIZAÇÃO DO BOLETIM FIEL AO MODELO OFICIAL DO PALMARES ---
     function gerarVisualizacaoBoletimTurma() {
         const serie = document.getElementById('filtro-serie-boletim').value;
         const turma = document.getElementById('filtro-turma-boletim').value;
@@ -783,21 +845,21 @@
             corpo.innerHTML = "";
 
             if (alunosTurma.length === 0) {
-                corpo.innerHTML = `<tr><td colspan="11" style="text-align: center; color: #666;">Nenhum aluno encontrado.</td></tr>`;
+                corpo.innerHTML = `<tr><td colspan="17" style="text-align: center; color: #666;">Nenhum aluno encontrado.</td></tr>`;
                 return;
             }
 
             const disciplinasPadrao = ["Língua Portuguesa", "Matemática", "Ciências da Natureza", "Ciências Humanas", "Inglês", "Educação Física", "Artes integradas", "Música", "Tecnologia e suas aplicações", "História", "Geografia", "Biologia", "Física", "Química", "Filosofia", "Sociologia: Ética, Cidadania e Atualidades", "Lingua Portuguesa (Escrita)", "Língua Portuguesa (Leitura)", "Lingua Portuguesa (Lingua)", "Matemática - Geometria", "Matemática - Algebra", "Incubadora de projetos"];
             const bimestres = ["1º Bimestre", "2º Bimestre", "3º Bimestre", "4º Bimestre"];
-            let regraSerie = MATRIZ_PESOS_OFICIAL[serie] || { prova: 0, cont: 100 };
 
             alunosTurma.forEach(aluno => {
                 disciplinasPadrao.forEach(disc => {
                     let temLancamento = notas.some(n => n.serie === serie && n.turma === turma && n.disciplina === disc && String(n.ra) === String(aluno.ra));
                     if (!temLancamento) return;
 
+                    let regraSerieDisc = obterRegraPesos(serie, disc);
                     const tr = document.createElement('tr');
-                    let htmlLinha = `<td><strong>${disc}</strong></td><td>${aluno.nome}<br><small>RA: ${aluno.ra}</small></td>`;
+                    let htmlLinha = `<td><strong>${disc}</strong></td>`;
                     
                     let somatoriaMediasBimestrais = 0;
                     let bimestresValidos = 0;
@@ -850,8 +912,8 @@
                         });
 
                         let mb = "-";
-                        if (temC || temB) {
-                            let calculada = (somaContínuas * (regraSerie.cont / 100)) + (somaBimestrais * (regraSerie.prova / 100));
+                        if (temC || (temB && regraSerieDisc.prova > 0) || (regraSerieDisc.prova === 0 && temC)) {
+                            let calculada = (somaContínuas * (regraSerieDisc.cont / 100)) + (somaBimestrais * (regraSerieDisc.prova / 100));
                             mb = calculada.toFixed(1);
                             somatoriaMediasBimestrais += calculada;
                             bimestresValidos++;
@@ -860,13 +922,15 @@
                         let classeMb = (mb !== "-" && parseFloat(mb) < 50) ? "nota-abaixo" : "";
                         let classeR = (notaR !== "-" && parseFloat(notaR) < 50) ? "nota-abaixo" : "";
 
-                        htmlLinha += `<td class="${classeMb}">${mb}</td><td class="${classeR}">${notaR}</td>`;
+                        // Colunas exatas do modelo oficial: MB, R, F
+                        htmlLinha += `<td class="${classeMb}">${mb}</td><td class="${classeR}">${notaR}</td><td>-</td>`;
                     });
 
                     let mediaAnual = bimestresValidos > 0 ? (somatoriaMediasBimestrais / bimestresValidos).toFixed(1) : "-";
                     let classeAnual = (mediaAnual !== "-" && parseFloat(mediaAnual) < 50) ? "nota-abaixo" : "";
 
-                    htmlLinha += `<td class="${classeAnual}"><strong>${mediaAnual}</strong></td>`;
+                    // Colunas finais: Nota F, RF, CC, Média anual
+                    htmlLinha += `<td>-</td><td>-</td><td>-</td><td class="${classeAnual}"><strong>${mediaAnual}</strong></td>`;
                     tr.innerHTML = htmlLinha;
                     corpo.appendChild(tr);
                 });

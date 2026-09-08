@@ -68,6 +68,7 @@
             <p style="font-size: 14px; color: #444; margin-bottom: 15px;">Selecione o módulo desejado:</p>
             <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirMenuSaida()">Autorização de Saída</button>
             <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirMenuFrequencia()">Controle de Frequência / Faltas</button>
+            <button id="btn-mod-ocorrencias" class="menu-btn hidden" onclick="abrirMenuOcorrencias()">Registro de Ocorrências</button>
             <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
         </div>
     </div>
@@ -88,6 +89,14 @@
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
+    <!-- SUBMENU DO MÓDULO DE OCORRÊNCIAS -->
+    <div id="submenu-ocorrencias" class="hidden">
+        <h2>Registro de Ocorrências</h2>
+        <button class="sub-menu-btn" onclick="abrirFormularioOcorrencia()">➕ Nova Ocorrência</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaOcorrencia()">📋 Consultar Ocorrências</button>
+        <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+    </div>
+
     <!-- MÓDULO 1: FORMULÁRIO DE SAÍDA -->
     <div id="modulo-saida" class="hidden">
         <h2>Nova Autorização de Saída</h2>
@@ -99,25 +108,25 @@
                 <input type="date" id="campo-data-saida" required>
             </div>
             <div class="form-group">
-                <label>Aluno:</label>
-                <select id="campo-aluno-saida" onchange="preencherRASAIDA()">
-                    <option value="">Selecione um aluno...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>RA:</label>
-                <input type="text" id="campo-ra-saida" readonly style="background-color: #e9ecef;">
-            </div>
-            <div class="form-group">
                 <label>Série/Ano:</label>
-                <select id="campo-serie-saida">
-                    <option value="">Selecione...</option>
+                <select id="campo-serie-saida" onchange="filtrarAlunosPorSerie('saida')">
+                    <option value="">Selecione a série...</option>
                     <option value="Maternal 1">Maternal 1</option><option value="Maternal 2">Maternal 2</option><option value="Maternal 3">Maternal 3</option>
                     <option value="Pré 1">Pré 1</option><option value="Pré 2">Pré 2</option>
                     <option value="1º Ano">1º Ano</option><option value="2º Ano">2º Ano</option><option value="3º Ano">3º Ano</option><option value="4º Ano">4º Ano</option><option value="5º Ano">5º Ano</option>
                     <option value="6º Ano">6º Ano</option><option value="7º Ano">7º Ano</option><option value="8º Ano">8º Ano</option><option value="9º Ano">9º Ano</option>
                     <option value="1ª Série">1ª Série (EM)</option><option value="2ª Série">2ª Série (EM)</option><option value="3ª Série">3ª Série (EM)</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label>Aluno:</label>
+                <select id="campo-aluno-saida" onchange="preencherRASAIDA()">
+                    <option value="">Primeiro selecione a série...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>RA:</label>
+                <input type="text" id="campo-ra-saida" readonly style="background-color: #e9ecef;">
             </div>
             <div class="form-group">
                 <label>Tipo de Autorização:</label>
@@ -172,25 +181,25 @@
                 <input type="date" id="freq-data" required>
             </div>
             <div class="form-group">
-                <label>Aluno:</label>
-                <select id="freq-aluno" onchange="preencherRAFreq()">
-                    <option value="">Selecione um aluno...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>RA:</label>
-                <input type="text" id="freq-ra" readonly style="background-color: #e9ecef;">
-            </div>
-            <div class="form-group">
                 <label>Série/Ano:</label>
-                <select id="freq-serie">
-                    <option value="">Selecione...</option>
+                <select id="freq-serie" onchange="filtrarAlunosPorSerie('freq')">
+                    <option value="">Selecione a série...</option>
                     <option value="Maternal 1">Maternal 1</option><option value="Maternal 2">Maternal 2</option><option value="Maternal 3">Maternal 3</option>
                     <option value="Pré 1">Pré 1</option><option value="Pré 2">Pré 2</option>
                     <option value="1º Ano">1º Ano</option><option value="2º Ano">2º Ano</option><option value="3º Ano">3º Ano</option><option value="4º Ano">4º Ano</option><option value="5º Ano">5º Ano</option>
                     <option value="6º Ano">6º Ano</option><option value="7º Ano">7º Ano</option><option value="8º Ano">8º Ano</option><option value="9º Ano">9º Ano</option>
                     <option value="1ª Série">1ª Série (EM)</option><option value="2ª Série">2ª Série (EM)</option><option value="3ª Série">3ª Série (EM)</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label>Aluno:</label>
+                <select id="freq-aluno" onchange="preencherRAFreq()">
+                    <option value="">Primeiro selecione a série...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>RA:</label>
+                <input type="text" id="freq-ra" readonly style="background-color: #e9ecef;">
             </div>
             <div class="form-group">
                 <label>Frequência / Ocorrência:</label>
@@ -243,6 +252,94 @@
         <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
     </div>
 
+    <!-- MÓDULO 3: FORMULÁRIO DE OCORRÊNCIAS -->
+    <div id="modulo-ocorrencia" class="hidden">
+        <h2>Nova Ocorrência</h2>
+        <div id="carregando-alunos-ocorrencia" class="loading">Carregando lista de alunos...</div>
+
+        <div id="formulario-ocorrencia" class="hidden">
+            <div class="form-group">
+                <label>Data da Ocorrência:</label>
+                <input type="date" id="ocorrencia-data" required>
+            </div>
+            <div class="form-group">
+                <label>Série/Ano:</label>
+                <select id="ocorrencia-serie" onchange="filtrarAlunosPorSerie('ocorrencia')">
+                    <option value="">Selecione a série...</option>
+                    <option value="Maternal 1">Maternal 1</option><option value="Maternal 2">Maternal 2</option><option value="Maternal 3">Maternal 3</option>
+                    <option value="Pré 1">Pré 1</option><option value="Pré 2">Pré 2</option>
+                    <option value="1º Ano">1º Ano</option><option value="2º Ano">2º Ano</option><option value="3º Ano">3º Ano</option><option value="4º Ano">4º Ano</option><option value="5º Ano">5º Ano</option>
+                    <option value="6º Ano">6º Ano</option><option value="7º Ano">7º Ano</option><option value="8º Ano">8º Ano</option><option value="9º Ano">9º Ano</option>
+                    <option value="1ª Série">1ª Série (EM)</option><option value="2ª Série">2ª Série (EM)</option><option value="3ª Série">3ª Série (EM)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Aluno:</label>
+                <select id="ocorrencia-aluno" onchange="preencherRAOcorrencia()">
+                    <option value="">Primeiro selecione a série...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>RA:</label>
+                <input type="text" id="ocorrencia-ra" readonly style="background-color: #e9ecef;">
+            </div>
+            <div class="form-group">
+                <label>Tipo de Ocorrência <span style="color: red;">*</span>:</label>
+                <select id="ocorrencia-tipo">
+                    <option value="">Selecione o tipo...</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Indisciplina">Indisciplina</option>
+                    <option value="Atraso">Atraso</option>
+                    <option value="Falta de material">Falta de material</option>
+                    <option value="Celular">Celular</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Breve Relato:</label>
+                <textarea id="ocorrencia-relato" rows="3" placeholder="Descreva o ocorrido..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Sanção (Opcional):</label>
+                <select id="ocorrencia-sancao">
+                    <option value="">Nenhuma / Em branco</option>
+                    <option value="Advertencia verbal">Advertência verbal</option>
+                    <option value="Notificacao via Classapp">Notificação via Classapp</option>
+                    <option value="Advertencia formal">Advertência formal</option>
+                    <option value="Suspensao">Suspensão</option>
+                    <option value="Acompanhado pela assessoria">Acompanhado pela assessoria</option>
+                    <option value="Coordenador de segmento conversou com o aluno">Coordenador de segmento conversou com o aluno</option>
+                </select>
+            </div>
+            <button onclick="enviarDadosOcorrencia()" id="btn-salvar-ocorrencia">Salvar Ocorrência</button>
+            <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
+        </div>
+    </div>
+
+    <!-- MÓDULO 3: CONSULTA DE OCORRÊNCIAS -->
+    <div id="modulo-consulta-ocorrencia" class="hidden">
+        <h2>Consultar Ocorrências</h2>
+        <div class="filtros-container">
+            <button id="ocorr-filtro-todos" class="ativo" onclick="filtrarRegistrosOcorrencias('todos')">Exibir Todos</button>
+        </div>
+        <div id="carregando-consulta-ocorrencia" class="loading">Buscando registros...</div>
+        <div style="overflow-x: auto;">
+            <table id="tabela-registros-ocorrencia" class="hidden">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Aluno (RA)</th>
+                        <th>Série</th>
+                        <th>Tipo / Sanção</th>
+                        <th>Relato</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela-ocorrencia"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
+    </div>
+
 </div>
 
 <script>
@@ -253,6 +350,7 @@
     let listaDeAlunos = [];
     let todosRegistrosSaida = [];
     let todosRegistrosFreq = [];
+    let todosRegistrosOcorrencias = [];
 
     window.onload = function () {
         google.accounts.id.initialize({
@@ -299,6 +397,9 @@
                 if (modulos.includes("frequencia")) {
                     document.getElementById('btn-mod-frequencia').style.display = 'block';
                 }
+                if (modulos.includes("ocorrencias")) {
+                    document.getElementById('btn-mod-ocorrencias').style.display = 'block';
+                }
                 if (modulos.length === 0) {
                     document.getElementById('sem-acesso').classList.remove('hidden');
                 }
@@ -312,10 +413,13 @@
     function voltarAoMenuPrincipal() {
         document.getElementById('submenu-saida').classList.add('hidden');
         document.getElementById('submenu-frequencia').classList.add('hidden');
+        document.getElementById('submenu-ocorrencias').classList.add('hidden');
         document.getElementById('modulo-saida').classList.add('hidden');
         document.getElementById('modulo-consulta-saida').classList.add('hidden');
         document.getElementById('modulo-frequencia').classList.add('hidden');
         document.getElementById('modulo-consulta-frequencia').classList.add('hidden');
+        document.getElementById('modulo-ocorrencia').classList.add('hidden');
+        document.getElementById('modulo-consulta-ocorrencia').classList.add('hidden');
         document.getElementById('tela-menu').classList.remove('hidden');
     }
 
@@ -361,7 +465,28 @@
         carregarRegistrosConsultaFreq();
     }
 
-    // Carregamento de Alunos
+    // Navegação Ocorrências
+    function abrirMenuOcorrencias() {
+        document.getElementById('tela-menu').classList.add('hidden');
+        document.getElementById('submenu-ocorrencias').classList.remove('hidden');
+    }
+    function voltarAoSubmenuOcorrencias() {
+        document.getElementById('modulo-ocorrencia').classList.add('hidden');
+        document.getElementById('modulo-consulta-ocorrencia').classList.add('hidden');
+        document.getElementById('submenu-ocorrencias').classList.remove('hidden');
+    }
+    function abrirFormularioOcorrencia() {
+        document.getElementById('submenu-ocorrencias').classList.add('hidden');
+        document.getElementById('modulo-ocorrencia').classList.remove('hidden');
+        carregarAlunosGeral();
+    }
+    function abrirTelaConsultaOcorrencia() {
+        document.getElementById('submenu-ocorrencias').classList.add('hidden');
+        document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden');
+        carregarRegistrosConsultaOcorrencias();
+    }
+
+    // Carregamento de Alunos com suporte à nova coluna Série
     function carregarAlunosGeral() {
         if (listaDeAlunos.length > 0) {
             liberarFormulariosAlunos();
@@ -372,19 +497,6 @@
             .then(response => response.json())
             .then(alunos => {
                 listaDeAlunos = alunos;
-                const selectSaida = document.getElementById('campo-aluno-saida');
-                const selectFreq = document.getElementById('freq-aluno');
-
-                alunos.forEach(aluno => {
-                    let opt1 = document.createElement('option');
-                    opt1.value = aluno.nome; opt1.text = aluno.nome;
-                    selectSaida.appendChild(opt1);
-
-                    let opt2 = document.createElement('option');
-                    opt2.value = aluno.nome; opt2.text = aluno.nome;
-                    selectFreq.appendChild(opt2);
-                });
-
                 liberarFormulariosAlunos();
             })
             .catch(error => console.error("Erro ao carregar alunos:", error));
@@ -395,6 +507,43 @@
         document.getElementById('formulario-saida').classList.remove('hidden');
         document.getElementById('carregando-alunos-freq').classList.add('hidden');
         document.getElementById('formulario-frequencia').classList.remove('hidden');
+        document.getElementById('carregando-alunos-ocorrencia').classList.add('hidden');
+        document.getElementById('formulario-ocorrencia').classList.remove('hidden');
+    }
+
+    // Filtro inteligente de Alunos por Série
+    function filtrarAlunosPorSerie(modulo) {
+        let serieSelecionada = "";
+        let selectAluno = null;
+        let inputRA = null;
+
+        if (modulo === 'saida') {
+            serieSelecionada = document.getElementById('campo-serie-saida').value;
+            selectAluno = document.getElementById('campo-aluno-saida');
+            inputRA = document.getElementById('campo-ra-saida');
+        } else if (modulo === 'freq') {
+            serieSelecionada = document.getElementById('freq-serie').value;
+            selectAluno = document.getElementById('freq-aluno');
+            inputRA = document.getElementById('freq-ra');
+        } else if (modulo === 'ocorrencia') {
+            serieSelecionada = document.getElementById('ocorrencia-serie').value;
+            selectAluno = document.getElementById('ocorrencia-aluno');
+            inputRA = document.getElementById('ocorrencia-ra');
+        }
+
+        selectAluno.innerHTML = '<option value="">Selecione um aluno...</option>';
+        inputRA.value = "";
+
+        if (!serieSelecionada) return;
+
+        const alunosFiltrados = listaDeAlunos.filter(a => a.serie && a.serie.trim() === serieSelecionada.trim());
+
+        alunosFiltrados.forEach(aluno => {
+            let opt = document.createElement('option');
+            opt.value = aluno.nome;
+            opt.text = aluno.nome;
+            selectAluno.appendChild(opt);
+        });
     }
 
     function preencherRASAIDA() {
@@ -407,6 +556,12 @@
         const nome = document.getElementById('freq-aluno').value;
         const aluno = listaDeAlunos.find(a => a.nome === nome);
         document.getElementById('freq-ra').value = aluno ? aluno.ra : "";
+    }
+
+    function preencherRAOcorrencia() {
+        const nome = document.getElementById('ocorrencia-aluno').value;
+        const aluno = listaDeAlunos.find(a => a.nome === nome);
+        document.getElementById('ocorrencia-ra').value = aluno ? aluno.ra : "";
     }
 
     // Envio Saída
@@ -435,9 +590,9 @@
         .then(() => {
             alert("Autorização salva com sucesso!");
             document.getElementById('campo-data-saida').value = "";
-            document.getElementById('campo-aluno-saida').value = "";
-            document.getElementById('campo-ra-saida').value = "";
             document.getElementById('campo-serie-saida').value = "";
+            document.getElementById('campo-aluno-saida').innerHTML = '<option value="">Primeiro selecione a série...</option>';
+            document.getElementById('campo-ra-saida').value = "";
             document.getElementById('campo-descricao-saida').value = "";
             btn.innerText = "Salvar Registro"; btn.disabled = false;
         }).catch(() => {
@@ -452,7 +607,7 @@
         const justificativa = document.getElementById('freq-justificativa').value.trim();
 
         if (!document.getElementById('freq-data').value || !document.getElementById('freq-aluno').value || !document.getElementById('freq-serie').value) {
-            alert("Preencha os campos obrigatórios (Data, Aluno e Série).");
+            alert("Preencha os campos obrigatórios (Data, Série e Aluno).");
             return;
         }
         if (!justificativa) {
@@ -480,9 +635,9 @@
         .then(() => {
             alert("Frequência salva com sucesso na planilha!");
             document.getElementById('freq-data').value = "";
-            document.getElementById('freq-aluno').value = "";
-            document.getElementById('freq-ra').value = "";
             document.getElementById('freq-serie').value = "";
+            document.getElementById('freq-aluno').innerHTML = '<option value="">Primeiro selecione a série...</option>';
+            document.getElementById('freq-ra').value = "";
             document.getElementById('freq-justificativa').value = "";
             document.getElementById('freq-observacoes').value = "";
             btn.innerText = "Salvar Frequência"; btn.disabled = false;
@@ -492,19 +647,63 @@
         });
     }
 
-    // Consulta Saída
+    // Envio Ocorrências (Com tipo obrigatório e sanção opcional)
+    function enviarDadosOcorrencia() {
+        const btn = document.getElementById('btn-salvar-ocorrencia');
+        const tipoOcorrencia = document.getElementById('ocorrencia-tipo').value;
+
+        if (!document.getElementById('ocorrencia-data').value || !document.getElementById('ocorrencia-serie').value || !document.getElementById('ocorrencia-aluno').value) {
+            alert("Preencha os campos obrigatórios (Data, Série e Aluno).");
+            return;
+        }
+        if (!tipoOcorrencia) {
+            alert("O campo 'Tipo de Ocorrência' é obrigatório.");
+            document.getElementById('ocorrencia-tipo').focus();
+            return;
+        }
+
+        btn.innerText = "Salvando...";
+        btn.disabled = true;
+
+        const dados = {
+            modulo: 'ocorrencias',
+            emailUsuario: usuarioLogado,
+            dataOcorrencia: document.getElementById('ocorrencia-data').value,
+            serie: document.getElementById('ocorrencia-serie').value,
+            nome: document.getElementById('ocorrencia-aluno').value,
+            ra: document.getElementById('ocorrencia-ra').value,
+            tipoOcorrencia: tipoOcorrencia,
+            relato: document.getElementById('ocorrencia-relato').value,
+            sancao: document.getElementById('ocorrencia-sancao').value
+        };
+
+        fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
+        .then(() => {
+            alert("Ocorrência salva com sucesso na planilha!");
+            document.getElementById('ocorrencia-data').value = "";
+            document.getElementById('ocorrencia-serie').value = "";
+            document.getElementById('ocorrencia-aluno').innerHTML = '<option value="">Primeiro selecione a série...</option>';
+            document.getElementById('ocorrencia-ra').value = "";
+            document.getElementById('ocorrencia-tipo').value = "";
+            document.getElementById('ocorrencia-relato').value = "";
+            document.getElementById('ocorrencia-sancao').value = "";
+            btn.innerText = "Salvar Ocorrência"; btn.disabled = false;
+        }).catch(() => {
+            alert("Erro ao salvar.");
+            btn.innerText = "Salvar Ocorrência"; btn.disabled = false;
+        });
+    }
+
+    // Consultas
     function carregarRegistrosConsultaSaida() {
         document.getElementById('carregando-consulta-saida').style.display = 'block';
         document.getElementById('tabela-registros-saida').classList.add('hidden');
-
-        fetch(API_URL + '?acao=buscarRegistrosSaida')
-            .then(res => res.json())
-            .then(regs => {
-                todosRegistrosSaida = regs;
-                document.getElementById('carregando-consulta-saida').style.display = 'none';
-                document.getElementById('tabela-registros-saida').classList.remove('hidden');
-                filtrarRegistrosSaida('todos');
-            });
+        fetch(API_URL + '?acao=buscarRegistrosSaida').then(res => res.json()).then(regs => {
+            todosRegistrosSaida = regs;
+            document.getElementById('carregando-consulta-saida').style.display = 'none';
+            document.getElementById('tabela-registros-saida').classList.remove('hidden');
+            filtrarRegistrosSaida('todos');
+        });
     }
 
     function filtrarRegistrosSaida(tipoFiltro) {
@@ -534,30 +733,20 @@
         filtrados.forEach(reg => {
             let dtExibe = reg.dataSaida ? reg.dataSaida.split('T')[0].split('-').reverse().join('/') : '';
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${dtExibe}</td>
-                <td><strong>${reg.nome}</strong><br><small>RA: ${reg.ra}</small></td>
-                <td>${reg.serie}</td>
-                <td>${reg.tipo}</td>
-                <td>${reg.descricao || '-'}</td>
-            `;
+            tr.innerHTML = `<td>${dtExibe}</td><td><strong>${reg.nome}</strong><br><small>RA: ${reg.ra}</small></td><td>${reg.serie}</td><td>${reg.tipo}</td><td>${reg.descricao || '-'}</td>`;
             corpo.appendChild(tr);
         });
     }
 
-    // Consulta Frequência
     function carregarRegistrosConsultaFreq() {
         document.getElementById('carregando-consulta-freq').style.display = 'block';
         document.getElementById('tabela-registros-freq').classList.add('hidden');
-
-        fetch(API_URL + '?acao=buscarRegistrosFrequencia')
-            .then(res => res.json())
-            .then(regs => {
-                todosRegistrosFreq = regs;
-                document.getElementById('carregando-consulta-freq').style.display = 'none';
-                document.getElementById('tabela-registros-freq').classList.remove('hidden');
-                filtrarRegistrosFreq('hoje');
-            });
+        fetch(API_URL + '?acao=buscarRegistrosFrequencia').then(res => res.json()).then(regs => {
+            todosRegistrosFreq = regs;
+            document.getElementById('carregando-consulta-freq').style.display = 'none';
+            document.getElementById('tabela-registros-freq').classList.remove('hidden');
+            filtrarRegistrosFreq('hoje');
+        });
     }
 
     function filtrarRegistrosFreq(tipoFiltro) {
@@ -584,13 +773,35 @@
         filtrados.forEach(reg => {
             let dtExibe = reg.dataFrequencia ? reg.dataFrequencia.split('T')[0].split('-').reverse().join('/') : '';
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${dtExibe}</td>
-                <td><strong>${reg.nome}</strong><br><small>RA: ${reg.ra}</small></td>
-                <td>${reg.serie}</td>
-                <td><span style="padding: 3px 8px; border-radius: 4px; font-size: 12px; background: #fff3cd; color: #856404">${reg.frequencia}</span></td>
-                <td><strong>Justificativa:</strong> ${reg.justificativa}<br><small style="color: #666;">Obs: ${reg.observacoes || '-'}</small></td>
-            `;
+            tr.innerHTML = `<td>${dtExibe}</td><td><strong>${reg.nome}</strong><br><small>RA: ${reg.ra}</small></td><td>${reg.serie}</td><td><span style="padding: 3px 8px; border-radius: 4px; font-size: 12px; background: #fff3cd; color: #856404">${reg.frequencia}</span></td><td><strong>Justificativa:</strong> ${reg.justificativa}<br><small style="color: #666;">Obs: ${reg.observacoes || '-'}</small></td>`;
+            corpo.appendChild(tr);
+        });
+    }
+
+    function carregarRegistrosConsultaOcorrencias() {
+        document.getElementById('carregando-consulta-ocorrencia').style.display = 'block';
+        document.getElementById('tabela-registros-ocorrencia').classList.add('hidden');
+        fetch(API_URL + '?acao=buscarRegistrosOcorrencias').then(res => res.json()).then(regs => {
+            todosRegistrosOcorrencias = regs;
+            document.getElementById('carregando-consulta-ocorrencia').style.display = 'none';
+            document.getElementById('tabela-registros-ocorrencia').classList.remove('hidden');
+            filtrarRegistrosOcorrencias('todos');
+        });
+    }
+
+    function filtrarRegistrosOcorrencias(tipoFiltro) {
+        const corpo = document.getElementById('corpo-tabela-ocorrencia');
+        corpo.innerHTML = "";
+
+        if (todosRegistrosOcorrencias.length === 0) {
+            corpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`;
+            return;
+        }
+
+        todosRegistrosOcorrencias.forEach(reg => {
+            let dtExibe = reg.dataOcorrencia ? reg.dataOcorrencia.split('T')[0].split('-').reverse().join('/') : '';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${dtExibe}</td><td><strong>${reg.nome}</strong><br><small>RA: ${reg.ra}</small></td><td>${reg.serie}</td><td><strong>Tipo:</strong> ${reg.tipoOcorrencia}<br><small style="color: #666;">Sanção: ${reg.sancao || 'Nenhuma'}</small></td><td>${reg.relato || '-'}</td>`;
             corpo.appendChild(tr);
         });
     }

@@ -7,7 +7,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #F2F2F2; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(1,101,82,0.15); width: 100%; max-width: 1000px; border-top: 6px solid #016552; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(1,101,82,0.15); width: 100%; max-width: 1100px; border-top: 6px solid #016552; }
         
         .logo-container { text-align: center; margin-bottom: 20px; }
         .logo-container img { max-width: 180px; height: auto; }
@@ -32,9 +32,9 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: center; }
         th { background-color: #016552; color: white; }
-        td:nth-child(2) { text-align: left; } /* Alinha nome do aluno à esquerda */
+        td:nth-child(2) { text-align: left; }
         
-        .nota-abaixo { color: #d9534f; font-weight: bold; } /* Abaixo de 50 aparece em vermelho */
+        .nota-abaixo { color: #d9534f; font-weight: bold; }
         
         .pacote-box { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .pacote-box label { margin-bottom: 0; font-weight: normal; }
@@ -92,20 +92,20 @@
     </div>
     <div id="submenu-notas" class="hidden">
         <h2>Módulo de Notas</h2>
-        <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas</button>
+        <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas por Atividade</button>
         <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaFiltroConsultaNotas()">📊 Visualizar Boletim / Médias por Turma</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- PASSO 1: CONFIGURAÇÃO DE LANÇAMENTO DE NOTAS -->
+    <!-- PASSO 1: CONFIGURAÇÃO DE LANÇAMENTO -->
     <div id="modulo-notas" class="hidden">
-        <h2>Configuração de Lançamento</h2>
+        <h2>Configuração de Atividade e Pesos</h2>
         <div id="carregando-alunos-notas" class="loading">Carregando dados estruturais...</div>
 
         <div id="form-config-notas" class="hidden">
             <div class="form-group">
                 <label>Bimestre:</label>
-                <select id="nota-bimestre" onchange="atualizarPainelPacotes()">
+                <select id="nota-bimestre" onchange="atualizarPainelPesosPacotes()">
                     <option value="1º Bimestre">1º Bimestre</option>
                     <option value="2º Bimestre">2º Bimestre</option>
                     <option value="3º Bimestre">3º Bimestre</option>
@@ -114,42 +114,59 @@
             </div>
             <div class="form-group">
                 <label>Série / Ano:</label>
-                <select id="nota-serie" onchange="atualizarTurmasPermitidas(); atualizarPainelPacotes();">
+                <select id="nota-serie" onchange="atualizarTurmasPermitidas(); atualizarPainelPesosPacotes();">
                     <option value="">Selecione a série...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Turma / Sala:</label>
-                <select id="nota-turma" onchange="atualizarPainelPacotes()">
+                <select id="nota-turma" onchange="atualizarPainelPesosPacotes()">
                     <option value="">Selecione a turma...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Disciplina:</label>
-                <select id="nota-disciplina" onchange="atualizarPainelPacotes()">
+                <select id="nota-disciplina" onchange="atualizarPainelPesosPacotes()">
                     <option value="">Selecione a disciplina...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Eixo de Avaliação:</label>
-                <select id="nota-eixo" onchange="atualizarPainelPacotes()">
+                <select id="nota-eixo" onchange="atualizarPainelPesosPacotes()">
                     <option value="continuas">Avaliações Contínuas (C1 a C6)</option>
                     <option value="bimestrais">Avaliações Bimestrais (B1 a B4)</option>
                     <option value="recuperacao">Recuperação (R1 e R2)</option>
                 </select>
             </div>
 
-            <!-- PAINEL DE PESOS DOS PACOTES -->
+            <!-- DISTRIBUIÇÃO DE PESOS ENTRE OS PACOTES DO EIXO -->
             <div style="background: #f1f8f6; border: 1px solid #016552; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes (Soma exata a 100%)</h3>
-                <div id="container-pacotes"></div>
+                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes no Eixo (Soma exata a 100%)</h3>
+                <div id="container-pesos-pacotes"></div>
                 <p id="aviso-soma-pesos" style="font-weight: bold; color: #d9534f; margin-top: 10px; font-size: 14px; text-align: center;"></p>
             </div>
 
-            <button onclick="validarPesosEAvancar()" id="btn-avancar-notas">Avançar para Lançamento</button>
+            <!-- IDENTIFICAÇÃO DA ATIVIDADE ESPECÍFICA -->
+            <div style="background: #eef4f8; border: 1px solid #004D93; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #004D93; margin-top: 0; font-size: 15px;">Nova Atividade Avaliativa</h3>
+                <div class="form-group">
+                    <label>Vincular ao Pacote:</label>
+                    <select id="atividade-pacote-alvo"></select>
+                </div>
+                <div class="form-group">
+                    <label>Nome da Atividade (Ex: Redação 1, Leitura 2, Lição de Casa):</label>
+                    <input type="text" id="atividade-nome" placeholder="Digite o nome da atividade...">
+                </div>
+                <div class="form-group">
+                    <label>Peso desta Atividade dentro do Pacote (Ex: 1 para padrão ou 2 para peso maior):</label>
+                    <input type="number" id="atividade-peso" value="1" min="1" max="10" style="text-align: center;">
+                </div>
+            </div>
+
+            <button onclick="validarEAvancarParaLancamento()" id="btn-avancar-notas">Avançar para Lançamento de Notas</button>
         </div>
 
-        <!-- PASSO 2: TABELA DE LANÇAMENTO -->
+        <!-- PASSO 2: TABELA DE LANÇAMENTO DA ATIVIDADE -->
         <div id="container-tabela-notas" class="hidden" style="margin-top: 20px;">
             <h3 id="titulo-turma-notas" style="color: #016552; text-align: center; font-size: 16px;"></h3>
             <div style="overflow-x: auto; max-height: 400px;">
@@ -159,13 +176,13 @@
                             <th>RA</th>
                             <th>Nome do Aluno</th>
                             <th>Série / Turma</th>
-                            <th id="th-pacote-label">Nota (0 a 100)</th>
+                            <th id="th-atividade-label">Nota (0 a 100)</th>
                         </tr>
                     </thead>
                     <tbody id="corpo-tabela-notas"></tbody>
                 </table>
             </div>
-            <button onclick="salvarNotasEmLote()" id="btn-salvar-notas" style="background-color: #016552; margin-top: 15px;">Salvar / Atualizar Notas</button>
+            <button onclick="salvarNotasEmLote()" id="btn-salvar-notas" style="background-color: #016552; margin-top: 15px;">Salvar Notas da Atividade</button>
             <button class="voltar-btn" onclick="voltarParaConfigPesos()">Voltar para Configuração</button>
         </div>
 
@@ -194,7 +211,7 @@
     <!-- TELA DE VISUALIZAÇÃO DO BOLETIM DA TURMA -->
     <div id="modulo-visualizacao-boletim" class="hidden">
         <h2 id="titulo-boletim-turma">Boletim Escolar 2026</h2>
-        <div id="carregando-boletim" class="loading">Gerando boletins...</div>
+        <div id="carregando-boletim" class="loading">Gerando boletins e calculando médias ponderadas...</div>
         <div style="overflow-x: auto; max-height: 500px;">
             <table id="tabela-boletim-turma" class="hidden">
                 <thead>
@@ -240,7 +257,6 @@
     let notasJaLancadasGlobal = [];
     let pesosSalvosGlobal = [];
 
-    // Tabela oficial de pesos mapeados (Prova Bimestral vs Contínuas)
     const MATRIZ_PESOS_OFICIAL = {
         '1º Ano': { prova: 0, cont: 100 },
         '2º Ano': { prova: 0, cont: 100 },
@@ -331,7 +347,6 @@
         ['Turma 1', 'Turma 2'].forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
     }
 
-    // --- CARREGAMENTO DE DADOS DO PROFESSOR ---
     function carregarDadosParaNotas() {
         document.getElementById('carregando-alunos-notas').classList.remove('hidden');
         document.getElementById('form-config-notas').classList.add('hidden');
@@ -372,7 +387,7 @@
         discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
 
         atualizarTurmasPermitidas();
-        atualizarPainelPacotes();
+        atualizarPainelPesosPacotes();
     }
 
     function atualizarTurmasPermitidas() {
@@ -381,13 +396,14 @@
         ['Turma 1', 'Turma 2'].forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
     }
 
-    function atualizarPainelPacotes() {
+    function atualizarPainelPesosPacotes() {
         const bimestre = document.getElementById('nota-bimestre').value;
         const serie = document.getElementById('nota-serie').value;
         const turma = document.getElementById('nota-turma').value;
         const disciplina = document.getElementById('nota-disciplina').value;
         const eixo = document.getElementById('nota-eixo').value;
-        const container = document.getElementById('container-pacotes');
+        
+        const container = document.getElementById('container-pesos-pacotes');
         container.innerHTML = "";
 
         let pacotes = eixo === 'continuas' ? ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'] : eixo === 'bimestrais' ? ['B1', 'B2', 'B3', 'B4'] : ['R1', 'R2'];
@@ -398,6 +414,9 @@
             try { pesosObj = JSON.parse(configSalva.pesosJson); } catch(e){}
         }
 
+        const selPacoteAlvo = document.getElementById('atividade-pacote-alvo');
+        selPacoteAlvo.innerHTML = "";
+
         pacotes.forEach((p, idx) => {
             let valorPadrao = 0;
             if (pesosObj[p] !== undefined) valorPadrao = pesosObj[p];
@@ -405,35 +424,43 @@
 
             let div = document.createElement('div');
             div.className = 'pacote-box';
-            div.innerHTML = `<label><strong>${p}</strong> (Peso %):</label><input type="number" min="0" max="100" value="${valorPadrao}" class="input-peso-pacote" data-pacote="${p}" oninput="calcularSomaPesos()" style="width: 100px; text-align: center;">`;
+            div.innerHTML = `<label><strong>${p}</strong> (Peso % no Eixo):</label><input type="number" min="0" max="100" value="${valorPadrao}" class="input-peso-pacote" data-pacote="${p}" oninput="calcularSomaPesosPacotes()" style="width: 100px; text-align: center;">`;
             container.appendChild(div);
+
+            let opt = document.createElement('option');
+            opt.value = p; opt.text = `Pacote ${p}`;
+            selPacoteAlvo.appendChild(opt);
         });
-        calcularSomaPesos();
+        calcularSomaPesosPacotes();
     }
 
-    function calcularSomaPesos() {
+    function calcularSomaPesosPacotes() {
         let soma = 0;
         document.querySelectorAll('.input-peso-pacote').forEach(inp => { soma += parseFloat(inp.value) || 0; });
         const aviso = document.getElementById('aviso-soma-pesos');
         const btnAvancar = document.getElementById('btn-avancar-notas');
 
         if (soma === 100) {
-            aviso.innerText = "Soma correta (100%). Pronto para prosseguir!"; aviso.style.color = "#016552";
+            aviso.innerText = "Soma dos pesos correta (100%)."; aviso.style.color = "#016552";
             btnAvancar.disabled = false; btnAvancar.style.opacity = "1";
         } else {
-            aviso.innerText = `Atenção: A soma atual dos pesos é ${soma}%. O total deve ser obrigatoriamente 100%.`; aviso.style.color = "#d9534f";
+            aviso.innerText = `Atenção: A soma dos pesos dos pacotes é ${soma}%. O total deve ser exatamente 100%.`; aviso.style.color = "#d9534f";
             btnAvancar.disabled = true; btnAvancar.style.opacity = "0.5";
         }
     }
 
-    function validarPesosEAvancar() {
+    function validarEAvancarParaLancamento() {
         const serie = document.getElementById('nota-serie').value;
         const turma = document.getElementById('nota-turma').value;
         const disciplina = document.getElementById('nota-disciplina').value;
         const bimestre = document.getElementById('nota-bimestre').value;
         const eixo = document.getElementById('nota-eixo').value;
+        const nomeAtividade = document.getElementById('atividade-nome').value.trim();
+        const pacoteAlvo = document.getElementById('atividade-pacote-alvo').value;
+        const pesoAtividade = parseFloat(document.getElementById('atividade-peso').value) || 1;
 
-        if(!serie || !turma || !disciplina) { alert("Preencha todos os campos de configuração."); return; }
+        if(!serie || !turma || !disciplina) { alert("Preencha todos os campos de configuração da turma."); return; }
+        if(!nomeAtividade) { alert("Dê um nome para a atividade (ex: Redação 1, Lição de Casa)."); return; }
 
         let pesosConfigurados = {}; let soma = 0;
         document.querySelectorAll('.input-peso-pacote').forEach(inp => {
@@ -441,39 +468,41 @@
             if(v > 0) { pesosConfigurados[p] = v; soma += v; }
         });
 
-        if (soma !== 100) { alert("A soma dos pesos deve ser exatamente 100%."); return; }
+        if (soma !== 100) { alert("A soma dos pesos dos pacotes deve ser exatamente 100%."); return; }
 
+        // Salva pesos dos pacotes no backstage
         fetch(API_URL, {
             method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ modulo: 'salvar_pesos', emailUsuario: usuarioLogado, bimestre, serie, turma, disciplina, eixo, pesos: pesosConfigurados })
         });
 
-        gerarTabelaLancamentoNotas(bimestre, serie, turma, disciplina, eixo, pesosConfigurados);
+        gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade);
     }
 
-    function gerarTabelaLancamentoNotas(bimestre, serie, turma, disciplina, eixo, pesosConfigurados) {
+    function gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade) {
         const alunosTurma = listaDeAlunos.filter(a => a.serie === serie);
-        let pacotesAtivos = Object.keys(pesosConfigurados);
-        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Eixo: ${eixo.toUpperCase()}`;
+        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Pacote: ${pacoteAlvo} | Atividade: "${nomeAtividade}" (Peso ${pesoAtividade})`;
         
-        const theadTr = document.querySelector('#container-tabela-notas thead tr');
-        let thHtml = `<th>RA</th><th>Nome do Aluno</th><th>Série / Turma</th>`;
-        pacotesAtivos.forEach(p => { thHtml += `<th>${p} (${pesosConfigurados[p]}%)</th>`; });
-        theadTr.innerHTML = thHtml;
+        document.getElementById('th-atividade-label').innerText = `${nomeAtividade} (Peso ${pesoAtividade}) - Nota 0-100`;
 
         const corpo = document.getElementById('corpo-tabela-notas');
         corpo.innerHTML = "";
 
         alunosTurma.forEach(aluno => {
             const tr = document.createElement('tr');
-            let tdHtml = `<td>${aluno.ra}</td><td><strong>${aluno.nome}</strong></td><td>${aluno.serie} (${turma})</td>`;
-            pacotesAtivos.forEach(p => {
-                let notaExistente = "";
-                let encontrada = notasJaLancadasGlobal.find(n => n.bimestre === bimestre && n.serie === serie && n.turma === turma && n.disciplina === disciplina && String(n.ra) === String(aluno.ra) && n.instrumento === p);
-                if (encontrada) notaExistente = encontrada.nota;
-                tdHtml += `<td><input type="number" min="0" max="100" step="1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${p}" value="${notaExistente}" placeholder="0-100" oninput="validarNotaLimite(this)"></td>`;
-            });
-            tr.innerHTML = tdHtml;
+            let notaExistente = "";
+            let encontrada = notasJaLancadasGlobal.find(n => 
+                n.bimestre === bimestre && n.serie === serie && n.turma === turma && n.disciplina === disciplina && 
+                n.eixo === eixo && n.pacote === pacoteAlvo && n.nomeAtividade === nomeAtividade && String(n.ra) === String(aluno.ra)
+            );
+            if (encontrada) notaExistente = encontrada.nota;
+
+            tr.innerHTML = `
+                <td>${aluno.ra}</td>
+                <td><strong>${aluno.nome}</strong></td>
+                <td>${aluno.serie} (${turma})</td>
+                <td><input type="number" min="0" max="100" step="1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${pacoteAlvo}" data-atividade="${nomeAtividade}" data-pesoa="${pesoAtividade}" value="${notaExistente}" placeholder="0-100" oninput="validarNotaLimite(this)"></td>
+            `;
             corpo.appendChild(tr);
         });
 
@@ -494,40 +523,44 @@
 
     function salvarNotasEmLote() {
         const btn = document.getElementById('btn-salvar-notas');
-        btn.innerText = "Salvando / Atualizando..."; btn.disabled = true;
+        btn.innerText = "Salvando..."; btn.disabled = true;
 
         const bimestre = document.getElementById('nota-bimestre').value;
         const serie = document.getElementById('nota-serie').value;
         const turma = document.getElementById('nota-turma').value;
         const disciplina = document.getElementById('nota-disciplina').value;
+        const eixo = document.getElementById('nota-eixo').value;
 
         let lancamentos = [];
         document.querySelectorAll('.input-nota').forEach(inp => {
             let notaVal = inp.value.trim();
             if(notaVal !== "") {
                 lancamentos.push({
-                    bimestre: bimestre, serie: serie, turma: turma, disciplina: disciplina,
+                    bimestre: bimestre, serie: serie, turma: turma, disciplina: disciplina, eixo: eixo,
+                    pacote: inp.getAttribute('data-pacote'),
+                    nomeAtividade: inp.getAttribute('data-atividade'),
+                    pesoAtividade: parseFloat(inp.getAttribute('data-pesoa')) || 1,
                     nome: inp.getAttribute('data-nome'), ra: inp.getAttribute('data-ra'),
-                    instrumento: inp.getAttribute('data-pacote'), nota: parseFloat(notaVal)
+                    nota: parseFloat(notaVal)
                 });
             }
         });
 
-        if(lancamentos.length === 0) { alert("Insira ao menos uma nota."); btn.innerText = "Salvar / Atualizar Notas"; btn.disabled = false; return; }
+        if(lancamentos.length === 0) { alert("Insira ao menos uma nota."); btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false; return; }
 
         fetch(API_URL, {
             method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ modulo: 'notas', emailUsuario: usuarioLogado, lancamentos: lancamentos })
         }).then(() => {
-            alert("Notas salvas/atualizadas com sucesso!");
-            btn.innerText = "Salvar / Atualizar Notas"; btn.disabled = false;
+            alert("Notas salvas com sucesso!");
+            btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
             carregarDadosParaNotas();
         }).catch(() => {
-            alert("Erro ao salvar."); btn.innerText = "Salvar / Atualizar Notas"; btn.disabled = false;
+            alert("Erro ao salvar."); btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
         });
     }
 
-    // --- VISUALIZAÇÃO ESPELHADA NO MODELO DE BOLETIM ---
+    // --- MOTOR DE CÁLCULO PONDERADO & VISUALIZAÇÃO DE BOLETIM ---
     function gerarVisualizacaoBoletimTurma() {
         const serie = document.getElementById('filtro-serie-boletim').value;
         const turma = document.getElementById('filtro-turma-boletim').value;
@@ -562,14 +595,12 @@
 
             const disciplinasPadrao = ["Língua Portuguesa", "Matemática", "Ciências da Natureza", "Ciências Humanas", "Inglês", "Educação Física", "Artes integradas", "Música", "Tecnologia e suas aplicações", "História", "Geografia", "Biologia", "Física", "Química", "Filosofia", "Sociologia: Ética, Cidadania e Atualidades", "Lingua Portuguesa (Escrita)", "Língua Portuguesa (Leitura)", "Lingua Portuguesa (Lingua)", "Matemática - Geometria", "Matemática - Algebra", "Incubadora de projetos"];
             const bimestres = ["1º Bimestre", "2º Bimestre", "3º Bimestre", "4º Bimestre"];
-
-            // Regras de peso oficial da série
             let regraSerie = MATRIZ_PESOS_OFICIAL[serie] || { prova: 0, cont: 100 };
 
             alunosTurma.forEach(aluno => {
                 disciplinasPadrao.forEach(disc => {
                     let temLancamento = notas.some(n => n.serie === serie && n.turma === turma && n.disciplina === disc && String(n.ra) === String(aluno.ra));
-                    if (!temLancamento) return; // Oculta disciplinas sem nota lançada para manter o boletim limpo
+                    if (!temLancamento) return;
 
                     const tr = document.createElement('tr');
                     let htmlLinha = `<td><strong>${disc}</strong></td><td>${aluno.nome}<br><small>RA: ${aluno.ra}</small></td>`;
@@ -578,6 +609,27 @@
                     let bimestresValidos = 0;
 
                     bimestres.forEach(bim => {
+                        let notasBimAluno = notas.filter(n => n.bimestre === bim && n.serie === serie && n.turma === turma && n.disciplina === disc && String(n.ra) === String(aluno.ra));
+
+                        // 1. Agrupar atividades por Pacote para calcular Média Ponderada Interna do Pacote
+                        let pacotesAlocados = {}; // { C1: { somaNotasPonderadas, somaPesos } }
+                        notasBimAluno.forEach(n => {
+                            let pkg = n.pacote;
+                            if(!pacotesAlocados[pkg]) pacotesAlocados[pkg] = { somaPond: 0, somaPesos: 0 };
+                            let pesoAtiv = n.pesoAtividade || 1;
+                            pacotesAlocados[pkg].somaPond += (n.nota * pesoAtiv);
+                            pacotesAlocados[pkg].somaPesos += pesoAtiv;
+                        });
+
+                        let mediasPacotesCalculadas = {};
+                        Object.keys(pacotesAlocados).forEach(pkg => {
+                            let obj = pacotesAlocados[pkg];
+                            if(obj.somaPesos > 0) {
+                                mediasPacotesCalculadas[pkg] = obj.somaPond / obj.somaPesos;
+                            }
+                        });
+
+                        // 2. Buscar pesos dos pacotes no eixo
                         let configC = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'continuas');
                         let configB = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'bimestrais');
                         let configR = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'recuperacao');
@@ -586,32 +638,34 @@
                         let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
                         let pesosR = configR ? JSON.parse(configR.pesosJson) : { 'R1': 100 };
 
-                        let notasAlunoBim = notas.filter(n => n.bimestre === bim && n.serie === serie && n.turma === turma && n.disciplina === disc && String(n.ra) === String(aluno.ra));
-
-                        let mapaNotas = {};
-                        notasAlunoBim.forEach(n => { mapaNotas[n.instrumento] = n.nota; });
-
-                        // Média Contínuas
-                        let somaC = 0, temC = false;
-                        Object.keys(pesosC).forEach(p => {
-                            if (mapaNotas[p] !== undefined) { somaC += (mapaNotas[p] * (pesosC[p] / 100)); temC = true; }
+                        // 3. Consolidar Eixo Contínuo
+                        let somaContínuas = 0; let temC = false;
+                        Object.keys(pesosC).forEach(pkg => {
+                            if(mediasPacotesCalculadas[pkg] !== undefined) {
+                                somaContínuas += (mediasPacotesCalculadas[pkg] * (pesosC[pkg] / 100));
+                                temC = true;
+                            }
                         });
 
-                        // Média Bimestrais
-                        let somaB = 0, temB = false;
-                        Object.keys(pesosB).forEach(p => {
-                            if (mapaNotas[p] !== undefined) { somaB += (mapaNotas[p] * (pesosB[p] / 100)); temB = true; }
+                        // 4. Consolidar Eixo Bimestral (Provas)
+                        let somaBimestrais = 0; let temB = false;
+                        Object.keys(pesosB).forEach(pkg => {
+                            if(mediasPacotesCalculadas[pkg] !== undefined) {
+                                somaBimestrais += (mediasPacotesCalculadas[pkg] * (pesosB[pkg] / 100));
+                                temB = true;
+                            }
                         });
 
-                        // Média Recuperação
+                        // 5. Recuperação
                         let notaR = "-";
-                        Object.keys(pesosR).forEach(p => {
-                            if (mapaNotas[p] !== undefined) notaR = mapaNotas[p];
+                        Object.keys(pesosR).forEach(pkg => {
+                            if(mediasPacotesCalculadas[pkg] !== undefined) notaR = mediasPacotesCalculadas[pkg].toFixed(1);
                         });
 
+                        // 6. Média Bimestral Final
                         let mb = "-";
                         if (temC || temB) {
-                            let calculada = (somaC * (regraSerie.cont / 100)) + (somaB * (regraSerie.prova / 100));
+                            let calculada = (somaContínuas * (regraSerie.cont / 100)) + (somaBimestrais * (regraSerie.prova / 100));
                             mb = calculada.toFixed(1);
                             somatoriaMediasBimestrais += calculada;
                             bimestresValidos++;

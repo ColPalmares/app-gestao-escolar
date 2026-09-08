@@ -93,11 +93,11 @@
     <div id="submenu-notas" class="hidden">
         <h2>Módulo de Notas</h2>
         <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas</button>
-        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaNotas()">📋 Consultar Notas & Médias Ponderadas</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaNotas()">📋 Consultar Notas & Média Bimestral</button>
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULO DE NOTAS: PASSO 1 - CONFIGURAÇÃO E PESOS DOS PACOTES (COM MEMÓRIA) -->
+    <!-- MÓDULO DE NOTAS: PASSO 1 - CONFIGURAÇÃO E PESOS DOS PACOTES -->
     <div id="modulo-notas" class="hidden">
         <h2>Configuração de Notas e Pesos</h2>
         <div id="carregando-alunos-notas" class="loading">Carregando dados estruturais...</div>
@@ -142,7 +142,7 @@
 
             <!-- PAINEL DE CONFIGURAÇÃO DE PESOS DOS PACOTES -->
             <div style="background: #f1f8f6; border: 1px solid #016552; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes (Carregados automaticamente ou customizáveis - Soma 100%)</h3>
+                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes (Soma deve ser exata a 100%)</h3>
                 <div id="container-pacotes"></div>
                 <p id="aviso-soma-pesos" style="font-weight: bold; color: #d9534f; margin-top: 10px; font-size: 14px; text-align: center;"></p>
             </div>
@@ -173,10 +173,10 @@
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu</button>
     </div>
 
-    <!-- MÓDULO DE CONSULTA / MÉDIA PONDERADA -->
+    <!-- MÓDULO DE CONSULTA / MÉDIA BIMESTRAL PONDERADA -->
     <div id="modulo-consulta-notas" class="hidden">
-        <h2>Consulta de Notas & Média Ponderada</h2>
-        <div id="carregando-consulta-notas" class="loading">Calculando médias e buscando dados...</div>
+        <h2>Consulta de Notas & Média Bimestral</h2>
+        <div id="carregando-consulta-notas" class="loading">Calculando médias bimestrais...</div>
         <div style="overflow-x: auto; max-height: 450px;">
             <table id="tabela-notas-lancadas" class="hidden">
                 <thead>
@@ -185,8 +185,9 @@
                         <th>Série / Turma</th>
                         <th>Disciplina</th>
                         <th>Aluno (RA)</th>
-                        <th>Detalhes dos Instrumentos</th>
-                        <th>Média Ponderada</th>
+                        <th>Nota Contínuas (Média Ponderada)</th>
+                        <th>Nota Bimestrais (Média Ponderada)</th>
+                        <th>Média Bimestral Final</th>
                     </tr>
                 </thead>
                 <tbody id="corpo-tabela-notas-lancadas"></tbody>
@@ -314,7 +315,6 @@
 
         let pacotes = eixo === 'continuas' ? ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'] : eixo === 'bimestrais' ? ['B1', 'B2', 'B3', 'B4'] : ['R1', 'R2'];
 
-        // Procura se já existe peso salvo para esta combinação
         let configSalva = pesosSalvosGlobal.find(p => p.bimestre === bimestre && p.serie === serie && p.turma === turma && p.disciplina === disciplina && p.eixo === eixo);
         let pesosObj = {};
         if (configSalva && configSalva.pesosJson) {
@@ -366,7 +366,6 @@
 
         if (soma !== 100) { alert("A soma dos pesos deve ser exatamente 100%."); return; }
 
-        // Salva os pesos no backstage automaticamente para manter na memória
         fetch(API_URL, {
             method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ modulo: 'salvar_pesos', emailUsuario: usuarioLogado, bimestre, serie, turma, disciplina, eixo, pesos: pesosConfigurados })
@@ -451,7 +450,7 @@
         });
     }
 
-    // --- CONSULTA COM MÉDIA PONDERADA ---
+    // --- CONSULTA COM ÁRVORE DE CÁLCULO DA MÉDIA BIMESTRAL ---
     function carregarNotasLancadasConsulta() {
         document.getElementById('carregando-consulta-notas').style.display = 'block';
         document.getElementById('tabela-notas-lancadas').classList.add('hidden');
@@ -469,7 +468,7 @@
             corpo.innerHTML = "";
 
             if (notas.length === 0) {
-                corpo.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #666;">Nenhuma nota lançada até o momento.</td></tr>`;
+                corpo.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #666;">Nenhuma nota lançada até o momento.</td></tr>`;
                 return;
             }
 
@@ -483,44 +482,39 @@
                 agrupado[chave].instrumentos[n.instrumento] = n.nota;
             });
 
-            // Tabela de pesos oficiais por série (Bimestral x Contínuas conforme mapeado)
-            // Ex: Fundamental II (6º ao 9º Ano) = 35% Prova / 65% Contínuas. Ensino Médio = 40% Prova / 60% Contínuas. Infantil/Anos Iniciais = 0% Prova / 100% Contínuas.
             Object.values(agrupado).forEach(item => {
-                let detalhesHtml = "";
-                let notaContinuaTotal = 0;
-                let notaBimestralTotal = 0;
-
-                // Identifica se há pesos salvos para contínuas e bimestrais desta turma/disciplina
+                // 1. Recupera pesos salvos para Contínuas (C1-C6) e Bimestrais (B1-B4)
                 let configC = pesosSalvosGlobal.find(p => p.bimestre === item.bimestre && p.serie === item.serie && p.turma === item.turma && p.disciplina === item.disciplina && p.eixo === 'continuas');
                 let configB = pesosSalvosGlobal.find(p => p.bimestre === item.bimestre && p.serie === item.serie && p.turma === item.turma && p.disciplina === item.disciplina && p.eixo === 'bimestrais');
 
                 let pesosC = configC ? JSON.parse(configC.pesosJson) : { 'C1': 100 };
                 let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
 
-                // Calcula Contínuas Ponderadas
+                // 2. Calcula Média Ponderada das Contínuas
                 let somaPonderadaC = 0;
-                let temC = false;
+                let temNotaC = false;
                 Object.keys(pesosC).forEach(p => {
                     if (item.instrumentos[p] !== undefined) {
                         somaPonderadaC += (item.instrumentos[p] * (pesosC[p] / 100));
-                        temC = true;
+                        temNotaC = true;
                     }
-                    detalhesHtml += `<b>${p}:</b> ${item.instrumentos[p] !== undefined ? item.instrumentos[p] : '-'} <small>(${pesosC[p]}%)</small> | `;
                 });
 
-                // Calcula Bimestrais Ponderadas
+                // 3. Calcula Média Ponderada das Bimestrais
                 let somaPonderadaB = 0;
-                let temB = false;
+                let temNotaB = false;
                 Object.keys(pesosB).forEach(p => {
+                    if (item.instrumentos[p] !== isValid = item.instrumentos[p] !== undefined) {
+                        // safe check
+                    }
                     if (item.instrumentos[p] !== undefined) {
                         somaPonderadaB += (item.instrumentos[p] * (pesosB[p] / 100));
-                        temB = true;
+                        temNotaB = true;
                     }
-                    detalhesHtml += `<b>${p}:</b> ${item.instrumentos[p] !== undefined ? item.instrumentos[p] : '-'} <small>(${pesosB[p]}%)</small> | `;
                 });
 
-                // Define peso do eixo conforme a série (ex: 6º ao 9º ano = 35% Prova e 65% Contínuas; Médio = 40% / 60%; Infantil/1º ao 3º = 0% / 100%)
-                let pesoProva = 35;
+                // 4. Define o peso da Prova Bimestral vs Contínuas conforme a série mapeada
+                let pesoProva = 35; // Padrão Fundamental II
                 let pesoCont = 65;
                 if (item.serie.includes('Maternal') || item.serie.includes('Pré') || item.serie.includes('1º Ano') || item.serie.includes('2º Ano') || item.serie.includes('3º Ano')) {
                     pesoProva = 0; pesoCont = 100;
@@ -528,7 +522,8 @@
                     pesoProva = 40; pesoCont = 60;
                 }
 
-                let mediaPonderadaFinal = (somaPonderadaC * (pesoCont / 100)) + (somaPonderadaB * (pesoProva / 100));
+                // 5. Calcula a Média Bimestral Final cruzando os dois eixos
+                let mediaBimestralFinal = (somaPonderadaC * (pesoCont / 100)) + (somaPonderadaB * (pesoProva / 100));
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -536,8 +531,9 @@
                     <td>${item.serie} (${item.turma})</td>
                     <td>${item.disciplina}</td>
                     <td><strong>${item.nome}</strong><br><small>RA: ${item.ra}</small></td>
-                    <td><small>${detalhesHtml}</small></td>
-                    <td><strong style="color: #016552; font-size: 15px;">${mediaPonderadaFinal.toFixed(1)}</strong></td>
+                    <td><strong>${temNotaC ? somaPonderadaC.toFixed(1) : '-'}</strong> <small>(${pesoCont}% do peso)</small></td>
+                    <td><strong>${temNotaB ? somaPonderadaB.toFixed(1) : '-'}</strong> <small>(${pesoProva}% do peso)</small></td>
+                    <td><strong style="color: #016552; font-size: 16px;">${mediaBimestralFinal.toFixed(1)}</strong></td>
                 `;
                 corpo.appendChild(tr);
             });

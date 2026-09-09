@@ -75,26 +75,29 @@ function configurarFormNotas() {
     document.getElementById('carregando-alunos-notas').classList.add('hidden');
     document.getElementById('form-config-notas').classList.remove('hidden');
     document.getElementById('container-tabela-notas').classList.add('hidden');
+    
     const selSerie = document.getElementById('nota-serie');
     selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-    let series = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
-    if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo !== 'Todas') {
-        series = [dadosEscopoUsuario.serieEscopo];
+    
+    let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
+    
+    // Se o usuário tiver restrição de série cadastrada na planilha (e não for "Todas" ou vazio)
+    if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODOS') {
+        // Transforma o texto da planilha em um array (ex: "2º Ano, 3º Ano" vira ['2º Ano', '3º Ano'])
+        let seriesPermitidas = dadosEscopoUsuario.serieEscopo.split(',').map(s => s.trim());
+        seriesDisponiveis = seriesDisponiveis.filter(s => seriesPermitidas.includes(s));
     }
-    series.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+    
+    seriesDisponiveis.forEach(s => { 
+        let o = document.createElement('option'); 
+        o.value = s; 
+        o.text = s; 
+        selSerie.appendChild(o); 
+    });
+    
     atualizarTurmasDinamicas();
     atualizarDisciplinasPorSerie();
     atualizarPainelPesosPacotes();
-}
-
-function atualizarTurmasDinamicas() {
-    const serie = document.getElementById('nota-serie').value;
-    const selTurma = document.getElementById('nota-turma');
-    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-    if(!serie) return;
-    [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Única"))].filter(Boolean).forEach(t => {
-        let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o);
-    });
 }
 
 function atualizarDisciplinasPorSerie() {
@@ -102,11 +105,21 @@ function atualizarDisciplinasPorSerie() {
     const selDisc = document.getElementById('nota-disciplina');
     selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
     if(!serie || !MATRIZ_CURRICULAR[serie]) return;
-    let disc = MATRIZ_CURRICULAR[serie];
-    if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
-        disc = [dadosEscopoUsuario.materiaEscopo];
+    
+    let disciplinasDisponiveis = MATRIZ_CURRICULAR[serie];
+    
+    // Se o usuário tiver restrição de disciplina cadastrada na planilha
+    if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODOS') {
+        let materiasPermitidas = dadosEscopoUsuario.materiaEscopo.split(',').map(m => m.trim());
+        disciplinasDisponiveis = disciplinasDisponiveis.filter(d => materiasPermitidas.includes(d));
     }
-    disc.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
+    
+    disciplinasDisponiveis.forEach(d => { 
+        let o = document.createElement('option'); 
+        o.value = d; 
+        o.text = d; 
+        selDisc.appendChild(o); 
+    });
 }
 
 function atualizarPainelPesosPacotes() {

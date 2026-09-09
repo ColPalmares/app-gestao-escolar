@@ -165,9 +165,33 @@
         <div class="form-group"><label>Data da Ocorrência:</label><input type="date" id="ocorrencia-data"></div>
         <div class="form-group"><label>Série:</label><select id="ocorrencia-serie" onchange="carregarAlunosPorSerieOcorrencia()"><option value="">Selecione...</option></select></div>
         <div class="form-group"><label>Aluno:</label><select id="ocorrencia-aluno"><option value="">Selecione o aluno...</option></select></div>
-        <div class="form-group"><label>Tipo de Ocorrência:</label><input type="text" id="ocorrencia-tipo" placeholder="Ex: Indisciplina, Atraso..."></div>
+        
+        <div class="form-group">
+            <label>Tipo de Ocorrência:</label>
+            <select id="ocorrencia-tipo">
+                <option value="">Selecione o tipo...</option>
+                <option value="Celular">Celular</option>
+                <option value="Indisciplina">Indisciplina</option>
+                <option value="Atraso">Atraso</option>
+                <option value="Falta de material">Falta de material</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Outros">Outros</option>
+            </select>
+        </div>
+
         <div class="form-group"><label>Relato:</label><textarea id="ocorrencia-relato" rows="3"></textarea></div>
-        <div class="form-group"><label>Sanção / Encaminhamento:</label><input type="text" id="ocorrencia-sancao"></div>
+        <div class="form-group">
+            <label>Sanção / Encaminhamento:</label>
+            <select id="ocorrencia-sancao">
+                <option value="">Selecione o encaminhamento...</option>
+                <option value="Advertência verbal">Advertência verbal</option>
+                <option value="Notificação via ClassApp">Notificação via ClassApp</option>
+                <option value="Advertência formal">Advertência formal</option>
+                <option value="Suspensão">Suspensão</option>
+                <option value="Acompanhamento pela Assessoria">Acompanhamento pela Assessoria</option>
+                <option value="Conversa com a coordenação de segmento">Conversa com a coordenação de segmento</option>
+            </select>
+        </div>
         <button onclick="salvarOcorrencia()">Salvar Ocorrência</button>
         <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
     </div>

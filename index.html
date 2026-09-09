@@ -118,7 +118,24 @@
         <div class="form-group"><label>Data:</label><input type="date" id="freq-data"></div>
         <div class="form-group"><label>Série:</label><select id="freq-serie" onchange="carregarAlunosPorSerieFreq()"><option value="">Selecione...</option></select></div>
         <div class="form-group"><label>Aluno:</label><select id="freq-aluno"><option value="">Selecione o aluno...</option></select></div>
-        <div class="form-group"><label>Frequência:</label><select id="freq-status"><option value="Presente">Presente</option><option value="Falta Justificada">Falta Justificada</option><option value="Falta Injustificada">Falta Injustificada</option></select></div>
+        
+        <div class="form-group">
+            <label>Frequência / Status:</label>
+            <select id="freq-status">
+                <option value="Presente">Presente</option>
+                <option value="Falta Justificada">Falta Justificada</option>
+                <option value="Falta Injustificada">Falta Injustificada</option>
+                <option value="Entrou na 2ª aula">Entrou na 2ª aula</option>
+                <option value="Entrou na 3ª aula">Entrou na 3ª aula</option>
+                <option value="Entrou na 4ª aula">Entrou na 4ª aula</option>
+                <option value="Entrou na 5ª aula">Entrou na 5ª aula</option>
+                <option value="Entrou na 6ª aula">Entrou na 6ª aula</option>
+                <option value="Entrou na 7ª aula">Entrou na 7ª aula</option>
+                <option value="Saída Antecipada">Saída Antecipada</option>
+                <option value="Dispensa Autorizada">Dispensa Autorizada</option>
+            </select>
+        </div>
+
         <div class="form-group"><label>Justificativa:</label><input type="text" id="freq-justificativa"></div>
         <div class="form-group"><label>Observações:</label><textarea id="freq-obs" rows="2"></textarea></div>
         <button onclick="salvarFrequencia()">Salvar Frequência</button>

@@ -81,9 +81,8 @@ function configurarFormNotas() {
     
     let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
     
-    // Se o usuário tiver restrição de série cadastrada na planilha (e não for "Todas" ou vazio)
-    if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODOS') {
-        // Transforma o texto da planilha em um array (ex: "2º Ano, 3º Ano" vira ['2º Ano', '3º Ano'])
+    // Se não for admin e houver restrição específica de série cadastrada na planilha
+    if (dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODOS') {
         let seriesPermitidas = dadosEscopoUsuario.serieEscopo.split(',').map(s => s.trim());
         seriesDisponiveis = seriesDisponiveis.filter(s => seriesPermitidas.includes(s));
     }
@@ -95,6 +94,7 @@ function configurarFormNotas() {
         selSerie.appendChild(o); 
     });
     
+    // Atualiza turmas e disciplinas mantendo a integridade dos seletores
     atualizarTurmasDinamicas();
     atualizarDisciplinasPorSerie();
     atualizarPainelPesosPacotes();
@@ -108,8 +108,8 @@ function atualizarDisciplinasPorSerie() {
     
     let disciplinasDisponiveis = MATRIZ_CURRICULAR[serie];
     
-    // Se o usuário tiver restrição de disciplina cadastrada na planilha
-    if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODOS') {
+    // Se não for admin e houver restrição de matéria cadastrada na planilha
+    if (dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODOS') {
         let materiasPermitidas = dadosEscopoUsuario.materiaEscopo.split(',').map(m => m.trim());
         disciplinasDisponiveis = disciplinasDisponiveis.filter(d => materiasPermitidas.includes(d));
     }

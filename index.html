@@ -116,7 +116,7 @@
             </div>
             <div class="form-group">
                 <label>Série / Ano:</label>
-                <select id="nota-serie" onchange="atualizarTurmasPermitidas(); atualizarPainelPesosPacotes();">
+                <select id="nota-serie" onchange="atualizarTurmasDinamicas(); atualizarDisciplinasPorSerie(); atualizarPainelPesosPacotes();">
                     <option value="">Selecione a série...</option>
                 </select>
             </div>
@@ -202,7 +202,7 @@
         </div>
         <div class="form-group">
             <label>Série / Ano:</label>
-            <select id="matriz-serie" onchange="atualizarTurmasMatriz()">
+            <select id="matriz-serie" onchange="atualizarTurmasMatrizDinamica(); atualizarDisciplinasMatriz();">
                 <option value="">Selecione a série...</option>
             </select>
         </div>
@@ -299,7 +299,7 @@
         </div>
         <div class="form-group">
             <label>Série / Ano:</label>
-            <select id="turma-filtro-serie" onchange="atualizarTurmasConsolidado()">
+            <select id="turma-filtro-serie" onchange="atualizarTurmasConsolidadoDinamicas()">
                 <option value="">Selecione a série...</option>
             </select>
         </div>
@@ -346,13 +346,21 @@
     let notasJaLancadasGlobal = [];
     let pesosSalvosGlobal = [];
 
-    const DISCIPLINAS_OFICIAIS = [
-        "Língua Portuguesa", "Matemática", "Ciências da Natureza", "Ciências Humanas", "Inglês", 
-        "Educação Física", "Artes integradas", "Música", "Tecnologia e suas aplicações", "História", 
-        "Geografia", "Biologia", "Física", "Química", "Filosofia", "Sociologia: Ética, Cidadania e Atualidades", 
-        "Lingua Portuguesa (Escrita)", "Língua Portuguesa (Leitura)", "Lingua Portuguesa (Lingua)", 
-        "Matemática - Geometria", "Matemática - Algebra", "Incubadora de projetos"
-    ];
+    // Matriz curricular rigorosa mapeada exatamente por Série/Ano
+    const MATRIZ_CURRICULAR = {
+        '1º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas"],
+        '2º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas", "Tecnologia e suas aplicações"],
+        '3º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas", "Tecnologia e suas aplicações"],
+        '4º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas", "Tecnologia e suas aplicações"],
+        '5º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas", "Tecnologia e suas aplicações"],
+        '6º Ano': ["Língua Portuguesa - Língua e Leitura", "Língua Portuguesa (Escrita)", "Educação Física", "Artes integradas", "Inglês", "Ciências da Natureza", "Matemática - Números e Álgebra", "Matemática - Geometria", "História", "Geografia", "Sociologia: Ética, Cidadania e Atualidades", "Tecnologia e suas aplicações"],
+        '7º Ano': ["Língua Portuguesa - Língua e Leitura", "Língua Portuguesa (Escrita)", "Educação Física", "Artes integradas", "Inglês", "Ciências da Natureza", "Matemática - Números e Álgebra", "Matemática - Geometria", "História", "Geografia", "Sociologia: Ética, Cidadania e Atualidades", "Tecnologia e suas aplicações"],
+        '8º Ano': ["Língua Portuguesa - Língua e Leitura", "Língua Portuguesa (Escrita)", "Educação Física", "Artes integradas", "Inglês", "Ciências da Natureza", "Matemática - Números e Álgebra", "Matemática - Geometria", "História", "Geografia", "Sociologia: Ética, Cidadania e Atualidades"],
+        '9º Ano': ["Língua Portuguesa - Língua e Leitura", "Língua Portuguesa (Escrita)", "Educação Física", "Artes integradas", "Inglês", "Ciências da Natureza", "Matemática - Números e Álgebra", "Matemática - Geometria", "História", "Geografia", "Sociologia: Ética, Cidadania e Atualidades"],
+        '1ª Série': ["Língua Portuguesa (Língua)", "Língua Portuguesa (Leitura)", "Língua Portuguesa (Escrita)", "Inglês", "Educação Física", "Artes", "Biologia", "Física", "Química", "Matemática - Álgebra", "Matemática - Geometria", "Geografia", "História", "Sociologia: Ética, Cidadania e Atualidades", "Filosofia", "Incubadora de projetos"],
+        '2ª Série': ["Língua Portuguesa (Língua)", "Língua Portuguesa (Leitura)", "Língua Portuguesa (Escrita)", "Inglês", "Educação Física", "Artes", "Biologia", "Física", "Química", "Matemática - Álgebra", "Matemática - Geometria", "Geografia", "História", "Sociologia: Ética, Cidadania e Atualidades", "Filosofia", "Incubadora de projetos"],
+        '3ª Série': ["Língua Portuguesa (Língua)", "Língua Portuguesa (Leitura)", "Língua Portuguesa (Escrita)", "Inglês", "Educação Física", "Artes", "Biologia", "Física", "Química", "Matemática - Álgebra", "Matemática - Geometria", "Geografia", "História", "Sociologia: Ética, Cidadania e Atualidades", "Filosofia"]
+    };
 
     const MAPA_PESOS_DISCIPLINA_SERIE = {
         '1º Ano': { default: { prova: 0, cont: 100 } },
@@ -370,11 +378,11 @@
         },
         '6º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Tecnologia e suas aplicações': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
         '7º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Tecnologia e suas aplicações': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
-        '8º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Tecnologia e suas aplicações': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
-        '9º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Tecnologia e suas aplicações': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
+        '8º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
+        '9º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
         '1ª Série': { 'Educação Física': { prova: 0, cont: 100 }, 'Incubadora de projetos': { prova: 0, cont: 100 }, 'default': { prova: 40, cont: 60 } },
         '2ª Série': { 'Educação Física': { prova: 0, cont: 100 }, 'Incubadora de projetos': { prova: 0, cont: 100 }, 'default': { prova: 40, cont: 60 } },
-        '3ª Série': { 'Educação Física': { prova: 0, cont: 100 }, 'Incubadora de projetos': { prova: 0, cont: 100 }, 'default': { prova: 40, cont: 60 } }
+        '3ª Série': { 'Educação Física': { prova: 0, cont: 100 }, 'default': { prova: 40, cont: 60 } }
     };
 
     function obterRegraPesos(serie, disciplina) {
@@ -448,21 +456,28 @@
             const selSerie = document.getElementById('matriz-serie');
             selSerie.innerHTML = '<option value="">Selecione a série...</option>';
             seriesUnicas.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
-
-            const selDisc = document.getElementById('matriz-disciplina');
-            selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
-            let discDisponiveis = DISCIPLINAS_OFICIAIS;
-            if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
-                discDisponiveis = [dadosEscopoUsuario.materiaEscopo];
-            }
-            discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
         });
     }
 
-    function atualizarTurmasMatriz() {
+    function atualizarTurmasMatrizDinamica() {
+        const serie = document.getElementById('matriz-serie').value;
         const selTurma = document.getElementById('matriz-turma');
         selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-        ['Turma 1', 'Turma 2'].forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+        if(!serie) return;
+        const turmasUnicas = [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Turma Única"))].filter(Boolean);
+        turmasUnicas.forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+    }
+
+    function atualizarDisciplinasMatriz() {
+        const serie = document.getElementById('matriz-serie').value;
+        const selDisc = document.getElementById('matriz-disciplina');
+        selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
+        if(!serie || !MATRIZ_CURRICULAR[serie]) return;
+        let discDisponiveis = MATRIZ_CURRICULAR[serie];
+        if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
+            discDisponiveis = [dadosEscopoUsuario.materiaEscopo];
+        }
+        discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
     }
 
     function gerarMatrizAnaliticaCompleta() {
@@ -490,7 +505,7 @@
             document.getElementById('carregando-matriz').classList.add('hidden');
             document.getElementById('tabela-matriz-analitica').classList.remove('hidden');
 
-            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie);
+            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (!a.turma || a.turma === turma));
             const notasBimTurma = notas.filter(n => n.bimestre === bimestre && n.serie === serie && n.turma === turma && n.disciplina === disciplina);
 
             let atividadesUnicas = [];
@@ -584,6 +599,225 @@
         });
     }
 
+    function carregarDadosParaNotas() {
+        document.getElementById('carregando-alunos-notas').classList.remove('hidden');
+        document.getElementById('form-config-notas').classList.add('hidden');
+
+        Promise.all([
+            fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()),
+            fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
+            fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
+        ]).then(([alunos, notas, pesos]) => {
+            listaDeAlunos = alunos;
+            notasJaLancadasGlobal = notas;
+            pesosSalvosGlobal = pesos;
+            configurarFormNotas();
+        });
+    }
+
+    function configurarFormNotas() {
+        document.getElementById('carregando-alunos-notas').classList.add('hidden');
+        document.getElementById('form-config-notas').classList.remove('hidden');
+        document.getElementById('container-tabela-notas').classList.add('hidden');
+
+        const selSerie = document.getElementById('nota-serie');
+        selSerie.innerHTML = '<option value="">Selecione a série...</option>';
+        
+        let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
+        if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo !== 'Todas') {
+            seriesDisponiveis = [dadosEscopoUsuario.serieEscopo];
+        }
+        seriesDisponiveis.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+
+        atualizarTurmasDinamicas();
+        atualizarDisciplinasPorSerie();
+        atualizarPainelPesosPacotes();
+    }
+
+    function atualizarTurmasDinamicas() {
+        const serie = document.getElementById('nota-serie').value;
+        const selTurma = document.getElementById('nota-turma');
+        selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+        if(!serie) return;
+        const turmasUnicas = [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Turma Única"))].filter(Boolean);
+        turmasUnicas.forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+    }
+
+    function atualizarDisciplinasPorSerie() {
+        const serie = document.getElementById('nota-serie').value;
+        const selDisc = document.getElementById('nota-disciplina');
+        selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
+        if(!serie || !MATRIZ_CURRICULAR[serie]) return;
+
+        let discDisponiveis = MATRIZ_CURRICULAR[serie];
+        if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
+            discDisponiveis = [dadosEscopoUsuario.materiaEscopo];
+        }
+        discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
+    }
+
+    function atualizarPainelPesosPacotes() {
+        const bimestre = document.getElementById('nota-bimestre').value;
+        const serie = document.getElementById('nota-serie').value;
+        const turma = document.getElementById('nota-turma').value;
+        const disciplina = document.getElementById('nota-disciplina').value;
+        const eixo = document.getElementById('nota-eixo').value;
+        
+        const container = document.getElementById('container-pesos-pacotes');
+        container.innerHTML = "";
+
+        let pacotes = eixo === 'continuas' ? ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'] : eixo === 'bimestrais' ? ['B1', 'B2', 'B3', 'B4'] : ['R1', 'R2'];
+
+        let configSalva = pesosSalvosGlobal.find(p => p.bimestre === bimestre && p.serie === serie && p.turma === turma && p.disciplina === disciplina && p.eixo === eixo);
+        let pesosObj = {};
+        if (configSalva && configSalva.pesosJson) {
+            try { pesosObj = JSON.parse(configSalva.pesosJson); } catch(e){}
+        }
+
+        const selPacoteAlvo = document.getElementById('atividade-pacote-alvo');
+        selPacoteAlvo.innerHTML = "";
+
+        pacotes.forEach((p, idx) => {
+            let valorPadrao = 0;
+            if (pesosObj[p] !== undefined) valorPadrao = pesosObj[p];
+            else if (idx === 0 && Object.keys(pesosObj).length === 0) valorPadrao = 100;
+
+            let div = document.createElement('div');
+            div.className = 'pacote-box';
+            div.innerHTML = `<label><strong>${p}</strong> (Peso % no Eixo):</label><input type="number" min="0" max="100" value="${valorPadrao}" class="input-peso-pacote" data-pacote="${p}" oninput="calcularSomaPesosPacotes()" style="width: 100px; text-align: center;">`;
+            container.appendChild(div);
+
+            let opt = document.createElement('option');
+            opt.value = p; opt.text = `Pacote ${p}`;
+            selPacoteAlvo.appendChild(opt);
+        });
+        calcularSomaPesosPacotes();
+    }
+
+    function calcularSomaPesosPacotes() {
+        let soma = 0;
+        document.querySelectorAll('.input-peso-pacote').forEach(inp => { soma += parseFloat(inp.value) || 0; });
+        const aviso = document.getElementById('aviso-soma-pesos');
+        const btnAvancar = document.getElementById('btn-avancar-notas');
+
+        if (soma === 100) {
+            aviso.innerText = "Soma dos pesos correta (100%)."; aviso.style.color = "#016552";
+            btnAvancar.disabled = false; btnAvancar.style.opacity = "1";
+        } else {
+            aviso.innerText = `Atenção: A soma dos pesos dos pacotes é ${soma}%. O total deve ser exatamente 100%.`; aviso.style.color = "#d9534f";
+            btnAvancar.disabled = true; btnAvancar.style.opacity = "0.5";
+        }
+    }
+
+    function validarEAvancarParaLancamento() {
+        const serie = document.getElementById('nota-serie').value;
+        const turma = document.getElementById('nota-turma').value;
+        const disciplina = document.getElementById('nota-disciplina').value;
+        const bimestre = document.getElementById('nota-bimestre').value;
+        const eixo = document.getElementById('nota-eixo').value;
+        const nomeAtividade = document.getElementById('atividade-nome').value.trim();
+        const pacoteAlvo = document.getElementById('atividade-pacote-alvo').value;
+        const pesoAtividade = parseFloat(document.getElementById('atividade-peso').value) || 1;
+
+        if(!serie || !turma || !disciplina) { alert("Preencha todos os campos de configuração da turma."); return; }
+        if(!nomeAtividade) { alert("Dê um nome para a atividade."); return; }
+
+        let pesosConfigurados = {}; let soma = 0;
+        document.querySelectorAll('.input-peso-pacote').forEach(inp => {
+            let p = inp.getAttribute('data-pacote'); let v = parseFloat(inp.value) || 0;
+            if(v > 0) { pesosConfigurados[p] = v; soma += v; }
+        });
+
+        if (soma !== 100) { alert("A soma dos pesos dos pacotes deve ser exatamente 100%."); return; }
+
+        fetch(API_URL, {
+            method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modulo: 'salvar_pesos', emailUsuario: usuarioLogado, bimestre, serie, turma, disciplina, eixo, pesos: pesosConfigurados })
+        });
+
+        gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade);
+    }
+
+    function gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade) {
+        const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (!a.turma || a.turma === turma));
+        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Pacote: ${pacoteAlvo} | Atividade: "${nomeAtividade}" (Peso ${pesoAtividade})`;
+        document.getElementById('th-atividade-label').innerText = `${nomeAtividade} (Peso ${pesoAtividade}) - Nota 0-100`;
+
+        const corpo = document.getElementById('corpo-tabela-notas');
+        corpo.innerHTML = "";
+
+        alunosTurma.forEach(aluno => {
+            const tr = document.createElement('tr');
+            let notaExistente = "";
+            let encontrada = notasJaLancadasGlobal.find(n => 
+                n.bimestre === bimestre && n.serie === serie && n.turma === turma && n.disciplina === disciplina && 
+                n.eixo === eixo && n.pacote === pacoteAlvo && n.nomeAtividade === nomeAtividade && String(n.ra) === String(aluno.ra)
+            );
+            if (encontrada) notaExistente = encontrada.nota;
+
+            tr.innerHTML = `
+                <td>${aluno.ra}</td>
+                <td><strong>${aluno.nome}</strong></td>
+                <td>${aluno.serie} (${turma})</td>
+                <td><input type="number" min="0" max="100" step="1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${pacoteAlvo}" data-atividade="${nomeAtividade}" data-pesoa="${pesoAtividade}" value="${notaExistente}" placeholder="0-100" oninput="validarNotaLimite(this)"></td>
+            `;
+            corpo.appendChild(tr);
+        });
+
+        document.getElementById('form-config-notas').classList.add('hidden');
+        document.getElementById('container-tabela-notas').classList.remove('hidden');
+    }
+
+    function validarNotaLimite(input) {
+        let val = parseFloat(input.value);
+        if (val < 0) { alert("Notas não podem ser negativas."); input.value = 0; }
+        else if (val > 100) { alert("A nota máxima é 100."); input.value = 100; }
+    }
+
+    function voltarParaConfigPesos() {
+        document.getElementById('container-tabela-notas').classList.add('hidden');
+        document.getElementById('form-config-notas').classList.remove('hidden');
+    }
+
+    function salvarNotasEmLote() {
+        const btn = document.getElementById('btn-salvar-notas');
+        btn.innerText = "Salvando..."; btn.disabled = true;
+
+        const bimestre = document.getElementById('nota-bimestre').value;
+        const serie = document.getElementById('nota-serie').value;
+        const turma = document.getElementById('nota-turma').value;
+        const disciplina = document.getElementById('nota-disciplina').value;
+        const eixo = document.getElementById('nota-eixo').value;
+
+        let lancamentos = [];
+        document.querySelectorAll('.input-nota').forEach(inp => {
+            let notaVal = inp.value.trim();
+            if(notaVal !== "") {
+                lancamentos.push({
+                    bimestre: bimestre, serie: serie, turma: turma, disciplina: disciplina, eixo: eixo,
+                    pacote: inp.getAttribute('data-pacote'),
+                    nomeAtividade: inp.getAttribute('data-atividade'),
+                    pesoAtividade: parseFloat(inp.getAttribute('data-pesoa')) || 1,
+                    nome: inp.getAttribute('data-nome'), ra: inp.getAttribute('data-ra'),
+                    nota: parseFloat(notaVal)
+                });
+            }
+        });
+
+        if(lancamentos.length === 0) { alert("Insira ao menos uma nota."); btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false; return; }
+
+        fetch(API_URL, {
+            method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modulo: 'notas', emailUsuario: usuarioLogado, lancamentos: lancamentos })
+        }).then(() => {
+            alert("Notas salvas com sucesso!");
+            btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
+            carregarDadosParaNotas();
+        }).catch(() => {
+            alert("Erro ao salvar."); btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
+        });
+    }
+
     // --- ROTAS DO BOLETIM INDIVIDUAL DO ALUNO ---
     function abrirTelaFiltroBoletimAluno() {
         document.getElementById('submenu-notas').classList.add('hidden');
@@ -641,8 +875,9 @@
             corpo.innerHTML = "";
 
             const bimestres = ["1º Bimestre", "2º Bimestre", "3º Bimestre", "4º Bimestre"];
+            let disciplinasSerie = MATRIZ_CURRICULAR[serie] || [];
 
-            DISCIPLINAS_OFICIAIS.forEach(disc => {
+            disciplinasSerie.forEach(disc => {
                 let regraSerieDisc = obterRegraPesos(serie, disc);
                 const tr = document.createElement('tr');
                 let htmlLinha = `<td><strong>${disc}</strong></td>`;
@@ -651,64 +886,17 @@
                 let bimestresValidos = 0;
 
                 bimestres.forEach(bim => {
-                    let notasBimAluno = notas.filter(n => n.bimestre === bim && n.serie === serie && n.disciplina === disc && String(n.ra) === String(raAluno));
-
-                    let pacotesAlocados = {};
-                    notasBimAluno.forEach(n => {
-                        let pkg = n.pacote;
-                        if(!pacotesAlocados[pkg]) pacotesAlocados[pkg] = { somaPond: 0, somaPesos: 0 };
-                        let pesoAtiv = n.pesoAtividade || 1;
-                        pacotesAlocados[pkg].somaPond += (n.nota * pesoAtiv);
-                        pacotesAlocados[pkg].somaPesos += pesoAtiv;
-                    });
-
-                    let mediasPacotesCalculadas = {};
-                    Object.keys(pacotesAlocados).forEach(pkg => {
-                        let obj = pacotesAlocados[pkg];
-                        if(obj.somaPesos > 0) mediasPacotesCalculadas[pkg] = obj.somaPond / obj.somaPesos;
-                    });
-
-                    let configC = pesos.find(p => p.bimestre === bim && p.serie === serie && p.disciplina === disc && p.eixo === 'continuas');
-                    let configB = pesos.find(p => p.bimestre === bim && p.serie === serie && p.disciplina === disc && p.eixo === 'bimestrais');
-                    let configR = pesos.find(p => p.bimestre === bim && p.serie === serie && p.disciplina === disc && p.eixo === 'recuperacao');
-
-                    let pesosC = configC ? JSON.parse(configC.pesosJson) : { 'C1': 100 };
-                    let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
-                    let pesosR = configR ? JSON.parse(configR.pesosJson) : { 'R1': 100 };
-
-                    let somaContínuas = 0; let temC = false;
-                    Object.keys(pesosC).forEach(pkg => {
-                        if(mediasPacotesCalculadas[pkg] !== undefined) {
-                            somaContínuas += (mediasPacotesCalculadas[pkg] * (pesosC[pkg] / 100));
-                            temC = true;
-                        }
-                    });
-
-                    let somaBimestrais = 0; let temB = false;
-                    Object.keys(pesosB).forEach(pkg => {
-                        if(mediasPacotesCalculadas[pkg] !== undefined) {
-                            somaBimestrais += (mediasPacotesCalculadas[pkg] * (pesosB[pkg] / 100));
-                            temB = true;
-                        }
-                    });
-
-                    let notaR = "-";
-                    Object.keys(pesosR).forEach(pkg => {
-                        if(mediasPacotesCalculadas[pkg] !== undefined) notaR = mediasPacotesCalculadas[pkg].toFixed(1);
-                    });
-
-                    let mb = "-";
-                    if (temC || (temB && regraSerieDisc.prova > 0) || (regraSerieDisc.prova === 0 && temC)) {
-                        let calculada = (somaContínuas * (regraSerieDisc.cont / 100)) + (somaBimestrais * (regraSerieDisc.prova / 100));
-                        mb = calculada.toFixed(1);
-                        somatoriaMediasBimestrais += calculada;
-                        bimestresValidos++;
-                    }
+                    let turmaAluno = alunoObj ? (alunoObj.turma || "Turma 1") : "Turma 1";
+                    let mb = calcularMediaBimestralAlunoDisc(notas, pesos, bim, serie, turmaAluno, disc, raAluno, regraSerieDisc);
+                    let notaR = "-"; // Recuperação paralela
 
                     let classeMb = (mb !== "-" && parseFloat(mb) < 50) ? "nota-abaixo" : "";
-                    let classeR = (notaR !== "-" && parseFloat(notaR) < 50) ? "nota-abaixo" : "";
-
-                    htmlLinha += `<td class="${classeMb}">${mb}</td><td class="${classeR}">${notaR}</td><td>-</td>`;
+                    htmlLinha += `<td class="${classeMb}">${mb}</td><td>${notaR}</td><td>-</td>`;
+                    
+                    if(mb !== "-") {
+                        somatoriaMediasBimestrais += parseFloat(mb);
+                        bimestresValidos++;
+                    }
                 });
 
                 let mediaAnual = bimestresValidos > 0 ? (somatoriaMediasBimestrais / bimestresValidos).toFixed(1) : "-";
@@ -736,10 +924,13 @@
         });
     }
 
-    function atualizarTurmasConsolidado() {
+    function atualizarTurmasConsolidadoDinamicas() {
+        const serie = document.getElementById('turma-filtro-serie').value;
         const selTurma = document.getElementById('turma-filtro-sala');
         selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-        ['Turma 1', 'Turma 2'].forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+        if(!serie) return;
+        const turmasUnicas = [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Turma Única"))].filter(Boolean);
+        turmasUnicas.forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
     }
 
     function gerarBoletimConsolidadoTurma() {
@@ -766,7 +957,7 @@
             document.getElementById('carregando-boletim-turma').classList.add('hidden');
             document.getElementById('tabela-boletim-turma-consolidado').classList.remove('hidden');
 
-            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie);
+            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (!a.turma || a.turma === turma));
             const head = document.getElementById('head-consolidado-turma');
             const corpo = document.getElementById('corpo-consolidado-turma');
             head.innerHTML = "";
@@ -777,9 +968,10 @@
                 return;
             }
 
-            // Cabeçalho: Aluno na 1ª coluna, disciplinas nas colunas seguintes
+            let disciplinasSerie = MATRIZ_CURRICULAR[serie] || [];
+
             let trHead = `<tr><th>Estudante (RA)</th>`;
-            DISCIPLINAS_OFICIAIS.forEach(disc => {
+            disciplinasSerie.forEach(disc => {
                 trHead += `<th>${disc}</th>`;
             });
             trHead += `</tr>`;
@@ -788,7 +980,7 @@
             alunosTurma.forEach(aluno => {
                 let trHtml = `<td><strong>${aluno.nome}</strong><br><small>RA: ${aluno.ra}</small></td>`;
 
-                DISCIPLINAS_OFICIAIS.forEach(disc => {
+                disciplinasSerie.forEach(disc => {
                     let regraSerieDisc = obterRegraPesos(serie, disc);
                     let notaExibida = "-";
 
@@ -835,7 +1027,7 @@
         });
 
         let configC = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'continuas');
-        let configB = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'bimestrais');
+        let configB = pesos.find(p => p.bimestre === bimestre && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'bimestrais');
         let pesosC = configC ? JSON.parse(configC.pesosJson) : { 'C1': 100 };
         let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
 

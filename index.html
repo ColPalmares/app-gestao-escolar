@@ -1,7 +1,242 @@
-<link rel="stylesheet" href="css/style.css">
-<!-- No final do body: -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Gestão Escolar - Colégio Palmares</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="logo-container">
+        <img src="logo-palmares.png" alt="Colégio Palmares">
+    </div>
+
+    <!-- TELA DE LOGIN -->
+    <div id="tela-login">
+        <h2>Acesso de Funcionários</h2>
+        <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 25px;">Utilize sua conta institucional</p>
+        <div id="buttonDiv" style="display: flex; justify-content: center;"></div>
+    </div>
+
+    <!-- TELA DO MENU PRINCIPAL -->
+    <div id="tela-menu" class="hidden">
+        <h2>Portal de Gestão Escolar</h2>
+        <p id="msg-bem-vindo" style="color: #666; font-size: 14px; text-align: center; font-weight: bold; margin-bottom: 20px;"></p>
+        <div id="carregando-permissoes" class="loading">Verificando permissões de acesso...</div>
+        
+        <div id="lista-modulos" class="hidden">
+            <p style="font-size: 14px; color: #444; margin-bottom: 15px;">Selecione o módulo desejado:</p>
+            <button id="btn-mod-saida" class="menu-btn hidden" onclick="abrirMenuSaida()">Autorização de Saída</button>
+            <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirMenuFrequencia()">Controle de Frequência / Faltas</button>
+            <button id="btn-mod-ocorrencias" class="menu-btn hidden" onclick="abrirMenuOcorrencias()">Registro de Ocorrências</button>
+            <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Módulo de Notas & Boletins</button>
+            <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
+        </div>
+    </div>
+
+    <!-- SUBMENUS -->
+    <div id="submenu-saida" class="hidden">
+        <h2>Autorização de Saída</h2>
+        <button class="sub-menu-btn" onclick="abrirFormularioSaida()">➕ Nova Autorização</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaSaida()">📋 Consultar Autorizações</button>
+        <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+    </div>
+    <div id="submenu-frequencia" class="hidden">
+        <h2>Controle de Frequência</h2>
+        <button class="sub-menu-btn" onclick="abrirFormularioFrequencia()">➕ Registrar Frequência</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaFrequencia()">📋 Consultar Frequências</button>
+        <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+    </div>
+    <div id="submenu-ocorrencias" class="hidden">
+        <h2>Registro de Ocorrências</h2>
+        <button class="sub-menu-btn" onclick="abrirFormularioOcorrencia()">➕ Nova Ocorrência</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaConsultaOcorrencia()">📋 Consultar Ocorrências</button>
+        <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+    </div>
+    <div id="submenu-notas" class="hidden">
+        <h2>Módulo de Notas</h2>
+        <button class="sub-menu-btn" onclick="abrirFormularioNotas()">✏️ Lançamento de Notas por Atividade</button>
+        <button class="sub-menu-btn" style="background-color: #FFC27D; color: #000;" onclick="abrirTelaFiltroMatrizAnalitica()">📋 Matriz Analítica por Atividade</button>
+        <button class="sub-menu-btn" style="background-color: #008080; color: #fff;" onclick="abrirTelaFiltroBoletimAluno()">👤 Boletim Individual do Aluno</button>
+        <button class="sub-menu-btn" style="background-color: #4682B4; color: #fff;" onclick="abrirTelaFiltroBoletimTurma()">👥 Boletim Consolidado da Turma</button>
+        <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+    </div>
+
+    <!-- TELA DE CADASTRO DE SAÍDA -->
+    <div id="modulo-saida" class="hidden">
+        <h2>Nova Autorização de Saída</h2>
+        <div class="form-group"><label>Data da Saída:</label><input type="date" id="saida-data"></div>
+        <div class="form-group"><label>Série do Aluno:</label><select id="saida-serie" onchange="carregarAlunosPorSerieSaida()"><option value="">Selecione...</option></select></div>
+        <div class="form-group"><label>Aluno:</label><select id="saida-aluno"><option value="">Selecione o aluno...</option></select></div>
+        <div class="form-group"><label>Tipo de Saída / Autorização:</label><select id="saida-tipo"><option value="Permanente">Permanente (Todo dia / Horário fixo)</option><option value="Saída Antecipada">Pontual / Saída Antecipada</option><option value="Excursão / Passeio">Excursão / Passeio</option><option value="Outros">Outros</option></select></div>
+        <div class="form-group"><label>Descrição / Motivo / Horário:</label><textarea id="saida-descricao" rows="3"></textarea></div>
+        <button onclick="salvarSaida()">Salvar Autorização</button>
+        <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
+    </div>
+
+    <!-- TELA DE CONSULTA DE SAÍDA -->
+    <div id="modulo-consulta-saida" class="hidden">
+        <h2>Consultar Autorizações de Saída</h2>
+        <div class="filtro-box">
+            <div class="form-group">
+                <label>Filtrar por Categoria:</label>
+                <select id="filtro-tipo-saida" onchange="filtrarTabelaSaidas()">
+                    <option value="TODOS">Todos os Tipos</option>
+                    <option value="Permanente">Permanentes</option>
+                    <option value="Saída Antecipada">Pontuais / Antecipadas</option>
+                    <option value="Excursão / Passeio">Excursões / Passeios</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Filtrar por Data Específica:</label>
+                <input type="date" id="filtro-data-saida" onchange="filtrarTabelaSaidas()">
+            </div>
+            <div class="form-group">
+                <label>Buscar Aluno / RA:</label>
+                <input type="text" id="filtro-busca-saida" placeholder="Nome ou RA..." oninput="filtrarTabelaSaidas()">
+            </div>
+            <div class="form-group" style="flex: 0 0 140px;">
+                <button style="margin-top: 22px; padding: 10px;" onclick="limparFiltrosSaida()">Limpar Filtro</button>
+            </div>
+        </div>
+        <div style="overflow-x: auto; max-height: 400px;">
+            <table>
+                <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Saída</th><th>Nome</th><th>RA</th><th>Série</th><th>Tipo</th><th>Descrição</th></tr></thead>
+                <tbody id="corpo-tabela-saidas"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
+    </div>
+
+    <!-- TELA DE FREQUÊNCIA (Placeholder para o módulo dedicado) -->
+    <div id="modulo-frequencia" class="hidden"><h2>Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
+    <div id="modulo-consulta-frequencia" class="hidden"><h2>Consulta Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
+
+    <!-- TELA DE OCORRÊNCIAS (Placeholder para o módulo dedicado) -->
+    <div id="modulo-ocorrencia" class="hidden"><h2>Ocorrência</h2><button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button></div>
+    <div id="modulo-consulta-ocorrencia" class="hidden"><h2>Consulta Ocorrência</h2><button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button></div>
+
+    <!-- MÓDULO DE NOTAS & BOLETINS -->
+    <div id="modulo-notas" class="hidden">
+        <h2>Configuração de Atividade e Pesos</h2>
+        <div id="carregando-alunos-notas" class="loading">Carregando dados...</div>
+
+        <div id="form-config-notas" class="hidden">
+            <div class="form-group"><label>Bimestre:</label><select id="nota-bimestre" onchange="atualizarPainelPesosPacotes()"><option value="1º Bimestre">1º Bimestre</option><option value="2º Bimestre">2º Bimestre</option><option value="3º Bimestre">3º Bimestre</option><option value="4º Bimestre">4º Bimestre</option></select></div>
+            <div class="form-group"><label>Série / Ano:</label><select id="nota-serie" onchange="atualizarTurmasDinamicas(); atualizarDisciplinasPorSerie(); atualizarPainelPesosPacotes();"><option value="">Selecione a série...</option></select></div>
+            <div class="form-group"><label>Turma / Sala:</label><select id="nota-turma" onchange="atualizarPainelPesosPacotes()"><option value="">Selecione a turma...</option></select></div>
+            <div class="form-group"><label>Disciplina:</label><select id="nota-disciplina" onchange="atualizarPainelPesosPacotes()"><option value="">Selecione a disciplina...</option></select></div>
+            <div class="form-group"><label>Eixo de Avaliação:</label><select id="nota-eixo" onchange="atualizarPainelPesosPacotes()"><option value="continuas">Avaliações Contínuas (C1 a C6)</option><option value="bimestrais">Avaliações Bimestrais (B1 a B4)</option><option value="recuperacao">Recuperação (R1 e R2)</option></select></div>
+
+            <div style="background: #f1f8f6; border: 1px solid #016552; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes no Eixo (Soma exata a 100%)</h3>
+                <div id="container-pesos-pacotes"></div>
+                <p id="aviso-soma-pesos" style="font-weight: bold; color: #d9534f; margin-top: 10px; font-size: 14px; text-align: center;"></p>
+            </div>
+
+            <div style="background: #eef4f8; border: 1px solid #004D93; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #004D93; margin-top: 0; font-size: 15px;">Nova Atividade Avaliativa</h3>
+                <div class="form-group"><label>Vincular ao Pacote:</label><select id="atividade-pacote-alvo"></select></div>
+                <div class="form-group"><label>Nome da Atividade:</label><input type="text" id="atividade-nome" placeholder="Digite o nome da atividade..."></div>
+                <div class="form-group"><label>Peso desta Atividade dentro do Pacote:</label><input type="number" id="atividade-peso" value="1" min="1" max="10" style="text-align: center;"></div>
+            </div>
+
+            <button onclick="validarEAvancarParaLancamento()" id="btn-avancar-notas">Avançar para Lançamento de Notas</button>
+        </div>
+
+        <div id="container-tabela-notas" class="hidden" style="margin-top: 20px;">
+            <h3 id="titulo-turma-notas" style="color: #016552; text-align: center; font-size: 16px;"></h3>
+            <div style="overflow-x: auto; max-height: 400px;">
+                <table>
+                    <thead><tr><th>RA</th><th>Nome do Aluno</th><th>Série / Turma</th><th id="th-atividade-label">Nota (0 a 100)</th></tr></thead>
+                    <tbody id="corpo-tabela-notas"></tbody>
+                </table>
+            </div>
+            <button onclick="salvarNotasEmLote()" id="btn-salvar-notas" style="background-color: #016552; margin-top: 15px;">Salvar Notas da Atividade</button>
+            <button class="voltar-btn" onclick="voltarParaConfigPesos()">Voltar para Configuração</button>
+        </div>
+
+        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu</button>
+    </div>
+
+    <!-- TELA DE FILTRO PARA MATRIZ ANALÍTICA -->
+    <div id="modulo-filtro-matriz" class="hidden">
+        <h2>Matriz Analítica Detalhada por Atividade</h2>
+        <div class="form-group"><label>Bimestre:</label><select id="matriz-bimestre"><option value="1º Bimestre">1º Bimestre</option><option value="2º Bimestre">2º Bimestre</option><option value="3º Bimestre">3º Bimestre</option><option value="4º Bimestre">4º Bimestre</option></select></div>
+        <div class="form-group"><label>Série / Ano:</label><select id="matriz-serie" onchange="atualizarTurmasMatrizDinamica(); atualizarDisciplinasMatriz();"><option value="">Selecione a série...</option></select></div>
+        <div class="form-group"><label>Turma / Sala:</label><select id="matriz-turma"><option value="">Selecione a turma...</option></select></div>
+        <div class="form-group"><label>Disciplina:</label><select id="matriz-disciplina"><option value="">Selecione a disciplina...</option></select></div>
+        <button onclick="gerarMatrizAnaliticaCompleta()">Exibir Matriz Analítica</button>
+        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
+    </div>
+
+    <div id="modulo-exibicao-matriz" class="hidden">
+        <h2 id="titulo-matriz-analitica">Matriz Analítica</h2>
+        <div id="carregando-matriz" class="loading">Carregando matriz...</div>
+        <div style="overflow-x: auto; max-height: 550px;">
+            <table id="tabela-matriz-analitica" class="hidden"><thead id="head-matriz-analitica"></thead><tbody id="corpo-matriz-analitica"></tbody></table>
+        </div>
+        <button class="voltar-btn" onclick="abrirTelaFiltroMatrizAnalitica()">Escolher Outra Turma / Matéria</button>
+    </div>
+
+    <!-- BOLETIM INDIVIDUAL DO ALUNO -->
+    <div id="modulo-filtro-boletim-aluno" class="hidden">
+        <h2>Boletim Individual do Aluno</h2>
+        <div class="form-group"><label>Série / Ano:</label><select id="aluno-filtro-serie" onchange="atualizarAlunosPorSerie()"><option value="">Selecione a série...</option></select></div>
+        <div class="form-group"><label>Estudante:</label><select id="aluno-filtro-ra"><option value="">Selecione o aluno...</option></select></div>
+        <button onclick="gerarBoletimIndividualAluno()">Exibir Boletim do Aluno</button>
+        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
+    </div>
+
+    <div id="modulo-exibicao-boletim-aluno" class="hidden">
+        <h2 id="titulo-boletim-aluno">BOLETIM ESCOLAR 2026</h2>
+        <div id="carregando-boletim-aluno" class="loading">Gerando boletim individual...</div>
+        <div style="overflow-x: auto; max-height: 550px;">
+            <table id="tabela-boletim-aluno" class="hidden">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="min-width: 180px;">Componente curricular</th>
+                        <th colspan="3">1º Bimestre</th><th colspan="3">2º Bimestre</th><th colspan="3">3º Bimestre</th><th colspan="3">4º Bimestre</th>
+                        <th rowspan="2">Nota<br>F</th><th rowspan="2">RF</th><th rowspan="2">CC</th><th rowspan="2">Média<br>anual</th>
+                    </tr>
+                    <tr><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th></tr>
+                </thead>
+                <tbody id="corpo-tabela-boletim-aluno"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="abrirTelaFiltroBoletimAluno()">Escolher Outro Aluno</button>
+    </div>
+
+    <!-- BOLETIM CONSOLIDADO DA TURMA -->
+    <div id="modulo-filtro-boletim-turma" class="hidden">
+        <h2>Boletim Consolidado da Turma</h2>
+        <div class="form-group"><label>Bimestre de Referência:</label><select id="turma-filtro-bimestre"><option value="1º Bimestre">1º Bimestre</option><option value="2º Bimestre">2º Bimestre</option><option value="3º Bimestre">3º Bimestre</option><option value="4º Bimestre">4º Bimestre</option><option value="Média Anual">Média Anual</option></select></div>
+        <div class="form-group"><label>Série / Ano:</label><select id="turma-filtro-serie" onchange="atualizarTurmasConsolidadoDinamicas()"><option value="">Selecione a série...</option></select></div>
+        <div class="form-group"><label>Turma / Sala:</label><select id="turma-filtro-sala"><option value="">Selecione a turma...</option></select></div>
+        <button onclick="gerarBoletimConsolidadoTurma()">Exibir Boletim Consolidado da Turma</button>
+        <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
+    </div>
+
+    <div id="modulo-exibicao-boletim-turma" class="hidden">
+        <h2 id="titulo-boletim-turma-consolidado">BOLETIM CONSOLIDADO DA TURMA</h2>
+        <div id="carregando-boletim-turma" class="loading">Calculando médias da turma...</div>
+        <div style="overflow-x: auto; max-height: 550px;">
+            <table id="tabela-boletim-turma-consolidado" class="hidden"><thead id="head-consolidado-turma"></thead><tbody id="corpo-consolidado-turma"></tbody></table>
+        </div>
+        <button class="voltar-btn" onclick="abrirTelaFiltroBoletimTurma()">Escolher Outra Turma</button>
+    </div>
+
+</div>
+
+<!-- CARREGAMENTO DOS MÓDULOS JS SEPARADOS -->
 <script src="js/app.js"></script>
 <script src="js/saidas.js"></script>
 <script src="js/frequencia.js"></script>
 <script src="js/ocorrencias.js"></script>
 <script src="js/notas.js"></script>
+</body>
+</html>

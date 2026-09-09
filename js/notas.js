@@ -596,3 +596,30 @@ function calcularMediaBimestralAlunoDisc(notas, pesos, bim, serie, turma, disc, 
     }
     return "-";
 }
+
+function atualizarTurmasDinamicas() {
+    const serieSelecionada = document.getElementById('nota-serie').value;
+    const selTurma = document.getElementById('nota-turma');
+    
+    if (!selTurma) return; // Proteção caso o elemento não exista na tela
+    
+    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+    
+    if (!serieSelecionada) return;
+    
+    // Filtra os alunos da série selecionada que possuem turma cadastrada
+    let turmasDaSerie = [...new Set(
+        listaDeAlunos
+            .filter(a => a.serie === serieSelecionada && a.turma)
+            .map(a => a.turma)
+    )].filter(Boolean);
+    
+    turmasDaSerie.sort();
+    
+    turmasDaSerie.forEach(t => {
+        let o = document.createElement('option');
+        o.value = t;
+        o.text = t;
+        selTurma.appendChild(o);
+    });
+}

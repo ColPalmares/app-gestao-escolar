@@ -112,10 +112,36 @@
         <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
     </div>
 
-    <!-- TELA DE FREQUÊNCIA (Placeholder para o módulo dedicado) -->
-    <div id="modulo-frequencia" class="hidden"><h2>Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
-    <div id="modulo-consulta-frequencia" class="hidden"><h2>Consulta Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
+    <!-- TELA DE CADASTRO DE FREQUÊNCIA -->
+    <div id="modulo-frequencia" class="hidden">
+        <h2>Registro de Frequência / Faltas</h2>
+        <div class="form-group"><label>Data:</label><input type="date" id="freq-data"></div>
+        <div class="form-group"><label>Série:</label><select id="freq-serie" onchange="carregarAlunosPorSerieFreq()"><option value="">Selecione...</option></select></div>
+        <div class="form-group"><label>Aluno:</label><select id="freq-aluno"><option value="">Selecione o aluno...</option></select></div>
+        <div class="form-group"><label>Frequência:</label><select id="freq-status"><option value="Presente">Presente</option><option value="Falta Justificada">Falta Justificada</option><option value="Falta Injustificada">Falta Injustificada</option></select></div>
+        <div class="form-group"><label>Justificativa:</label><input type="text" id="freq-justificativa"></div>
+        <div class="form-group"><label>Observações:</label><textarea id="freq-obs" rows="2"></textarea></div>
+        <button onclick="salvarFrequencia()">Salvar Frequência</button>
+        <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
+    </div>
 
+    <!-- TELA DE CONSULTA DE FREQUÊNCIA -->
+    <div id="modulo-consulta-frequencia" class="hidden">
+        <h2>Consultar Frequências</h2>
+        <div class="filtro-box">
+            <div class="form-group"><label>Filtrar por Data:</label><input type="date" id="filtro-data-freq" onchange="filtrarTabelaFrequencia()"></div>
+            <div class="form-group"><label>Buscar Aluno / RA:</label><input type="text" id="filtro-busca-freq" placeholder="Nome ou RA..." oninput="filtrarTabelaFrequencia()"></div>
+            <div class="form-group" style="flex: 0 0 150px;"><button style="margin-top: 22px; padding: 10px;" onclick="limparFiltrosFreq()">Limpar Filtro</button></div>
+        </div>
+        <div style="overflow-x: auto; max-height: 400px;">
+            <table>
+                <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Freq.</th><th>Nome</th><th>RA</th><th>Série</th><th>Status</th><th>Justificativa</th><th>Obs</th></tr></thead>
+                <tbody id="corpo-tabela-frequencia"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
+    </div>
+    
     <!-- TELA DE OCORRÊNCIAS (Placeholder para o módulo dedicado) -->
     <div id="modulo-ocorrencia" class="hidden"><h2>Ocorrência</h2><button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button></div>
     <div id="modulo-consulta-ocorrencia" class="hidden"><h2>Consulta Ocorrência</h2><button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button></div>

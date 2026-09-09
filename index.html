@@ -37,6 +37,9 @@
         .nota-abaixo { color: #d9534f; font-weight: bold; }
         .pacote-box { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .pacote-box label { margin-bottom: 0; font-weight: normal; }
+        
+        .filtro-box { background: #f1f8f6; border: 1px solid #016552; padding: 12px; border-radius: 6px; margin-bottom: 15px; display: flex; gap: 10px; align-items: flex-end; }
+        .filtro-box .form-group { margin-bottom: 0; flex: 1; }
     </style>
 </head>
 <body>
@@ -98,21 +101,25 @@
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- MÓDULOS DE SAÍDA, FREQUÊNCIA E OCORRÊNCIAS (RESTAURADOS) -->
+    <!-- MÓDULOS DE SAÍDA -->
     <div id="modulo-saida" class="hidden">
         <h2>Nova Autorização de Saída</h2>
         <div class="form-group"><label>Data da Saída:</label><input type="date" id="saida-data"></div>
         <div class="form-group"><label>Série do Aluno:</label><select id="saida-serie" onchange="carregarAlunosPorSerieGenerico('saida')"><option value="">Selecione...</option></select></div>
         <div class="form-group"><label>Aluno:</label><select id="saida-aluno"><option value="">Selecione o aluno...</option></select></div>
-        <div class="form-group"><label>Tipo de Saída:</label><select id="saida-tipo"><option value="Antecipada">Antecipada</option><option value="Excursão">Excursão</option><option value="Outros">Outros</option></select></div>
-        <div class="form-group"><label>Descrição / Motivo:</label><textarea id="saida-descricao" rows="3"></textarea></div>
+        <div class="form-group"><label>Tipo de Saída / Autorização:</label><select id="saida-tipo"><option value="Saída Antecipada">Saída Antecipada</option><option value="Permanente">Permanente (Todo dia / Horário fixo)</option><option value="Excursão / Passeio">Excursão / Passeio</option><option value="Outros">Outros</option></select></div>
+        <div class="form-group"><label>Descrição / Motivo / Horário:</label><textarea id="saida-descricao" rows="3"></textarea></div>
         <button onclick="salvarSaida()">Salvar Autorização</button>
         <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
     </div>
 
     <div id="modulo-consulta-saida" class="hidden">
         <h2>Consultar Autorizações de Saída</h2>
-        <div style="overflow-x: auto; max-height: 450px;">
+        <div class="filtro-box">
+            <div class="form-group"><label>Filtrar por Tipo:</label><select id="filtro-tipo-saida" onchange="filtrarTabelaSaidas()"><option value="TODOS">Todos os Tipos</option><option value="Permanente">Permanentes</option><option value="Saída Antecipada">Saídas Antecipadas</option><option value="Excursão / Passeio">Excursões / Passeios</option></select></div>
+            <div class="form-group"><label>Buscar Aluno / RA:</label><input type="text" id="filtro-busca-saida" placeholder="Digite nome ou RA..." oninput="filtrarTabelaSaidas()"></div>
+        </div>
+        <div style="overflow-x: auto; max-height: 400px;">
             <table>
                 <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Saída</th><th>Nome</th><th>RA</th><th>Série</th><th>Tipo</th><th>Descrição</th></tr></thead>
                 <tbody id="corpo-tabela-saidas"></tbody>
@@ -121,12 +128,13 @@
         <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
     </div>
 
+    <!-- MÓDULOS DE FREQUÊNCIA -->
     <div id="modulo-frequencia" class="hidden">
         <h2>Registro de Frequência / Faltas</h2>
         <div class="form-group"><label>Data:</label><input type="date" id="freq-data"></div>
         <div class="form-group"><label>Série:</label><select id="freq-serie" onchange="carregarAlunosPorSerieGenerico('freq')"><option value="">Selecione...</option></select></div>
         <div class="form-group"><label>Aluno:</label><select id="freq-aluno"><option value="">Selecione o aluno...</option></select></div>
-        <div class="form-group"><label>Frequência:</label><select id="freq-status"><option value="Presnte">Presente</option><option value="Falta Justificada">Falta Justificada</option><option value="Falta Injustificada">Falta Injustificada</option></select></div>
+        <div class="form-group"><label>Frequência:</label><select id="freq-status"><option value="Presente">Presente</option><option value="Falta Justificada">Falta Justificada</option><option value="Falta Injustificada">Falta Injustificada</option></select></div>
         <div class="form-group"><label>Justificativa:</label><input type="text" id="freq-justificativa"></div>
         <div class="form-group"><label>Observações:</label><textarea id="freq-obs" rows="2"></textarea></div>
         <button onclick="salvarFrequencia()">Salvar Frequência</button>
@@ -135,7 +143,12 @@
 
     <div id="modulo-consulta-frequencia" class="hidden">
         <h2>Consultar Frequências</h2>
-        <div style="overflow-x: auto; max-height: 450px;">
+        <div class="filtro-box">
+            <div class="form-group"><label>Filtrar por Data:</label><input type="date" id="filtro-data-freq" onchange="filtrarTabelaFrequencia()"></div>
+            <div class="form-group"><label>Buscar Aluno / RA:</label><input type="text" id="filtro-busca-freq" placeholder="Nome ou RA..." oninput="filtrarTabelaFrequencia()"></div>
+            <div class="form-group" style="flex: 0 0 150px;"><button style="margin-top: 22px; padding: 10px;" onclick="limparFiltrosFreq()">Limpar Filtro</button></div>
+        </div>
+        <div style="overflow-x: auto; max-height: 400px;">
             <table>
                 <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Freq.</th><th>Nome</th><th>RA</th><th>Série</th><th>Status</th><th>Justificativa</th><th>Obs</th></tr></thead>
                 <tbody id="corpo-tabela-frequencia"></tbody>
@@ -144,6 +157,7 @@
         <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
     </div>
 
+    <!-- MÓDULOS DE OCORRÊNCIAS -->
     <div id="modulo-ocorrencia" class="hidden">
         <h2>Registro de Ocorrências</h2>
         <div class="form-group"><label>Data da Ocorrência:</label><input type="date" id="ocorrencia-data"></div>
@@ -158,7 +172,12 @@
 
     <div id="modulo-consulta-ocorrencia" class="hidden">
         <h2>Consultar Ocorrências</h2>
-        <div style="overflow-x: auto; max-height: 450px;">
+        <div class="filtro-box">
+            <div class="form-group"><label>Filtrar por Data:</label><input type="date" id="filtro-data-ocorrencia" onchange="filtrarTabelaOcorrencias()"></div>
+            <div class="form-group"><label>Buscar Aluno / RA:</label><input type="text" id="filtro-busca-ocorrencia" placeholder="Nome ou RA..." oninput="filtrarTabelaOcorrencias()"></div>
+            <div class="form-group" style="flex: 0 0 150px;"><button style="margin-top: 22px; padding: 10px;" onclick="limparFiltrosOcorrencia()">Limpar Filtro</button></div>
+        </div>
+        <div style="overflow-x: auto; max-height: 400px;">
             <table>
                 <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Ocorr.</th><th>Série</th><th>Nome</th><th>RA</th><th>Tipo</th><th>Relato</th><th>Sanção</th></tr></thead>
                 <tbody id="corpo-tabela-ocorrencias"></tbody>
@@ -173,41 +192,11 @@
         <div id="carregando-alunos-notas" class="loading">Carregando dados...</div>
 
         <div id="form-config-notas" class="hidden">
-            <div class="form-group">
-                <label>Bimestre:</label>
-                <select id="nota-bimestre" onchange="atualizarPainelPesosPacotes()">
-                    <option value="1º Bimestre">1º Bimestre</option>
-                    <option value="2º Bimestre">2º Bimestre</option>
-                    <option value="3º Bimestre">3º Bimestre</option>
-                    <option value="4º Bimestre">4º Bimestre</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Série / Ano:</label>
-                <select id="nota-serie" onchange="atualizarTurmasDinamicas(); atualizarDisciplinasPorSerie(); atualizarPainelPesosPacotes();">
-                    <option value="">Selecione a série...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Turma / Sala:</label>
-                <select id="nota-turma" onchange="atualizarPainelPesosPacotes()">
-                    <option value="">Selecione a turma...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Disciplina:</label>
-                <select id="nota-disciplina" onchange="atualizarPainelPesosPacotes()">
-                    <option value="">Selecione a disciplina...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Eixo de Avaliação:</label>
-                <select id="nota-eixo" onchange="atualizarPainelPesosPacotes()">
-                    <option value="continuas">Avaliações Contínuas (C1 a C6)</option>
-                    <option value="bimestrais">Avaliações Bimestrais (B1 a B4)</option>
-                    <option value="recuperacao">Recuperação (R1 e R2)</option>
-                </select>
-            </div>
+            <div class="form-group"><label>Bimestre:</label><select id="nota-bimestre" onchange="atualizarPainelPesosPacotes()"><option value="1º Bimestre">1º Bimestre</option><option value="2º Bimestre">2º Bimestre</option><option value="3º Bimestre">3º Bimestre</option><option value="4º Bimestre">4º Bimestre</option></select></div>
+            <div class="form-group"><label>Série / Ano:</label><select id="nota-serie" onchange="atualizarTurmasDinamicas(); atualizarDisciplinasPorSerie(); atualizarPainelPesosPacotes();"><option value="">Selecione a série...</option></select></div>
+            <div class="form-group"><label>Turma / Sala:</label><select id="nota-turma" onchange="atualizarPainelPesosPacotes()"><option value="">Selecione a turma...</option></select></div>
+            <div class="form-group"><label>Disciplina:</label><select id="nota-disciplina" onchange="atualizarPainelPesosPacotes()"><option value="">Selecione a disciplina...</option></select></div>
+            <div class="form-group"><label>Eixo de Avaliação:</label><select id="nota-eixo" onchange="atualizarPainelPesosPacotes()"><option value="continuas">Avaliações Contínuas (C1 a C6)</option><option value="bimestrais">Avaliações Bimestrais (B1 a B4)</option><option value="recuperacao">Recuperação (R1 e R2)</option></select></div>
 
             <div style="background: #f1f8f6; border: 1px solid #016552; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="color: #016552; margin-top: 0; font-size: 15px;">Pesos dos Pacotes no Eixo (Soma exata a 100%)</h3>
@@ -217,18 +206,9 @@
 
             <div style="background: #eef4f8; border: 1px solid #004D93; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="color: #004D93; margin-top: 0; font-size: 15px;">Nova Atividade Avaliativa</h3>
-                <div class="form-group">
-                    <label>Vincular ao Pacote:</label>
-                    <select id="atividade-pacote-alvo"></select>
-                </div>
-                <div class="form-group">
-                    <label>Nome da Atividade:</label>
-                    <input type="text" id="atividade-nome" placeholder="Digite o nome da atividade...">
-                </div>
-                <div class="form-group">
-                    <label>Peso desta Atividade dentro do Pacote:</label>
-                    <input type="number" id="atividade-peso" value="1" min="1" max="10" style="text-align: center;">
-                </div>
+                <div class="form-group"><label>Vincular ao Pacote:</label><select id="atividade-pacote-alvo"></select></div>
+                <div class="form-group"><label>Nome da Atividade:</label><input type="text" id="atividade-nome" placeholder="Digite o nome da atividade..."></div>
+                <div class="form-group"><label>Peso desta Atividade dentro do Pacote:</label><input type="number" id="atividade-peso" value="1" min="1" max="10" style="text-align: center;"></div>
             </div>
 
             <button onclick="validarEAvancarParaLancamento()" id="btn-avancar-notas">Avançar para Lançamento de Notas</button>
@@ -238,14 +218,7 @@
             <h3 id="titulo-turma-notas" style="color: #016552; text-align: center; font-size: 16px;"></h3>
             <div style="overflow-x: auto; max-height: 400px;">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>RA</th>
-                            <th>Nome do Aluno</th>
-                            <th>Série / Turma</th>
-                            <th id="th-atividade-label">Nota (0 a 100)</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>RA</th><th>Nome do Aluno</th><th>Série / Turma</th><th id="th-atividade-label">Nota (0 a 100)</th></tr></thead>
                     <tbody id="corpo-tabela-notas"></tbody>
                 </table>
             </div>
@@ -271,10 +244,7 @@
         <h2 id="titulo-matriz-analitica">Matriz Analítica</h2>
         <div id="carregando-matriz" class="loading">Carregando matriz...</div>
         <div style="overflow-x: auto; max-height: 550px;">
-            <table id="tabela-matriz-analitica" class="hidden">
-                <thead id="head-matriz-analitica"></thead>
-                <tbody id="corpo-matriz-analitica"></tbody>
-            </table>
+            <table id="tabela-matriz-analitica" class="hidden"><thead id="head-matriz-analitica"></thead><tbody id="corpo-matriz-analitica"></tbody></table>
         </div>
         <button class="voltar-btn" onclick="abrirTelaFiltroMatrizAnalitica()">Escolher Outra Turma / Matéria</button>
     </div>
@@ -299,9 +269,7 @@
                         <th colspan="3">1º Bimestre</th><th colspan="3">2º Bimestre</th><th colspan="3">3º Bimestre</th><th colspan="3">4º Bimestre</th>
                         <th rowspan="2">Nota<br>F</th><th rowspan="2">RF</th><th rowspan="2">CC</th><th rowspan="2">Média<br>anual</th>
                     </tr>
-                    <tr>
-                        <th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th>
-                    </tr>
+                    <tr><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th></tr>
                 </thead>
                 <tbody id="corpo-tabela-boletim-aluno"></tbody>
             </table>
@@ -323,10 +291,7 @@
         <h2 id="titulo-boletim-turma-consolidado">BOLETIM CONSOLIDADO DA TURMA</h2>
         <div id="carregando-boletim-turma" class="loading">Calculando médias da turma...</div>
         <div style="overflow-x: auto; max-height: 550px;">
-            <table id="tabela-boletim-turma-consolidado" class="hidden">
-                <thead id="head-consolidado-turma"></thead>
-                <tbody id="corpo-consolidado-turma"></tbody>
-            </table>
+            <table id="tabela-boletim-turma-consolidado" class="hidden"><thead id="head-consolidado-turma"></thead><tbody id="corpo-consolidado-turma"></tbody></table>
         </div>
         <button class="voltar-btn" onclick="abrirTelaFiltroBoletimTurma()">Escolher Outra Turma</button>
     </div>
@@ -337,11 +302,8 @@
     const CLIENT_ID = '293823202125-glofclf9sgueb5vc079v8fas105i1b57.apps.googleusercontent.com'; 
     const API_URL = 'https://script.google.com/macros/s/AKfycbwT6wFmQ2qXiaHus3QpWghtrvUS5Gw1U1tmAeSGKONp7PdA3G6No3ntgW7UgQrKKt5W1g/exec';
     
-    let usuarioLogado = "";
-    let dadosEscopoUsuario = {};
-    let listaDeAlunos = [];
-    let notasJaLancadasGlobal = [];
-    let pesosSalvosGlobal = [];
+    let usuarioLogado = "", dadosEscopoUsuario = {}, listaDeAlunos = [], notasJaLancadasGlobal = [], pesosSalvosGlobal = [];
+    let cacheSaidas = [], cacheFrequencia = [], cacheOcorrencias = [];
 
     const MATRIZ_CURRICULAR = {
         '1º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas"],
@@ -418,8 +380,7 @@
 
     function voltarAoMenuPrincipal() {
         ['submenu-saida', 'submenu-frequencia', 'submenu-ocorrencias', 'submenu-notas', 'modulo-saida', 'modulo-consulta-saida', 'modulo-frequencia', 'modulo-consulta-frequencia', 'modulo-ocorrencia', 'modulo-consulta-ocorrencia', 'modulo-notas', 'modulo-filtro-matriz', 'modulo-exibicao-matriz', 'modulo-filtro-boletim-aluno', 'modulo-exibicao-boletim-aluno', 'modulo-filtro-boletim-turma', 'modulo-exibicao-boletim-turma'].forEach(id => {
-            let el = document.getElementById(id);
-            if(el) el.classList.add('hidden');
+            let el = document.getElementById(id); if(el) el.classList.add('hidden');
         });
         document.getElementById('tela-menu').classList.remove('hidden');
     }
@@ -437,7 +398,6 @@
         document.getElementById('submenu-notas').classList.remove('hidden'); 
     }
 
-    // Funções Auxiliares para Carregar Alunos nos Módulos de Saída/Freq/Ocorrência
     function carregarAlunosPorSerieGenerico(tipo) {
         const serie = document.getElementById(tipo + '-serie').value;
         const selAluno = document.getElementById(tipo + '-aluno');
@@ -462,9 +422,9 @@
         });
     }
 
-    function abrirFormularioSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-saida').classList.remove('hidden'); popularSeriesGenerico('saida-serie'); }
-    function abrirFormularioFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-frequencia').classList.remove('hidden'); popularSeriesGenerico('freq-serie'); }
-    function abrirFormularioOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-ocorrencia').classList.remove('hidden'); popularSeriesGenerico('ocorrencia-serie'); }
+    function abrirFormularioSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-saida').classList.remove('hidden'); popularSeriesGenerico('saida-serie'); document.getElementById('saida-data').valueAsDate = new Date(); }
+    function abrirFormularioFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-frequencia').classList.remove('hidden'); popularSeriesGenerico('freq-serie'); document.getElementById('freq-data').valueAsDate = new Date(); }
+    function abrirFormularioOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-ocorrencia').classList.remove('hidden'); popularSeriesGenerico('ocorrencia-serie'); document.getElementById('ocorrencia-data').valueAsDate = new Date(); }
 
     function salvarSaida() {
         const data = document.getElementById('saida-data').value;
@@ -507,43 +467,118 @@
         }).then(() => { alert("Ocorrência salva com sucesso!"); voltarAoSubmenuOcorrencias(); });
     }
 
+    // Consultas com Filtros Interativos Restaudos
     function abrirTelaConsultaSaida() {
         document.getElementById('submenu-saida').classList.add('hidden');
         document.getElementById('modulo-consulta-saida').classList.remove('hidden');
+        document.getElementById('filtro-tipo-saida').value = 'TODOS';
+        document.getElementById('filtro-busca-saida').value = '';
         fetch(API_URL + '?acao=buscarRegistrosSaida').then(res => res.json()).then(lista => {
-            const corpo = document.getElementById('corpo-tabela-saidas');
-            corpo.innerHTML = "";
-            lista.forEach(l => {
-                corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${l.dataSaida}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.serie}</td><td>${l.tipo}</td><td>${l.descricao}</td></tr>`;
-            });
+            cacheSaidas = lista;
+            renderizarTabelaSaidas(lista);
+        });
+    }
+
+    function filtrarTabelaSaidas() {
+        const tipoFiltro = document.getElementById('filtro-tipo-saida').value;
+        const busca = document.getElementById('filtro-busca-saida').value.toLowerCase();
+        let filtrados = cacheSaidas.filter(l => {
+            let matchTipo = (tipoFiltro === 'TODOS' || l.tipo === tipoFiltro);
+            let matchBusca = (!busca || l.nome.toLowerCase().includes(busca) || String(l.ra).includes(busca) || l.serie.toLowerCase().includes(busca));
+            return matchTipo && matchBusca;
+        });
+        renderizarTabelaSaidas(filtrados);
+    }
+
+    function renderizarTabelaSaidas(lista) {
+        const corpo = document.getElementById('corpo-tabela-saidas');
+        corpo.innerHTML = "";
+        if(lista.length === 0) { corpo.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`; return; }
+        lista.forEach(l => {
+            let dataFmt = l.dataSaida ? new Date(l.dataSaida).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : "-";
+            corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${dataFmt}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.serie}</td><td>${l.tipo}</td><td>${l.descricao}</td></tr>`;
         });
     }
 
     function abrirTelaConsultaFrequencia() {
         document.getElementById('submenu-frequencia').classList.add('hidden');
         document.getElementById('modulo-consulta-frequencia').classList.remove('hidden');
+        document.getElementById('filtro-data-freq').value = '';
+        document.getElementById('filtro-busca-freq').value = '';
         fetch(API_URL + '?acao=buscarRegistrosFrequencia').then(res => res.json()).then(lista => {
-            const corpo = document.getElementById('corpo-tabela-frequencia');
-            corpo.innerHTML = "";
-            lista.forEach(l => {
-                corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${l.dataFrequencia}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.serie}</td><td>${l.frequencia}</td><td>${l.justificativa}</td><td>${l.observacoes}</td></tr>`;
-            });
+            cacheFrequencia = lista;
+            renderizarTabelaFrequencia(lista);
+        });
+    }
+
+    function filtrarTabelaFrequencia() {
+        const dataFiltro = document.getElementById('filtro-data-freq').value;
+        const busca = document.getElementById('filtro-busca-freq').value.toLowerCase();
+        let filtrados = cacheFrequencia.filter(l => {
+            let dataRegFmt = l.dataFrequencia ? l.dataFrequencia.split('T')[0] : "";
+            let matchData = (!dataFiltro || dataRegFmt === dataFiltro);
+            let matchBusca = (!busca || l.nome.toLowerCase().includes(busca) || String(l.ra).includes(busca) || l.serie.toLowerCase().includes(busca));
+            return matchData && matchBusca;
+        });
+        renderizarTabelaFrequencia(filtrados);
+    }
+
+    function limparFiltrosFreq() {
+        document.getElementById('filtro-data-freq').value = '';
+        document.getElementById('filtro-busca-freq').value = '';
+        renderizarTabelaFrequencia(cacheFrequencia);
+    }
+
+    function renderizarTabelaFrequencia(lista) {
+        const corpo = document.getElementById('corpo-tabela-frequencia');
+        corpo.innerHTML = "";
+        if(lista.length === 0) { corpo.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`; return; }
+        lista.forEach(l => {
+            let dataFmt = l.dataFrequencia ? new Date(l.dataFrequencia).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : "-";
+            corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${dataFmt}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.serie}</td><td>${l.frequencia}</td><td>${l.justificativa}</td><td>${l.observacoes}</td></tr>`;
         });
     }
 
     function abrirTelaConsultaOcorrencia() {
         document.getElementById('submenu-ocorrencias').classList.add('hidden');
         document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden');
+        document.getElementById('filtro-data-ocorrencia').value = '';
+        document.getElementById('filtro-busca-ocorrencia').value = '';
         fetch(API_URL + '?acao=buscarRegistrosOcorrencias').then(res => res.json()).then(lista => {
-            const corpo = document.getElementById('corpo-tabela-ocorrencias');
-            corpo.innerHTML = "";
-            lista.forEach(l => {
-                corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${l.dataOcorrencia}</td><td>${l.serie}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.tipoOcorrencia}</td><td>${l.relato}</td><td>${l.sancao}</td></tr>`;
-            });
+            cacheOcorrencias = lista;
+            renderizarTabelaOcorrencias(lista);
         });
     }
 
-    // Módulo de Notas & Boletins
+    function filtrarTabelaOcorrencias() {
+        const dataFiltro = document.getElementById('filtro-data-ocorrencia').value;
+        const busca = document.getElementById('filtro-busca-ocorrencia').value.toLowerCase();
+        let filtrados = cacheOcorrencias.filter(l => {
+            let dataRegFmt = l.dataOcorrencia ? l.dataOcorrencia.split('T')[0] : "";
+            let matchData = (!dataFiltro || dataRegFmt === dataFiltro);
+            let matchBusca = (!busca || l.nome.toLowerCase().includes(busca) || String(l.ra).includes(busca) || l.serie.toLowerCase().includes(busca));
+            return matchData && matchBusca;
+        });
+        renderizarTabelaOcorrencias(filtrados);
+    }
+
+    function limparFiltrosOcorrencia() {
+        document.getElementById('filtro-data-ocorrencia').value = '';
+        document.getElementById('filtro-busca-ocorrencia').value = '';
+        renderizarTabelaOcorrencias(cacheOcorrencias);
+    }
+
+    function renderizarTabelaOcorrencias(lista) {
+        const corpo = document.getElementById('corpo-tabela-ocorrencias');
+        corpo.innerHTML = "";
+        if(lista.length === 0) { corpo.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`; return; }
+        lista.forEach(l => {
+            let dataFmt = l.dataOcorrencia ? new Date(l.dataOcorrencia).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : "-";
+            corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${dataFmt}</td><td>${l.serie}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.tipoOcorrencia}</td><td>${l.relato}</td><td>${l.sancao}</td></tr>`;
+        });
+    }
+
+    // Módulo de Notas & Boletins (Preservado e Intacto)
     function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarDadosParaNotas(); }
     
     function abrirTelaFiltroMatrizAnalitica() {

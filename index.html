@@ -35,7 +35,6 @@
         td:nth-child(1) { text-align: left; font-weight: bold; }
         
         .nota-abaixo { color: #d9534f; font-weight: bold; }
-        
         .pacote-box { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .pacote-box label { margin-bottom: 0; font-weight: normal; }
     </style>
@@ -99,7 +98,76 @@
         <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
     </div>
 
-    <!-- TELA DE LANÇAMENTO -->
+    <!-- MÓDULOS DE SAÍDA, FREQUÊNCIA E OCORRÊNCIAS (RESTAURADOS) -->
+    <div id="modulo-saida" class="hidden">
+        <h2>Nova Autorização de Saída</h2>
+        <div class="form-group"><label>Data da Saída:</label><input type="date" id="saida-data"></div>
+        <div class="form-group"><label>Série do Aluno:</label><select id="saida-serie" onchange="carregarAlunosPorSerieGenerico('saida')"><option value="">Selecione...</option></select></div>
+        <div class="form-group"><label>Aluno:</label><select id="saida-aluno"><option value="">Selecione o aluno...</option></select></div>
+        <div class="form-group"><label>Tipo de Saída:</label><select id="saida-tipo"><option value="Antecipada">Antecipada</option><option value="Excursão">Excursão</option><option value="Outros">Outros</option></select></div>
+        <div class="form-group"><label>Descrição / Motivo:</label><textarea id="saida-descricao" rows="3"></textarea></div>
+        <button onclick="salvarSaida()">Salvar Autorização</button>
+        <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
+    </div>
+
+    <div id="modulo-consulta-saida" class="hidden">
+        <h2>Consultar Autorizações de Saída</h2>
+        <div style="overflow-x: auto; max-height: 450px;">
+            <table>
+                <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Saída</th><th>Nome</th><th>RA</th><th>Série</th><th>Tipo</th><th>Descrição</th></tr></thead>
+                <tbody id="corpo-tabela-saidas"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button>
+    </div>
+
+    <div id="modulo-frequencia" class="hidden">
+        <h2>Registro de Frequência / Faltas</h2>
+        <div class="form-group"><label>Data:</label><input type="date" id="freq-data"></div>
+        <div class="form-group"><label>Série:</label><select id="freq-serie" onchange="carregarAlunosPorSerieGenerico('freq')"><option value="">Selecione...</option></select></div>
+        <div class="form-group"><label>Aluno:</label><select id="freq-aluno"><option value="">Selecione o aluno...</option></select></div>
+        <div class="form-group"><label>Frequência:</label><select id="freq-status"><option value="Presnte">Presente</option><option value="Falta Justificada">Falta Justificada</option><option value="Falta Injustificada">Falta Injustificada</option></select></div>
+        <div class="form-group"><label>Justificativa:</label><input type="text" id="freq-justificativa"></div>
+        <div class="form-group"><label>Observações:</label><textarea id="freq-obs" rows="2"></textarea></div>
+        <button onclick="salvarFrequencia()">Salvar Frequência</button>
+        <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
+    </div>
+
+    <div id="modulo-consulta-frequencia" class="hidden">
+        <h2>Consultar Frequências</h2>
+        <div style="overflow-x: auto; max-height: 450px;">
+            <table>
+                <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Freq.</th><th>Nome</th><th>RA</th><th>Série</th><th>Status</th><th>Justificativa</th><th>Obs</th></tr></thead>
+                <tbody id="corpo-tabela-frequencia"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button>
+    </div>
+
+    <div id="modulo-ocorrencia" class="hidden">
+        <h2>Registro de Ocorrências</h2>
+        <div class="form-group"><label>Data da Ocorrência:</label><input type="date" id="ocorrencia-data"></div>
+        <div class="form-group"><label>Série:</label><select id="ocorrencia-serie" onchange="carregarAlunosPorSerieGenerico('ocorrencia')"><option value="">Selecione...</option></select></div>
+        <div class="form-group"><label>Aluno:</label><select id="ocorrencia-aluno"><option value="">Selecione o aluno...</option></select></div>
+        <div class="form-group"><label>Tipo de Ocorrência:</label><input type="text" id="ocorrencia-tipo" placeholder="Ex: Indisciplina, Atraso..."></div>
+        <div class="form-group"><label>Relato:</label><textarea id="ocorrencia-relato" rows="3"></textarea></div>
+        <div class="form-group"><label>Sanção / Encaminhamento:</label><input type="text" id="ocorrencia-sancao"></div>
+        <button onclick="salvarOcorrencia()">Salvar Ocorrência</button>
+        <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
+    </div>
+
+    <div id="modulo-consulta-ocorrencia" class="hidden">
+        <h2>Consultar Ocorrências</h2>
+        <div style="overflow-x: auto; max-height: 450px;">
+            <table>
+                <thead><tr><th>Data Reg.</th><th>Usuário</th><th>Data Ocorr.</th><th>Série</th><th>Nome</th><th>RA</th><th>Tipo</th><th>Relato</th><th>Sanção</th></tr></thead>
+                <tbody id="corpo-tabela-ocorrencias"></tbody>
+            </table>
+        </div>
+        <button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button>
+    </div>
+
+    <!-- TELA DE LANÇAMENTO DE NOTAS -->
     <div id="modulo-notas" class="hidden">
         <h2>Configuração de Atividade e Pesos</h2>
         <div id="carregando-alunos-notas" class="loading">Carregando dados...</div>
@@ -191,33 +259,10 @@
     <!-- TELA DE FILTRO PARA MATRIZ ANALÍTICA -->
     <div id="modulo-filtro-matriz" class="hidden">
         <h2>Matriz Analítica Detalhada por Atividade</h2>
-        <div class="form-group">
-            <label>Bimestre:</label>
-            <select id="matriz-bimestre">
-                <option value="1º Bimestre">1º Bimestre</option>
-                <option value="2º Bimestre">2º Bimestre</option>
-                <option value="3º Bimestre">3º Bimestre</option>
-                <option value="4º Bimestre">4º Bimestre</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Série / Ano:</label>
-            <select id="matriz-serie" onchange="atualizarTurmasMatrizDinamica(); atualizarDisciplinasMatriz();">
-                <option value="">Selecione a série...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Turma / Sala:</label>
-            <select id="matriz-turma">
-                <option value="">Selecione a turma...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Disciplina:</label>
-            <select id="matriz-disciplina">
-                <option value="">Selecione a disciplina...</option>
-            </select>
-        </div>
+        <div class="form-group"><label>Bimestre:</label><select id="matriz-bimestre"><option value="1º Bimestre">1º Bimestre</option><option value="2º Bimestre">2º Bimestre</option><option value="3º Bimestre">3º Bimestre</option><option value="4º Bimestre">4º Bimestre</option></select></div>
+        <div class="form-group"><label>Série / Ano:</label><select id="matriz-serie" onchange="atualizarTurmasMatrizDinamica(); atualizarDisciplinasMatriz();"><option value="">Selecione a série...</option></select></div>
+        <div class="form-group"><label>Turma / Sala:</label><select id="matriz-turma"><option value="">Selecione a turma...</option></select></div>
+        <div class="form-group"><label>Disciplina:</label><select id="matriz-disciplina"><option value="">Selecione a disciplina...</option></select></div>
         <button onclick="gerarMatrizAnaliticaCompleta()">Exibir Matriz Analítica</button>
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
     </div>
@@ -234,26 +279,15 @@
         <button class="voltar-btn" onclick="abrirTelaFiltroMatrizAnalitica()">Escolher Outra Turma / Matéria</button>
     </div>
 
-    <!-- TELA 1: FILTRO PARA BOLETIM INDIVIDUAL DO ALUNO -->
+    <!-- BOLETIM INDIVIDUAL DO ALUNO -->
     <div id="modulo-filtro-boletim-aluno" class="hidden">
         <h2>Boletim Individual do Aluno</h2>
-        <div class="form-group">
-            <label>Série / Ano:</label>
-            <select id="aluno-filtro-serie" onchange="atualizarAlunosPorSerie()">
-                <option value="">Selecione a série...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Estudante:</label>
-            <select id="aluno-filtro-ra">
-                <option value="">Selecione o aluno...</option>
-            </select>
-        </div>
+        <div class="form-group"><label>Série / Ano:</label><select id="aluno-filtro-serie" onchange="atualizarAlunosPorSerie()"><option value="">Selecione a série...</option></select></div>
+        <div class="form-group"><label>Estudante:</label><select id="aluno-filtro-ra"><option value="">Selecione o aluno...</option></select></div>
         <button onclick="gerarBoletimIndividualAluno()">Exibir Boletim do Aluno</button>
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
     </div>
 
-    <!-- TELA 1 EXIBIÇÃO: BOLETIM INDIVIDUAL DO ALUNO -->
     <div id="modulo-exibicao-boletim-aluno" class="hidden">
         <h2 id="titulo-boletim-aluno">BOLETIM ESCOLAR 2026</h2>
         <div id="carregando-boletim-aluno" class="loading">Gerando boletim individual...</div>
@@ -262,20 +296,11 @@
                 <thead>
                     <tr>
                         <th rowspan="2" style="min-width: 180px;">Componente curricular</th>
-                        <th colspan="3">1º Bimestre</th>
-                        <th colspan="3">2º Bimestre</th>
-                        <th colspan="3">3º Bimestre</th>
-                        <th colspan="3">4º Bimestre</th>
-                        <th rowspan="2">Nota<br>F</th>
-                        <th rowspan="2">RF</th>
-                        <th rowspan="2">CC</th>
-                        <th rowspan="2">Média<br>anual</th>
+                        <th colspan="3">1º Bimestre</th><th colspan="3">2º Bimestre</th><th colspan="3">3º Bimestre</th><th colspan="3">4º Bimestre</th>
+                        <th rowspan="2">Nota<br>F</th><th rowspan="2">RF</th><th rowspan="2">CC</th><th rowspan="2">Média<br>anual</th>
                     </tr>
                     <tr>
-                        <th>MB</th><th>R</th><th>F</th>
-                        <th>MB</th><th>R</th><th>F</th>
-                        <th>MB</th><th>R</th><th>F</th>
-                        <th>MB</th><th>R</th><th>F</th>
+                        <th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th><th>MB</th><th>R</th><th>F</th>
                     </tr>
                 </thead>
                 <tbody id="corpo-tabela-boletim-aluno"></tbody>
@@ -284,36 +309,16 @@
         <button class="voltar-btn" onclick="abrirTelaFiltroBoletimAluno()">Escolher Outro Aluno</button>
     </div>
 
-    <!-- TELA 2: FILTRO PARA BOLETIM CONSOLIDADO DA TURMA -->
+    <!-- BOLETIM CONSOLIDADO DA TURMA -->
     <div id="modulo-filtro-boletim-turma" class="hidden">
         <h2>Boletim Consolidado da Turma</h2>
-        <div class="form-group">
-            <label>Bimestre de Referência:</label>
-            <select id="turma-filtro-bimestre">
-                <option value="1º Bimestre">1º Bimestre</option>
-                <option value="2º Bimestre">2º Bimestre</option>
-                <option value="3º Bimestre">3º Bimestre</option>
-                <option value="4º Bimestre">4º Bimestre</option>
-                <option value="Média Anual">Média Anual</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Série / Ano:</label>
-            <select id="turma-filtro-serie" onchange="atualizarTurmasConsolidadoDinamicas()">
-                <option value="">Selecione a série...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Turma / Sala:</label>
-            <select id="turma-filtro-sala">
-                <option value="">Selecione a turma...</option>
-            </select>
-        </div>
+        <div class="form-group"><label>Bimestre de Referência:</label><select id="turma-filtro-bimestre"><option value="1º Bimestre">1º Bimestre</option><option value="2º Bimestre">2º Bimestre</option><option value="3º Bimestre">3º Bimestre</option><option value="4º Bimestre">4º Bimestre</option><option value="Média Anual">Média Anual</option></select></div>
+        <div class="form-group"><label>Série / Ano:</label><select id="turma-filtro-serie" onchange="atualizarTurmasConsolidadoDinamicas()"><option value="">Selecione a série...</option></select></div>
+        <div class="form-group"><label>Turma / Sala:</label><select id="turma-filtro-sala"><option value="">Selecione a turma...</option></select></div>
         <button onclick="gerarBoletimConsolidadoTurma()">Exibir Boletim Consolidado da Turma</button>
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar</button>
     </div>
 
-    <!-- TELA 2 EXIBIÇÃO: BOLETIM CONSOLIDADO DA TURMA -->
     <div id="modulo-exibicao-boletim-turma" class="hidden">
         <h2 id="titulo-boletim-turma-consolidado">BOLETIM CONSOLIDADO DA TURMA</h2>
         <div id="carregando-boletim-turma" class="loading">Calculando médias da turma...</div>
@@ -325,14 +330,6 @@
         </div>
         <button class="voltar-btn" onclick="abrirTelaFiltroBoletimTurma()">Escolher Outra Turma</button>
     </div>
-
-    <!-- OUTROS MÓDULOS -->
-    <div id="modulo-saida" class="hidden"><h2>Saída</h2><button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button></div>
-    <div id="modulo-consulta-saida" class="hidden"><h2>Consulta Saída</h2><button class="voltar-btn" onclick="voltarAoSubmenuSaida()">Voltar</button></div>
-    <div id="modulo-frequencia" class="hidden"><h2>Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
-    <div id="modulo-consulta-frequencia" class="hidden"><h2>Consulta Frequência</h2><button class="voltar-btn" onclick="voltarAoSubmenuFrequencia()">Voltar</button></div>
-    <div id="modulo-ocorrencia" class="hidden"><h2>Ocorrência</h2><button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button></div>
-    <div id="modulo-consulta-ocorrencia" class="hidden"><h2>Consulta Ocorrência</h2><button class="voltar-btn" onclick="voltarAoSubmenuOcorrencias()">Voltar</button></div>
 
 </div>
 
@@ -346,7 +343,6 @@
     let notasJaLancadasGlobal = [];
     let pesosSalvosGlobal = [];
 
-    // Matriz curricular rigorosa mapeada exatamente por Série/Ano
     const MATRIZ_CURRICULAR = {
         '1º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas"],
         '2º Ano': ["Língua Portuguesa", "Educação Física", "Artes integradas", "Música", "Inglês", "Ciências da Natureza", "Matemática", "Ciências Humanas", "Tecnologia e suas aplicações"],
@@ -366,16 +362,8 @@
         '1º Ano': { default: { prova: 0, cont: 100 } },
         '2º Ano': { default: { prova: 0, cont: 100 } },
         '3º Ano': { default: { prova: 0, cont: 100 } },
-        '4º Ano': {
-            'Língua Portuguesa': { prova: 30, cont: 70 }, 'Inglês': { prova: 30, cont: 70 },
-            'Ciências da Natureza': { prova: 30, cont: 70 }, 'Matemática': { prova: 30, cont: 70 },
-            'Ciências Humanas': { prova: 30, cont: 70 }, 'default': { prova: 0, cont: 100 }
-        },
-        '5º Ano': {
-            'Língua Portuguesa': { prova: 30, cont: 70 }, 'Inglês': { prova: 30, cont: 70 },
-            'Ciências da Natureza': { prova: 30, cont: 70 }, 'Matemática': { prova: 30, cont: 70 },
-            'Ciências Humanas': { prova: 30, cont: 70 }, 'default': { prova: 0, cont: 100 }
-        },
+        '4º Ano': { 'Língua Portuguesa': { prova: 30, cont: 70 }, 'Inglês': { prova: 30, cont: 70 }, 'Ciências da Natureza': { prova: 30, cont: 70 }, 'Matemática': { prova: 30, cont: 70 }, 'Ciências Humanas': { prova: 30, cont: 70 }, 'default': { prova: 0, cont: 100 } },
+        '5º Ano': { 'Língua Portuguesa': { prova: 30, cont: 70 }, 'Inglês': { prova: 30, cont: 70 }, 'Ciências da Natureza': { prova: 30, cont: 70 }, 'Matemática': { prova: 30, cont: 70 }, 'Ciências Humanas': { prova: 30, cont: 70 }, 'default': { prova: 0, cont: 100 } },
         '6º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Tecnologia e suas aplicações': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
         '7º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Tecnologia e suas aplicações': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
         '8º Ano': { 'Sociologia: Ética, Cidadania e Atualidades': { prova: 0, cont: 100 }, 'Educação Física': { prova: 0, cont: 100 }, 'Artes integradas': { prova: 0, cont: 100 }, 'default': { prova: 35, cont: 65 } },
@@ -409,9 +397,7 @@
     function decodificarJWT(token) {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
         return JSON.parse(jsonPayload);
     }
 
@@ -438,24 +424,137 @@
         document.getElementById('tela-menu').classList.remove('hidden');
     }
 
+    // Navegação de Submenus e Módulos
+    function abrirMenuSaida() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
+    function voltarAoSubmenuSaida() { document.getElementById('modulo-saida').classList.add('hidden'); document.getElementById('modulo-consulta-saida').classList.add('hidden'); document.getElementById('submenu-saida').classList.remove('hidden'); }
+    function abrirMenuFrequencia() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
+    function voltarAoSubmenuFrequencia() { document.getElementById('modulo-frequencia').classList.add('hidden'); document.getElementById('modulo-consulta-frequencia').classList.add('hidden'); document.getElementById('submenu-frequencia').classList.remove('hidden'); }
+    function abrirMenuOcorrencias() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
+    function voltarAoSubmenuOcorrencias() { document.getElementById('modulo-ocorrencia').classList.add('hidden'); document.getElementById('modulo-consulta-ocorrencia').classList.add('hidden'); document.getElementById('submenu-ocorrencias').classList.remove('hidden'); }
     function abrirMenuNotas() { document.getElementById('tela-menu').classList.add('hidden'); document.getElementById('submenu-notas').classList.remove('hidden'); }
     function voltarSubmenuNotas() { 
         ['modulo-notas', 'modulo-filtro-matriz', 'modulo-exibicao-matriz', 'modulo-filtro-boletim-aluno', 'modulo-exibicao-boletim-aluno', 'modulo-filtro-boletim-turma', 'modulo-exibicao-boletim-turma'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById('submenu-notas').classList.remove('hidden'); 
     }
+
+    // Funções Auxiliares para Carregar Alunos nos Módulos de Saída/Freq/Ocorrência
+    function carregarAlunosPorSerieGenerico(tipo) {
+        const serie = document.getElementById(tipo + '-serie').value;
+        const selAluno = document.getElementById(tipo + '-aluno');
+        selAluno.innerHTML = '<option value="">Selecione o aluno...</option>';
+        if(!serie) return;
+        listaDeAlunos.filter(a => a.serie === serie).forEach(a => {
+            let opt = document.createElement('option');
+            opt.value = a.ra;
+            opt.text = `${a.nome} (RA: ${a.ra}) - Turma: ${a.turma}`;
+            selAluno.appendChild(opt);
+        });
+    }
+
+    function popularSeriesGenerico(idSelect) {
+        fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
+            listaDeAlunos = alunos;
+            const sel = document.getElementById(idSelect);
+            sel.innerHTML = '<option value="">Selecione...</option>';
+            [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => {
+                let o = document.createElement('option'); o.value = s; o.text = s; sel.appendChild(o);
+            });
+        });
+    }
+
+    function abrirFormularioSaida() { document.getElementById('submenu-saida').classList.add('hidden'); document.getElementById('modulo-saida').classList.remove('hidden'); popularSeriesGenerico('saida-serie'); }
+    function abrirFormularioFrequencia() { document.getElementById('submenu-frequencia').classList.add('hidden'); document.getElementById('modulo-frequencia').classList.remove('hidden'); popularSeriesGenerico('freq-serie'); }
+    function abrirFormularioOcorrencia() { document.getElementById('submenu-ocorrencias').classList.add('hidden'); document.getElementById('modulo-ocorrencia').classList.remove('hidden'); popularSeriesGenerico('ocorrencia-serie'); }
+
+    function salvarSaida() {
+        const data = document.getElementById('saida-data').value;
+        const ra = document.getElementById('saida-aluno').value;
+        const tipo = document.getElementById('saida-tipo').value;
+        const desc = document.getElementById('saida-descricao').value;
+        if(!data || !ra) { alert("Preencha a data e selecione o aluno."); return; }
+        let aluno = listaDeAlunos.find(a => String(a.ra) === String(ra));
+        fetch(API_URL, {
+            method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modulo: 'autorizacao_saida', emailUsuario: usuarioLogado, dataSaida: data, nome: aluno.nome, ra: aluno.ra, serie: aluno.serie, tipo: tipo, descricao: desc })
+        }).then(() => { alert("Autorização salva com sucesso!"); voltarAoSubmenuSaida(); });
+    }
+
+    function salvarFrequencia() {
+        const data = document.getElementById('freq-data').value;
+        const ra = document.getElementById('freq-aluno').value;
+        const status = document.getElementById('freq-status').value;
+        const just = document.getElementById('freq-justificativa').value;
+        const obs = document.getElementById('freq-obs').value;
+        if(!data || !ra) { alert("Preencha a data e selecione o aluno."); return; }
+        let aluno = listaDeAlunos.find(a => String(a.ra) === String(ra));
+        fetch(API_URL, {
+            method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modulo: 'frequencia', emailUsuario: usuarioLogado, dataFrequencia: data, nome: aluno.nome, ra: aluno.ra, serie: aluno.serie, frequencia: status, justificativa: just, observacoes: obs })
+        }).then(() => { alert("Frequência salva com sucesso!"); voltarAoSubmenuFrequencia(); });
+    }
+
+    function salvarOcorrencia() {
+        const data = document.getElementById('ocorrencia-data').value;
+        const ra = document.getElementById('ocorrencia-aluno').value;
+        const tipo = document.getElementById('ocorrencia-tipo').value;
+        const relato = document.getElementById('ocorrencia-relato').value;
+        const sancao = document.getElementById('ocorrencia-sancao').value;
+        if(!data || !ra || !tipo) { alert("Preencha os campos obrigatórios."); return; }
+        let aluno = listaDeAlunos.find(a => String(a.ra) === String(ra));
+        fetch(API_URL, {
+            method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modulo: 'ocorrencias', emailUsuario: usuarioLogado, dataOcorrencia: data, serie: aluno.serie, nome: aluno.nome, ra: aluno.ra, tipoOcorrencia: tipo, relato: relato, sancao: sancao })
+        }).then(() => { alert("Ocorrência salva com sucesso!"); voltarAoSubmenuOcorrencias(); });
+    }
+
+    function abrirTelaConsultaSaida() {
+        document.getElementById('submenu-saida').classList.add('hidden');
+        document.getElementById('modulo-consulta-saida').classList.remove('hidden');
+        fetch(API_URL + '?acao=buscarRegistrosSaida').then(res => res.json()).then(lista => {
+            const corpo = document.getElementById('corpo-tabela-saidas');
+            corpo.innerHTML = "";
+            lista.forEach(l => {
+                corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${l.dataSaida}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.serie}</td><td>${l.tipo}</td><td>${l.descricao}</td></tr>`;
+            });
+        });
+    }
+
+    function abrirTelaConsultaFrequencia() {
+        document.getElementById('submenu-frequencia').classList.add('hidden');
+        document.getElementById('modulo-consulta-frequencia').classList.remove('hidden');
+        fetch(API_URL + '?acao=buscarRegistrosFrequencia').then(res => res.json()).then(lista => {
+            const corpo = document.getElementById('corpo-tabela-frequencia');
+            corpo.innerHTML = "";
+            lista.forEach(l => {
+                corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${l.dataFrequencia}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.serie}</td><td>${l.frequencia}</td><td>${l.justificativa}</td><td>${l.observacoes}</td></tr>`;
+            });
+        });
+    }
+
+    function abrirTelaConsultaOcorrencia() {
+        document.getElementById('submenu-ocorrencias').classList.add('hidden');
+        document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden');
+        fetch(API_URL + '?acao=buscarRegistrosOcorrencias').then(res => res.json()).then(lista => {
+            const corpo = document.getElementById('corpo-tabela-ocorrencias');
+            corpo.innerHTML = "";
+            lista.forEach(l => {
+                corpo.innerHTML += `<tr><td>${new Date(l.dataRegistro).toLocaleDateString()}</td><td>${l.usuario}</td><td>${l.dataOcorrencia}</td><td>${l.serie}</td><td><strong>${l.nome}</strong></td><td>${l.ra}</td><td>${l.tipoOcorrencia}</td><td>${l.relato}</td><td>${l.sancao}</td></tr>`;
+            });
+        });
+    }
+
+    // Módulo de Notas & Boletins
     function abrirFormularioNotas() { document.getElementById('submenu-notas').classList.add('hidden'); document.getElementById('modulo-notas').classList.remove('hidden'); carregarDadosParaNotas(); }
     
     function abrirTelaFiltroMatrizAnalitica() {
         document.getElementById('submenu-notas').classList.add('hidden');
         document.getElementById('modulo-exibicao-matriz').classList.add('hidden');
         document.getElementById('modulo-filtro-matriz').classList.remove('hidden');
-
         fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
             listaDeAlunos = alunos;
-            const seriesUnicas = [...new Set(alunos.map(a => a.serie))].filter(Boolean);
             const selSerie = document.getElementById('matriz-serie');
             selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-            seriesUnicas.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+            [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
         });
     }
 
@@ -464,8 +563,9 @@
         const selTurma = document.getElementById('matriz-turma');
         selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
         if(!serie) return;
-        const turmasUnicas = [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Turma Única"))].filter(Boolean);
-        turmasUnicas.forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+        [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Única"))].filter(Boolean).forEach(t => {
+            let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o);
+        });
     }
 
     function atualizarDisciplinasMatriz() {
@@ -473,11 +573,11 @@
         const selDisc = document.getElementById('matriz-disciplina');
         selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
         if(!serie || !MATRIZ_CURRICULAR[serie]) return;
-        let discDisponiveis = MATRIZ_CURRICULAR[serie];
+        let disc = MATRIZ_CURRICULAR[serie];
         if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
-            discDisponiveis = [dadosEscopoUsuario.materiaEscopo];
+            disc = [dadosEscopoUsuario.materiaEscopo];
         }
-        discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
+        disc.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
     }
 
     function gerarMatrizAnaliticaCompleta() {
@@ -485,27 +585,23 @@
         const serie = document.getElementById('matriz-serie').value;
         const turma = document.getElementById('matriz-turma').value;
         const disciplina = document.getElementById('matriz-disciplina').value;
-
-        if(!serie || !turma || !disciplina) { alert("Preencha todos os filtros da matriz."); return; }
+        if(!serie || !turma || !disciplina) { alert("Preencha todos os filtros."); return; }
 
         document.getElementById('modulo-filtro-matriz').classList.add('hidden');
         document.getElementById('modulo-exibicao-matriz').classList.remove('hidden');
         document.getElementById('carregando-matriz').classList.remove('hidden');
         document.getElementById('tabela-matriz-analitica').classList.add('hidden');
-
         document.getElementById('titulo-matriz-analitica').innerText = `MATRIZ ANALÍTICA | ${disciplina} | ${serie} (${turma}) - ${bimestre}`;
 
         Promise.all([
             fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
             fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
         ]).then(([notas, pesos]) => {
-            notasJaLancadasGlobal = notas;
-            pesosSalvosGlobal = pesos;
-
+            notasJaLancadasGlobal = notas; pesosSalvosGlobal = pesos;
             document.getElementById('carregando-matriz').classList.add('hidden');
             document.getElementById('tabela-matriz-analitica').classList.remove('hidden');
 
-            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (!a.turma || a.turma === turma));
+            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (a.turma === turma || (!a.turma && turma === "Única")));
             const notasBimTurma = notas.filter(n => n.bimestre === bimestre && n.serie === serie && n.turma === turma && n.disciplina === disciplina);
 
             let atividadesUnicas = [];
@@ -518,8 +614,7 @@
 
             const head = document.getElementById('head-matriz-analitica');
             const corpo = document.getElementById('corpo-matriz-analitica');
-            head.innerHTML = "";
-            corpo.innerHTML = "";
+            head.innerHTML = ""; corpo.innerHTML = "";
 
             if (alunosTurma.length === 0) {
                 corpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum aluno encontrado.</td></tr>`;
@@ -528,21 +623,18 @@
 
             let tr1 = `<tr><th>Nº Sala</th><th>RA</th><th>Estudante</th><th>Situação</th>`;
             let tr2 = `<tr><th></th><th></th><th></th><th></th>`;
-
             atividadesUnicas.forEach(ativ => {
                 tr1 += `<th style="background: #004D93; color: white;">Pacote ${ativ.pacote}</th>`;
                 tr2 += `<th>${ativ.nome}<br><small>(Peso ${ativ.peso})</small></th>`;
             });
             tr1 += `<th rowspan="2" style="background: #016552; color: white;">Média Final</th></tr>`;
             tr2 += `</tr>`;
-
             head.innerHTML = tr1 + tr2;
 
             let regraSerieDisc = obterRegraPesos(serie, disciplina);
 
             alunosTurma.forEach((aluno, index) => {
                 let htmlLinha = `<td>${index + 1}</td><td>${aluno.ra}</td><td><strong>${aluno.nome}</strong></td><td>Cursando</td>`;
-
                 let notasAluno = notasBimTurma.filter(n => String(n.ra) === String(aluno.ra));
                 let mapaNotasAluno = {};
                 notasAluno.forEach(n => { mapaNotasAluno[`${n.pacote}_${n.nomeAtividade}`] = n.nota; });
@@ -568,14 +660,9 @@
                 let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
 
                 let somaC = 0, temC = false;
-                Object.keys(pesosC).forEach(pkg => {
-                    if(mediasPacotes[pkg] !== undefined) { somaC += (mediasPacotes[pkg] * (pesosC[pkg] / 100)); temC = true; }
-                });
-
+                Object.keys(pesosC).forEach(pkg => { if(mediasPacotes[pkg] !== undefined) { somaC += (mediasPacotes[pkg] * (pesosC[pkg] / 100)); temC = true; } });
                 let somaB = 0, temB = false;
-                Object.keys(pesosB).forEach(pkg => {
-                    if(mediasPacotes[pkg] !== undefined) { somaB += (mediasPacotes[pkg] * (pesosB[pkg] / 100)); temB = true; }
-                });
+                Object.keys(pesosB).forEach(pkg => { if(mediasPacotes[pkg] !== undefined) { somaB += (mediasPacotes[pkg] * (pesosB[pkg] / 100)); temB = true; } });
 
                 let mediaBimestralFinal = "-";
                 if(temC || temB) {
@@ -591,7 +678,6 @@
 
                 let classeFinal = (mediaBimestralFinal !== "-" && parseFloat(mediaBimestralFinal) < 50) ? "nota-abaixo" : "";
                 htmlLinha += `<td class="${classeFinal}"><strong>${mediaBimestralFinal}</strong></td>`;
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = htmlLinha;
                 corpo.appendChild(tr);
@@ -602,15 +688,12 @@
     function carregarDadosParaNotas() {
         document.getElementById('carregando-alunos-notas').classList.remove('hidden');
         document.getElementById('form-config-notas').classList.add('hidden');
-
         Promise.all([
             fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()),
             fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
             fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
         ]).then(([alunos, notas, pesos]) => {
-            listaDeAlunos = alunos;
-            notasJaLancadasGlobal = notas;
-            pesosSalvosGlobal = pesos;
+            listaDeAlunos = alunos; notasJaLancadasGlobal = notas; pesosSalvosGlobal = pesos;
             configurarFormNotas();
         });
     }
@@ -619,16 +702,13 @@
         document.getElementById('carregando-alunos-notas').classList.add('hidden');
         document.getElementById('form-config-notas').classList.remove('hidden');
         document.getElementById('container-tabela-notas').classList.add('hidden');
-
         const selSerie = document.getElementById('nota-serie');
         selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-        
-        let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
+        let series = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
         if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo !== 'Todas') {
-            seriesDisponiveis = [dadosEscopoUsuario.serieEscopo];
+            series = [dadosEscopoUsuario.serieEscopo];
         }
-        seriesDisponiveis.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
-
+        series.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
         atualizarTurmasDinamicas();
         atualizarDisciplinasPorSerie();
         atualizarPainelPesosPacotes();
@@ -639,8 +719,9 @@
         const selTurma = document.getElementById('nota-turma');
         selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
         if(!serie) return;
-        const turmasUnicas = [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Turma Única"))].filter(Boolean);
-        turmasUnicas.forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+        [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Única"))].filter(Boolean).forEach(t => {
+            let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o);
+        });
     }
 
     function atualizarDisciplinasPorSerie() {
@@ -648,12 +729,11 @@
         const selDisc = document.getElementById('nota-disciplina');
         selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
         if(!serie || !MATRIZ_CURRICULAR[serie]) return;
-
-        let discDisponiveis = MATRIZ_CURRICULAR[serie];
+        let disc = MATRIZ_CURRICULAR[serie];
         if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
-            discDisponiveis = [dadosEscopoUsuario.materiaEscopo];
+            disc = [dadosEscopoUsuario.materiaEscopo];
         }
-        discDisponiveis.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
+        disc.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
     }
 
     function atualizarPainelPesosPacotes() {
@@ -662,34 +742,21 @@
         const turma = document.getElementById('nota-turma').value;
         const disciplina = document.getElementById('nota-disciplina').value;
         const eixo = document.getElementById('nota-eixo').value;
-        
         const container = document.getElementById('container-pesos-pacotes');
         container.innerHTML = "";
-
         let pacotes = eixo === 'continuas' ? ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'] : eixo === 'bimestrais' ? ['B1', 'B2', 'B3', 'B4'] : ['R1', 'R2'];
-
         let configSalva = pesosSalvosGlobal.find(p => p.bimestre === bimestre && p.serie === serie && p.turma === turma && p.disciplina === disciplina && p.eixo === eixo);
         let pesosObj = {};
-        if (configSalva && configSalva.pesosJson) {
-            try { pesosObj = JSON.parse(configSalva.pesosJson); } catch(e){}
-        }
-
+        if (configSalva && configSalva.pesosJson) { try { pesosObj = JSON.parse(configSalva.pesosJson); } catch(e){} }
         const selPacoteAlvo = document.getElementById('atividade-pacote-alvo');
         selPacoteAlvo.innerHTML = "";
-
         pacotes.forEach((p, idx) => {
-            let valorPadrao = 0;
-            if (pesosObj[p] !== undefined) valorPadrao = pesosObj[p];
-            else if (idx === 0 && Object.keys(pesosObj).length === 0) valorPadrao = 100;
-
+            let valorPadrao = pesosObj[p] !== undefined ? pesosObj[p] : (idx === 0 && Object.keys(pesosObj).length === 0 ? 100 : 0);
             let div = document.createElement('div');
             div.className = 'pacote-box';
             div.innerHTML = `<label><strong>${p}</strong> (Peso % no Eixo):</label><input type="number" min="0" max="100" value="${valorPadrao}" class="input-peso-pacote" data-pacote="${p}" oninput="calcularSomaPesosPacotes()" style="width: 100px; text-align: center;">`;
             container.appendChild(div);
-
-            let opt = document.createElement('option');
-            opt.value = p; opt.text = `Pacote ${p}`;
-            selPacoteAlvo.appendChild(opt);
+            let opt = document.createElement('option'); opt.value = p; opt.text = `Pacote ${p}`; selPacoteAlvo.appendChild(opt);
         });
         calcularSomaPesosPacotes();
     }
@@ -699,7 +766,6 @@
         document.querySelectorAll('.input-peso-pacote').forEach(inp => { soma += parseFloat(inp.value) || 0; });
         const aviso = document.getElementById('aviso-soma-pesos');
         const btnAvancar = document.getElementById('btn-avancar-notas');
-
         if (soma === 100) {
             aviso.innerText = "Soma dos pesos correta (100%)."; aviso.style.color = "#016552";
             btnAvancar.disabled = false; btnAvancar.style.opacity = "1";
@@ -719,7 +785,7 @@
         const pacoteAlvo = document.getElementById('atividade-pacote-alvo').value;
         const pesoAtividade = parseFloat(document.getElementById('atividade-peso').value) || 1;
 
-        if(!serie || !turma || !disciplina) { alert("Preencha todos os campos de configuração da turma."); return; }
+        if(!serie || !turma || !disciplina) { alert("Preencha todos os campos."); return; }
         if(!nomeAtividade) { alert("Dê um nome para a atividade."); return; }
 
         let pesosConfigurados = {}; let soma = 0;
@@ -727,25 +793,22 @@
             let p = inp.getAttribute('data-pacote'); let v = parseFloat(inp.value) || 0;
             if(v > 0) { pesosConfigurados[p] = v; soma += v; }
         });
-
-        if (soma !== 100) { alert("A soma dos pesos dos pacotes deve ser exatamente 100%."); return; }
+        if (soma !== 100) { alert("A soma dos pesos deve ser exatamente 100%."); return; }
 
         fetch(API_URL, {
             method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ modulo: 'salvar_pesos', emailUsuario: usuarioLogado, bimestre, serie, turma, disciplina, eixo, pesos: pesosConfigurados })
         });
-
         gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade);
     }
 
     function gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade) {
-        const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (!a.turma || a.turma === turma));
-        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Pacote: ${pacoteAlvo} | Atividade: "${nomeAtividade}" (Peso ${pesoAtividade})`;
+        const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (a.turma === turma || (!a.turma && turma === "Única")));
+        document.getElementById('titulo-turma-notas').innerText = `${bimestre} | ${disciplina} | ${serie} (${turma}) | Pacote: ${pacoteAlvo} | Atividade: "${nomeAtividade}"`;
         document.getElementById('th-atividade-label').innerText = `${nomeAtividade} (Peso ${pesoAtividade}) - Nota 0-100`;
 
         const corpo = document.getElementById('corpo-tabela-notas');
         corpo.innerHTML = "";
-
         alunosTurma.forEach(aluno => {
             const tr = document.createElement('tr');
             let notaExistente = "";
@@ -763,7 +826,6 @@
             `;
             corpo.appendChild(tr);
         });
-
         document.getElementById('form-config-notas').classList.add('hidden');
         document.getElementById('container-tabela-notas').classList.remove('hidden');
     }
@@ -782,7 +844,6 @@
     function salvarNotasEmLote() {
         const btn = document.getElementById('btn-salvar-notas');
         btn.innerText = "Salvando..."; btn.disabled = true;
-
         const bimestre = document.getElementById('nota-bimestre').value;
         const serie = document.getElementById('nota-serie').value;
         const turma = document.getElementById('nota-turma').value;
@@ -794,7 +855,7 @@
             let notaVal = inp.value.trim();
             if(notaVal !== "") {
                 lancamentos.push({
-                    bimestre: bimestre, serie: serie, turma: turma, disciplina: disciplina, eixo: eixo,
+                    bimestre, serie, turma, disciplina, eixo,
                     pacote: inp.getAttribute('data-pacote'),
                     nomeAtividade: inp.getAttribute('data-atividade'),
                     pesoAtividade: parseFloat(inp.getAttribute('data-pesoa')) || 1,
@@ -818,18 +879,16 @@
         });
     }
 
-    // --- ROTAS DO BOLETIM INDIVIDUAL DO ALUNO ---
+    // Boletim Individual
     function abrirTelaFiltroBoletimAluno() {
         document.getElementById('submenu-notas').classList.add('hidden');
         document.getElementById('modulo-exibicao-boletim-aluno').classList.add('hidden');
         document.getElementById('modulo-filtro-boletim-aluno').classList.remove('hidden');
-        
         fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
             listaDeAlunos = alunos;
-            const seriesUnicas = [...new Set(alunos.map(a => a.serie))].filter(Boolean);
             const selSerie = document.getElementById('aluno-filtro-serie');
             selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-            seriesUnicas.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+            [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
         });
     }
 
@@ -838,8 +897,7 @@
         const selAluno = document.getElementById('aluno-filtro-ra');
         selAluno.innerHTML = '<option value="">Selecione o aluno...</option>';
         if(!serie) return;
-        const alunosFiltrados = listaDeAlunos.filter(a => a.serie === serie);
-        alunosFiltrados.forEach(a => {
+        listaDeAlunos.filter(a => a.serie === serie).forEach(a => {
             let o = document.createElement('option'); o.value = a.ra; o.text = `${a.nome} (RA: ${a.ra})`;
             selAluno.appendChild(o);
         });
@@ -848,32 +906,25 @@
     function gerarBoletimIndividualAluno() {
         const raAluno = document.getElementById('aluno-filtro-ra').value;
         const serie = document.getElementById('aluno-filtro-serie').value;
-
         if(!raAluno || !serie) { alert("Selecione a série e o aluno."); return; }
 
         let alunoObj = listaDeAlunos.find(a => String(a.ra) === String(raAluno));
-        let nomeAluno = alunoObj ? alunoObj.nome : "Estudante";
-
         document.getElementById('modulo-filtro-boletim-aluno').classList.add('hidden');
         document.getElementById('modulo-exibicao-boletim-aluno').classList.remove('hidden');
         document.getElementById('carregando-boletim-aluno').classList.remove('hidden');
         document.getElementById('tabela-boletim-aluno').classList.add('hidden');
-
-        document.getElementById('titulo-boletim-aluno').innerText = `BOLETIM ESCOLAR 2026 - ${nomeAluno} (${serie})`;
+        document.getElementById('titulo-boletim-aluno').innerText = `BOLETIM ESCOLAR 2026 - ${alunoObj.nome} (${serie})`;
 
         Promise.all([
             fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
             fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
         ]).then(([notas, pesos]) => {
-            notasJaLancadasGlobal = notas;
-            pesosSalvosGlobal = pesos;
-
+            notasJaLancadasGlobal = notas; pesosSalvosGlobal = pesos;
             document.getElementById('carregando-boletim-aluno').classList.add('hidden');
             document.getElementById('tabela-boletim-aluno').classList.remove('hidden');
 
             const corpo = document.getElementById('corpo-tabela-boletim-aluno');
             corpo.innerHTML = "";
-
             const bimestres = ["1º Bimestre", "2º Bimestre", "3º Bimestre", "4º Bimestre"];
             let disciplinasSerie = MATRIZ_CURRICULAR[serie] || [];
 
@@ -881,27 +932,18 @@
                 let regraSerieDisc = obterRegraPesos(serie, disc);
                 const tr = document.createElement('tr');
                 let htmlLinha = `<td><strong>${disc}</strong></td>`;
-                
-                let somatoriaMediasBimestrais = 0;
-                let bimestresValidos = 0;
+                let somaMedias = 0, validos = 0;
 
                 bimestres.forEach(bim => {
-                    let turmaAluno = alunoObj ? (alunoObj.turma || "Turma 1") : "Turma 1";
+                    let turmaAluno = alunoObj.turma || "Única";
                     let mb = calcularMediaBimestralAlunoDisc(notas, pesos, bim, serie, turmaAluno, disc, raAluno, regraSerieDisc);
-                    let notaR = "-"; // Recuperação paralela
-
                     let classeMb = (mb !== "-" && parseFloat(mb) < 50) ? "nota-abaixo" : "";
-                    htmlLinha += `<td class="${classeMb}">${mb}</td><td>${notaR}</td><td>-</td>`;
-                    
-                    if(mb !== "-") {
-                        somatoriaMediasBimestrais += parseFloat(mb);
-                        bimestresValidos++;
-                    }
+                    htmlLinha += `<td class="${classeMb}">${mb}</td><td>-</td><td>-</td>`;
+                    if(mb !== "-") { somaMedias += parseFloat(mb); validos++; }
                 });
 
-                let mediaAnual = bimestresValidos > 0 ? (somatoriaMediasBimestrais / bimestresValidos).toFixed(1) : "-";
+                let mediaAnual = validos > 0 ? (somaMedias / validos).toFixed(1) : "-";
                 let classeAnual = (mediaAnual !== "-" && parseFloat(mediaAnual) < 50) ? "nota-abaixo" : "";
-
                 htmlLinha += `<td>-</td><td>-</td><td>-</td><td class="${classeAnual}"><strong>${mediaAnual}</strong></td>`;
                 tr.innerHTML = htmlLinha;
                 corpo.appendChild(tr);
@@ -909,18 +951,16 @@
         });
     }
 
-    // --- ROTAS DO BOLETIM CONSOLIDADO DA TURMA ---
+    // Boletim Consolidado
     function abrirTelaFiltroBoletimTurma() {
         document.getElementById('submenu-notas').classList.add('hidden');
         document.getElementById('modulo-exibicao-boletim-turma').classList.add('hidden');
         document.getElementById('modulo-filtro-boletim-turma').classList.remove('hidden');
-        
         fetch(API_URL + '?acao=buscarAlunos').then(res => res.json()).then(alunos => {
             listaDeAlunos = alunos;
-            const seriesUnicas = [...new Set(alunos.map(a => a.serie))].filter(Boolean);
             const selSerie = document.getElementById('turma-filtro-serie');
             selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-            seriesUnicas.forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+            [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
         });
     }
 
@@ -929,69 +969,60 @@
         const selTurma = document.getElementById('turma-filtro-sala');
         selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
         if(!serie) return;
-        const turmasUnicas = [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Turma Única"))].filter(Boolean);
-        turmasUnicas.forEach(t => { let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o); });
+        [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Única"))].filter(Boolean).forEach(t => {
+            let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o);
+        });
     }
 
     function gerarBoletimConsolidadoTurma() {
         const bimestreRef = document.getElementById('turma-filtro-bimestre').value;
         const serie = document.getElementById('turma-filtro-serie').value;
         const turma = document.getElementById('turma-filtro-sala').value;
-
         if(!serie || !turma) { alert("Selecione a série e a turma."); return; }
 
         document.getElementById('modulo-filtro-boletim-turma').classList.add('hidden');
         document.getElementById('modulo-exibicao-boletim-turma').classList.remove('hidden');
         document.getElementById('carregando-boletim-turma').classList.remove('hidden');
         document.getElementById('tabela-boletim-turma-consolidado').classList.add('hidden');
-
         document.getElementById('titulo-boletim-turma-consolidado').innerText = `BOLETIM CONSOLIDADO | ${serie} (${turma}) - ${bimestreRef}`;
 
         Promise.all([
             fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
             fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
         ]).then(([notas, pesos]) => {
-            notasJaLancadasGlobal = notas;
-            pesosSalvosGlobal = pesos;
-
+            notasJaLancadasGlobal = notas; pesosSalvosGlobal = pesos;
             document.getElementById('carregando-boletim-turma').classList.add('hidden');
             document.getElementById('tabela-boletim-turma-consolidado').classList.remove('hidden');
 
-            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (!a.turma || a.turma === turma));
+            const alunosTurma = listaDeAlunos.filter(a => a.serie === serie && (a.turma === turma || (!a.turma && turma === "Única")));
             const head = document.getElementById('head-consolidado-turma');
             const corpo = document.getElementById('corpo-consolidado-turma');
-            head.innerHTML = "";
-            corpo.innerHTML = "";
+            head.innerHTML = ""; corpo.innerHTML = "";
 
             if (alunosTurma.length === 0) {
-                corpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum aluno encontrado para esta turma.</td></tr>`;
+                corpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum aluno encontrado.</td></tr>`;
                 return;
             }
 
             let disciplinasSerie = MATRIZ_CURRICULAR[serie] || [];
-
             let trHead = `<tr><th>Estudante (RA)</th>`;
-            disciplinasSerie.forEach(disc => {
-                trHead += `<th>${disc}</th>`;
-            });
+            disciplinasSerie.forEach(disc => { trHead += `<th>${disc}</th>`; });
             trHead += `</tr>`;
             head.innerHTML = trHead;
 
             alunosTurma.forEach(aluno => {
                 let trHtml = `<td><strong>${aluno.nome}</strong><br><small>RA: ${aluno.ra}</small></td>`;
-
                 disciplinasSerie.forEach(disc => {
                     let regraSerieDisc = obterRegraPesos(serie, disc);
                     let notaExibida = "-";
 
                     if (bimestreRef === "Média Anual") {
-                        let somatoriaMediasBimestrais = 0;
-                        let bimestresValidos = 0;
+                        let somaMedias = 0, validos = 0;
                         ["1º Bimestre", "2º Bimestre", "3º Bimestre", "4º Bimestre"].forEach(bim => {
                             let mb = calcularMediaBimestralAlunoDisc(notas, pesos, bim, serie, turma, disc, aluno.ra, regraSerieDisc);
-                            if(mb !== "-") { somatoriaMediasBimestrais += parseFloat(mb); bimestresValidos++; }
+                            if(mb !== "-") { somaMedias += parseFloat(mb); validos++; }
                         });
-                        if(bimestresValidos > 0) notaExibida = (somatoriaMediasBimestrais / bimestresValidos).toFixed(1);
+                        if(validos > 0) notaExibida = (somaMedias / validos).toFixed(1);
                     } else {
                         notaExibida = calcularMediaBimestralAlunoDisc(notas, pesos, bimestreRef, serie, turma, disc, aluno.ra, regraSerieDisc);
                     }
@@ -999,7 +1030,6 @@
                     let classeNota = (notaExibida !== "-" && parseFloat(notaExibida) < 50) ? "nota-abaixo" : "";
                     trHtml += `<td class="${classeNota}">${notaExibida}</td>`;
                 });
-
                 let tr = document.createElement('tr');
                 tr.innerHTML = trHtml;
                 corpo.appendChild(tr);
@@ -1027,25 +1057,15 @@
         });
 
         let configC = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'continuas');
-        let configB = pesos.find(p => p.bimestre === bimestre && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'bimestrais');
+        let configB = pesos.find(p => p.bimestre === bim && p.serie === serie && p.turma === turma && p.disciplina === disc && p.eixo === 'bimestrais');
         let pesosC = configC ? JSON.parse(configC.pesosJson) : { 'C1': 100 };
         let pesosB = configB ? JSON.parse(configB.pesosJson) : { 'B1': 100 };
 
         let somaContínuas = 0; let temC = false;
-        Object.keys(pesosC).forEach(pkg => {
-            if(mediasPacotesCalculadas[pkg] !== undefined) {
-                somaContínuas += (mediasPacotesCalculadas[pkg] * (pesosC[pkg] / 100));
-                temC = true;
-            }
-        });
+        Object.keys(pesosC).forEach(pkg => { if(mediasPacotesCalculadas[pkg] !== undefined) { somaContínuas += (mediasPacotesCalculadas[pkg] * (pesosC[pkg] / 100)); temC = true; } });
 
         let somaBimestrais = 0; let temB = false;
-        Object.keys(pesosB).forEach(pkg => {
-            if(mediasPacotesCalculadas[pkg] !== undefined) {
-                somaBimestrais += (mediasPacotesCalculadas[pkg] * (pesosB[pkg] / 100));
-                temB = true;
-            }
-        });
+        Object.keys(pesosB).forEach(pkg => { if(mediasPacotesCalculadas[pkg] !== undefined) { somaBimestrais += (mediasPacotesCalculadas[pkg] * (pesosB[pkg] / 100)); temB = true; } });
 
         if (temC || (temB && regraSerieDisc.prova > 0) || (regraSerieDisc.prova === 0 && temC)) {
             let calculada = (somaContínuas * (regraSerieDisc.cont / 100)) + (somaBimestrais * (regraSerieDisc.prova / 100));

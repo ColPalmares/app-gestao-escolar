@@ -39,39 +39,37 @@ function carregarAlunosPorSerieOcorrencia() {
     });
 }
 
-function salvarOcorrencia() {
+async function salvarOcorrencia() {
     const data = document.getElementById('ocorrencia-data').value;
     const ra = document.getElementById('ocorrencia-aluno').value;
     const tipo = document.getElementById('ocorrencia-tipo').value;
     const relato = document.getElementById('ocorrencia-relato').value;
     const sancao = document.getElementById('ocorrencia-sancao').value;
     
-    if(!data || !ra || !tipo) {
-        alert("Preencha os campos obrigatórios (Data, Aluno e Tipo).");
+    if(!data || !ra) {
+        alert("Preencha a data e selecione o aluno.");
         return;
     }
     
     let aluno = listaDeAlunos.find(a => String(a.ra) === String(ra));
     
-    fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            modulo: 'ocorrencias',
-            emailUsuario: usuarioLogado,
-            dataOcorrencia: data,
-            serie: aluno.serie,
-            nome: aluno.nome,
-            ra: aluno.ra,
-            tipoOcorrencia: tipo,
-            relato: relato,
-            sancao: sancao
-        })
-    }).then(() => {
-        alert("Ocorrência salva com sucesso!");
+    const { error } = await _supabase.from('ocorrencias').insert([{
+        usuario: usuarioLogado,
+        data_ocorrencia: data,
+        ra: aluno.ra,
+        nome: aluno.nome,
+        serie: aluno.serie,
+        tipo_ocorrencia: tipo,
+        relato: relato,
+        sancao: sancao
+    }]);
+
+    if (error) {
+        alert("Erro ao salvar ocorrência: " + error.message);
+    } else {
+        alert("Ocorrência registrada com sucesso!");
         voltarAoSubmenuOcorrencias();
-    });
+    }
 }
 
 function abrirTelaConsultaOcorrencia() {

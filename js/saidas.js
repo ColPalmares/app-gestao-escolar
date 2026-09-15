@@ -42,7 +42,7 @@ function carregarAlunosPorSerieSaida() {
     });
 }
 
-function salvarSaida() {
+async function salvarSaida() {
     const data = document.getElementById('saida-data').value;
     const ra = document.getElementById('saida-aluno').value;
     const tipo = document.getElementById('saida-tipo').value;
@@ -55,39 +55,34 @@ function salvarSaida() {
     
     let aluno = listaDeAlunos.find(a => String(a.ra) === String(ra));
     
-    fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            modulo: 'autorizacao_saida',
-            emailUsuario: usuarioLogado,
-            dataSaida: data,
-            nome: aluno.nome,
-            ra: aluno.ra,
-            serie: aluno.serie,
-            tipo: tipo,
-            descricao: desc
-        })
-    }).then(() => {
-        alert("Autorização salva com sucesso!");
+    const { error } = await _supabase.from('autorizacoes_saida').insert([{
+        usuario: usuarioLogado,
+        data_saida: data,
+        ra: aluno.ra,
+        nome: aluno.nome,
+        serie: aluno.serie,
+        tipo: tipo,
+        descricao: desc
+    }]);
+
+    if (error) {
+        alert("Erro ao salvar: " + error.message);
+    } else {
+        alert("Autorização salva com sucesso no Supabase!");
         voltarAoSubmenuSaida();
-    });
+    }
 }
 
-function abrirTelaConsultaSaida() {
+async function abrirTelaConsultaSaida() {
     document.getElementById('submenu-saida').classList.add('hidden');
     document.getElementById('modulo-consulta-saida').classList.remove('hidden');
-    document.getElementById('filtro-tipo-saida').value = 'TODOS';
-    document.getElementById('filtro-data-saida').value = '';
-    document.getElementById('filtro-busca-saida').value = '';
     
-    fetch(API_URL + '?acao=buscarRegistrosSaida')
-        .then(res => res.json())
-        .then(lista => {
-            cacheSaidas = lista;
-            renderizarTabelaSaidas(lista);
-        });
+    const { data, error } = await _supabase.from('autorizacoes_saida').select('*').order('id', { ascending: false });
+    
+    if (!error) {
+        cacheSaidas = data;
+        renderizarTabelaSaidas(data);
+    }
 }
 
 function filtrarTabelaSaidas() {

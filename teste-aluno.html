@@ -1,1 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Supabase - Cadastro de Alunos</title>
+    <!-- Carrega a biblioteca oficial do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 40px; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        h2 { color: #1a73e8; text-align: center; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        button:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
 
+<div class="container">
+    <h2>Cadastro de Novo Aluno (Teste)</h2>
+    
+    <div class="form-group">
+        <label>RA (Registro Acadêmico):</label>
+        <input type="text" id="campo-ra" placeholder="Ex: 2026001">
+    </div>
+    <div class="form-group">
+        <label>Nome do Aluno:</label>
+        <input type="text" id="campo-nome" placeholder="Nome completo">
+    </div>
+    <div class="form-group">
+        <label>Série/Ano:</label>
+        <select id="campo-serie">
+            <option value="">Selecione...</option>
+            <option value="1º Ano">1º Ano</option>
+            <option value="6º Ano">6º Ano</option>
+            <option value="1ª Série (EM)">1ª Série (EM)</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>E-mail do Aluno:</label>
+        <input type="email" id="campo-email" placeholder="aluno@email.com">
+    </div>
+    
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    <h3 style="color: #666; font-size: 16px; margin-top: 0;">Dados dos Responsáveis</h3>
+    
+    <div style="display: flex; gap: 15px;">
+        <div class="form-group" style="flex: 1;">
+            <label>Nome do Pai:</label>
+            <input type="text" id="campo-pai">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Telefone do Pai:</label>
+            <input type="text" id="campo-tel-pai" placeholder="(11) 90000-0000">
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 15px;">
+        <div class="form-group" style="flex: 1;">
+            <label>Nome da Mãe:</label>
+            <input type="text" id="campo-mae">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Telefone da Mãe:</label>
+            <input type="text" id="campo-tel-mae" placeholder="(11) 90000-0000">
+        </div>
+    </div>
+
+    <button id="btn-salvar" onclick="salvarAluno()">💾 Salvar Aluno no Supabase</button>
+</div>
+
+<script>
+    // 1. Configure suas chaves de acesso aqui!
+    const SUPABASE_URL = 'https://wngloiajewzhevkifnfp.supabase.co/rest/v1/';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduZ2xvaWFqZXd6aGV2a2lmbmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODk3NzQsImV4cCI6MjEwNTA2NTc3NH0.A-_E2afJp5aYYFqLVoaS7DigOhH0tFE0mMPKUtLmgYk';
+
+    // 2. Inicializa a conexão com o banco
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 3. Função para enviar os dados
+    async function salvarAluno() {
+        const btn = document.getElementById('btn-salvar');
+        btn.innerText = "Salvando...";
+        btn.disabled = true;
+
+        // Captura os valores digitados
+        const dadosAluno = {
+            ra: document.getElementById('campo-ra').value,
+            nome: document.getElementById('campo-nome').value,
+            serie: document.getElementById('campo-serie').value,
+            email: document.getElementById('campo-email').value,
+            nome_pai: document.getElementById('campo-pai').value,
+            telefone_pai: document.getElementById('campo-tel-pai').value,
+            nome_mae: document.getElementById('campo-mae').value,
+            telefone_mae: document.getElementById('campo-tel-mae').value
+        };
+
+        if(!dadosAluno.ra || !dadosAluno.nome || !dadosAluno.serie) {
+            alert("Preencha RA, Nome e Série!");
+            btn.innerText = "💾 Salvar Aluno no Supabase";
+            btn.disabled = false;
+            return;
+        }
+
+        // Insere na tabela 'alunos' do Supabase
+        const { data, error } = await supabase
+            .from('alunos')
+            .insert([dadosAluno]);
+
+        if (error) {
+            alert("Erro ao salvar: " + error.message);
+        } else {
+            alert("🎉 Aluno salvo com sucesso no Supabase!");
+            // Limpa os campos após salvar
+            document.querySelectorAll('input').forEach(input => input.value = '');
+            document.getElementById('campo-serie').value = '';
+        }
+        
+        btn.innerText = "💾 Salvar Aluno no Supabase";
+        btn.disabled = false;
+    }
+</script>
+</body>
+</html>

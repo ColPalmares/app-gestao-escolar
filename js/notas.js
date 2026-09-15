@@ -264,7 +264,29 @@ function salvarNotasEmLote() {
         alert("Erro ao salvar."); btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
     });
 }
+async function salvarNotasNoBanco(lancamentosArray) {
+    // lancamentosArray é a lista de notas gerada na tela do professor
+    const dadosFormatados = lancamentosArray.map(l => ({
+        usuario: usuarioLogado,
+        serie: l.serie,
+        turma: l.turma,
+        disciplina: l.disciplina,
+        trimestre: l.bimestre,
+        pacote: l.pacote,
+        atividade: l.nomeAtividade,
+        ra: l.ra,
+        nome: l.nome,
+        nota: l.nota
+    }));
 
+    const { error } = await _supabase.from('notas').upsert(dadosFormatados);
+
+    if (error) {
+        alert("Erro ao salvar notas: " + error.message);
+    } else {
+        alert("Notas salvas com sucesso no Supabase!");
+    }
+}
 // Matriz Analítica
 function abrirTelaFiltroMatrizAnalitica() {
     document.getElementById('submenu-notas').classList.add('hidden');

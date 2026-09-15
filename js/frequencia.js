@@ -39,11 +39,11 @@ function carregarAlunosPorSerieFreq() {
     });
 }
 
-function salvarFrequencia() {
+async function salvarFrequencia() {
     const data = document.getElementById('freq-data').value;
     const ra = document.getElementById('freq-aluno').value;
     const status = document.getElementById('freq-status').value;
-    const just = document.getElementById('freq-justificativa').value;
+    const justificativa = document.getElementById('freq-justificativa').value;
     const obs = document.getElementById('freq-obs').value;
     
     if(!data || !ra) {
@@ -53,25 +53,23 @@ function salvarFrequencia() {
     
     let aluno = listaDeAlunos.find(a => String(a.ra) === String(ra));
     
-    fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            modulo: 'frequencia',
-            emailUsuario: usuarioLogado,
-            dataFrequencia: data,
-            nome: aluno.nome,
-            ra: aluno.ra,
-            serie: aluno.serie,
-            frequencia: status,
-            justificativa: just,
-            observacoes: obs
-        })
-    }).then(() => {
+    const { error } = await _supabase.from('frequencias').insert([{
+        usuario: usuarioLogado,
+        data_frequencia: data,
+        ra: aluno.ra,
+        nome: aluno.nome,
+        serie: aluno.serie,
+        status: status,
+        justificativa: justificativa,
+        obs: obs
+    }]);
+
+    if (error) {
+        alert("Erro ao salvar frequência: " + error.message);
+    } else {
         alert("Frequência salva com sucesso!");
         voltarAoSubmenuFrequencia();
-    });
+    }
 }
 
 function abrirTelaConsultaFrequencia() {

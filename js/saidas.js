@@ -42,6 +42,7 @@ function carregarAlunosPorSerieSaida() {
     });
 }
 
+// 🚀 SALVAR SAÍDA DIRETAMENTE NO SUPABASE
 async function salvarSaida() {
     const data = document.getElementById('saida-data').value;
     const ra = document.getElementById('saida-aluno').value;
@@ -66,23 +67,33 @@ async function salvarSaida() {
     }]);
 
     if (error) {
-        alert("Erro ao salvar: " + error.message);
+        alert("Erro ao salvar no Supabase: " + error.message);
     } else {
         alert("Autorização salva com sucesso no Supabase!");
         voltarAoSubmenuSaida();
     }
 }
 
+// 🚀 CONSULTAR SAÍDAS DIRETAMENTE DO SUPABASE
 async function abrirTelaConsultaSaida() {
     document.getElementById('submenu-saida').classList.add('hidden');
     document.getElementById('modulo-consulta-saida').classList.remove('hidden');
+    document.getElementById('filtro-tipo-saida').value = 'TODOS';
+    document.getElementById('filtro-data-saida').value = '';
+    document.getElementById('filtro-busca-saida').value = '';
     
-    const { data, error } = await _supabase.from('autorizacoes_saida').select('*').order('id', { ascending: false });
-    
-    if (!error) {
-        cacheSaidas = data;
-        renderizarTabelaSaidas(data);
+    const { data, error } = await _supabase
+        .from('autorizacoes_saida')
+        .select('*')
+        .order('id', { ascending: false });
+        
+    if (error) {
+        alert("Erro ao buscar registros: " + error.message);
+        return;
     }
+    
+    cacheSaidas = data || [];
+    renderizarTabelaSaidas(cacheSaidas);
 }
 
 function filtrarTabelaSaidas() {
@@ -92,7 +103,7 @@ function filtrarTabelaSaidas() {
     
     let filtrados = cacheSaidas.filter(l => {
         let matchTipo = (tipoFiltro === 'TODOS' || l.tipo === tipoFiltro);
-        let dataRegFmt = l.dataSaida ? l.dataSaida.split('T')[0] : "";
+        let dataRegFmt = l.data_saida ? l.data_saida.split('T')[0] : "";
         let matchData = (!dataFiltro || dataRegFmt === dataFiltro);
         let matchBusca = (!busca || l.nome.toLowerCase().includes(busca) || String(l.ra).includes(busca) || l.serie.toLowerCase().includes(busca));
         return matchTipo && matchData && matchBusca;
@@ -118,16 +129,18 @@ function renderizarTabelaSaidas(lista) {
     }
     
     lista.forEach(l => {
-        let dataFmt = l.dataSaida ? new Date(l.dataSaida).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : "-";
+        let dataRegFmt = l.data_registro ? new Date(l.data_registro).toLocaleDateString() : "-";
+        let dataFmt = l.data_saida ? new Date(l.data_saida).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : "-";
+        
         corpo.innerHTML += `<tr>
-            <td>${new Date(l.dataRegistro).toLocaleDateString()}</td>
+            <td>${dataRegFmt}</td>
             <td>${l.usuario}</td>
             <td>${dataFmt}</td>
             <td><strong>${l.nome}</strong></td>
             <td>${l.ra}</td>
             <td>${l.serie}</td>
             <td>${l.tipo}</td>
-            <td>${l.descricao}</td>
+            <td>${l.descricao || ''}</td>
         </tr>`;
     });
 }

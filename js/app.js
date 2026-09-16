@@ -41,7 +41,6 @@ async function carregarAlunosGlobal(callback) {
         return;
     }
     
-    // Puxa da tabela 'alunos' que você criou no primeiro teste
     const { data, error } = await _supabase
         .from('alunos')
         .select('*')
@@ -52,6 +51,12 @@ async function carregarAlunosGlobal(callback) {
         return;
     }
     
-    listaDeAlunos = data || [];
+    // 🚀 Normaliza os dados igual fazíamos no Apps Script antigo
+    listaDeAlunos = (data || []).map(a => ({
+        ...a,
+        ra: String(a.ra), // Força o RA a ser texto para os filtros não quebrarem
+        turma: a.turma ? String(a.turma) : "Única" // Se estiver vazio, vira Única
+    }));
+    
     if(callback) callback(listaDeAlunos);
 }

@@ -18,9 +18,12 @@ function abrirFormularioOcorrencia() {
     
     carregarAlunosGlobal(alunos => {
         const sel = document.getElementById('ocorrencia-serie');
-        sel.innerHTML = '<option value="">Selecione...</option>';
+        sel.innerHTML = '<option value="">Selecione a série...</option>';
         [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => {
-            let o = document.createElement('option'); o.value = s; o.text = s; sel.appendChild(o);
+            let o = document.createElement('option');
+            o.value = s;
+            o.text = s;
+            sel.appendChild(o);
         });
     });
 }
@@ -34,28 +37,29 @@ function carregarAlunosPorSerieOcorrencia() {
     listaDeAlunos.filter(a => a.serie === serie).forEach(a => {
         let opt = document.createElement('option');
         opt.value = a.ra;
-        opt.text = `${a.nome} (RA: ${a.ra}) - Turma: ${a.turma}`;
+        opt.text = `${a.nome} (RA: ${a.ra}) - Turma: ${a.turma || ''}`;
         selAluno.appendChild(opt);
     });
 }
 
+// 🚀 SALVAR OCORRÊNCIA DIRETAMENTE NO SUPABASE
 async function salvarOcorrencia() {
-    const data = document.getElementById('ocorrencia-data').value;
+    const dataOcorrencia = document.getElementById('ocorrencia-data').value;
     const ra = document.getElementById('ocorrencia-aluno').value;
     const tipo = document.getElementById('ocorrencia-tipo').value;
     const relato = document.getElementById('ocorrencia-relato').value;
     const sancao = document.getElementById('ocorrencia-sancao').value;
     
-    if(!data || !ra) {
-        alert("Preencha a data e selecione o aluno.");
+    if(!dataOcorrencia || !ra || !tipo) {
+        alert("Preencha os campos obrigatórios (Data, Aluno e Tipo).");
         return;
     }
     
     let aluno = listaDeAlunos.find(a => String(a.ra) === String(ra));
     
     const { error } = await _supabase.from('ocorrencias').insert([{
-        usuario: usuarioLogado,
-        data_ocorrencia: data,
+        usuario: 'Teste Aberto', // Temporário enquanto validamos a plataforma aberta
+        data_ocorrencia: dataOcorrencia,
         ra: aluno.ra,
         nome: aluno.nome,
         serie: aluno.serie,
@@ -65,33 +69,45 @@ async function salvarOcorrencia() {
     }]);
 
     if (error) {
-        alert("Erro ao salvar ocorrência: " + error.message);
+        alert("Erro ao salvar ocorrência no Supabase: " + error.message);
     } else {
-        alert("Ocorrência registrada com sucesso!");
+        alert("Ocorrência salva com sucesso no Supabase!");
         voltarAoSubmenuOcorrencias();
+        // Limpa o formulário
+        document.getElementById('ocorrencia-tipo').value = '';
+        document.getElementById('ocorrencia-relato').value = '';
+        document.getElementById('ocorrencia-sancao').value = '';
     }
 }
 
-function abrirTelaConsultaOcorrencia() {
+// 🚀 CONSULTAR OCORRÊNCIAS DIRETAMENTE DO SUPABASE
+async function abrirTelaConsultaOcorrencia() {
     document.getElementById('submenu-ocorrencias').classList.add('hidden');
     document.getElementById('modulo-consulta-ocorrencia').classList.remove('hidden');
-    document.getElementById('filtro-data-ocorrencia').value = '';
-    document.getElementById('filtro-busca-ocorrencia').value = '';
     
-    fetch(API_URL + '?acao=buscarRegistrosOcorrencias')
-        .then(res => res.json())
-        .then(lista => {
-            cacheOcorrencias = lista;
-            renderizarTabelaOcorrencias(lista);
-        });
+    if(document.getElementById('filtro-data-ocorrencia')) document.getElementById('filtro-data-ocorrencia').value = '';
+    if(document.getElementById('filtro-busca-ocorrencia')) document.getElementById('filtro-busca-ocorrencia').value = '';
+    
+    const { data, error } = await _supabase
+        .from('ocorrencias')
+        .select('*')
+        .order('id', { ascending: false });
+        
+    if (error) {
+        alert("Erro ao buscar registros: " + error.message);
+        return;
+    }
+    
+    cacheOcorrencias = data || [];
+    renderizarTabelaOcorrencias(cacheOcorrencias);
 }
 
 function filtrarTabelaOcorrencias() {
-    const dataFiltro = document.getElementById('filtro-data-ocorrencia').value;
-    const busca = document.getElementById('filtro-busca-ocorrencia').value.toLowerCase();
+    const dataFiltro = document.getElementById('filtro-data-ocorrencia') ? document.getElementById('filtro-data-ocorrencia').value : '';
+    const busca = document.getElementById('filtro-busca-ocorrencia') ? document.getElementById('filtro-busca-ocorrencia').value.toLowerCase() : '';
     
     let filtrados = cacheOcorrencias.filter(l => {
-        let dataRegFmt = l.dataOcorrencia ? l.dataOcorrencia.split('T')[0] : "";
+        let dataRegFmt = l.data_ocorrencia ? l.data_ocorrencia.split('T')[0] : "";
         let matchData = (!dataFiltro || dataRegFmt === dataFiltro);
         let matchBusca = (!busca || l.nome.toLowerCase().includes(busca) || String(l.ra).includes(busca) || l.serie.toLowerCase().includes(busca));
         return matchData && matchBusca;
@@ -101,32 +117,32 @@ function filtrarTabelaOcorrencias() {
 }
 
 function limparFiltrosOcorrencia() {
-    document.getElementById('filtro-data-ocorrencia').value = '';
-    document.getElementById('filtro-busca-ocorrencia').value = '';
+    if(document.getElementById('filtro-data-ocorrencia')) document.getElementById('filtro-data-ocorrencia').value = '';
+    if(document.getElementById('filtro-busca-ocorrencia')) document.getElementById('filtro-busca-ocorrencia').value = '';
     renderizarTabelaOcorrencias(cacheOcorrencias);
 }
 
 function renderizarTabelaOcorrencias(lista) {
     const corpo = document.getElementById('corpo-tabela-ocorrencias');
+    if(!corpo) return;
     corpo.innerHTML = "";
     
     if(lista.length === 0) {
-        corpo.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`;
+        corpo.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #666;">Nenhum registro encontrado.</td></tr>`;
         return;
     }
     
     lista.forEach(l => {
-        let dataFmt = l.dataOcorrencia ? new Date(l.dataOcorrencia).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : "-";
+        let dataFmt = l.data_ocorrencia ? new Date(l.data_ocorrencia).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : "-";
+        
         corpo.innerHTML += `<tr>
-            <td>${new Date(l.dataRegistro).toLocaleDateString()}</td>
-            <td>${l.usuario}</td>
             <td>${dataFmt}</td>
             <td>${l.serie}</td>
             <td><strong>${l.nome}</strong></td>
             <td>${l.ra}</td>
-            <td>${l.tipoOcorrencia}</td>
-            <td>${l.relato}</td>
-            <td>${l.sancao}</td>
+            <td>${l.tipo_ocorrencia || ''}</td>
+            <td>${l.relato || ''}</td>
+            <td>${l.sancao || ''}</td>
         </tr>`;
     });
 }

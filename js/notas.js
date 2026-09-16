@@ -38,6 +38,58 @@ function obterRegraPesos(serie, disciplina) {
     return serieConfig['default'] || { prova: 0, cont: 100 };
 }
 
+// ==========================================
+// 🚀 FUNÇÕES DE CONEXÃO COM O SUPABASE
+// ==========================================
+
+async function buscarPesosDoBanco() {
+    const { data, error } = await _supabase.from('config_pesos').select('*');
+    if (error) { console.error("Erro ao buscar pesos:", error); return []; }
+    return data.map(l => ({
+        bimestre: l.bimestre, serie: l.serie, turma: l.turma, 
+        disciplina: l.disciplina, eixo: l.eixo, pesosJson: l.pesos_json
+    }));
+}
+
+async function buscarNotasDoBanco() {
+    const { data, error } = await _supabase.from('notas').select('*');
+    if (error) { console.error("Erro ao buscar notas:", error); return []; }
+    return data.map(l => ({
+        bimestre: l.trimestre, serie: l.serie, turma: l.turma, 
+        disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote, 
+        nomeAtividade: l.atividade, pesoAtividade: l.peso_atividade, 
+        ra: l.ra, nome: l.nome, nota: l.nota
+    }));
+}
+
+async function salvarPesosNoBancoSupabase(bimestre, serie, turma, disciplina, eixo, pesos) {
+    await _supabase.from('config_pesos').delete().match({ bimestre, serie, turma, disciplina, eixo });
+    await _supabase.from('config_pesos').insert([{
+        bimestre, serie, turma, disciplina, eixo, pesos_json: JSON.stringify(pesos)
+    }]);
+}
+
+async function salvarNotasNoBancoSupabase(lancamentos) {
+    for (let l of lancamentos) {
+        await _supabase.from('notas').delete().match({ 
+            trimestre: l.bimestre, serie: l.serie, turma: l.turma, 
+            disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote, 
+            atividade: l.nomeAtividade, ra: String(l.ra) 
+        });
+        await _supabase.from('notas').insert([{
+            usuario: typeof usuarioLogado !== 'undefined' && usuarioLogado ? usuarioLogado : 'Teste Aberto',
+            trimestre: l.bimestre, serie: l.serie, turma: l.turma,
+            disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote,
+            atividade: l.nomeAtividade, peso_atividade: l.pesoAtividade,
+            ra: String(l.ra), nome: l.nome, nota: l.nota
+        }]);
+    }
+}
+
+// ==========================================
+// MÓDULO DE INTERFACE - NOTAS E AVALIAÇÕES
+// ==========================================
+
 function abrirMenuNotas() { 
     document.getElementById('tela-menu').classList.add('hidden'); 
     document.getElementById('submenu-notas').classList.remove('hidden'); 
@@ -60,10 +112,11 @@ function abrirFormularioNotas() {
 function carregarDadosParaNotas() {
     document.getElementById('carregando-alunos-notas').classList.remove('hidden');
     document.getElementById('form-config-notas').classList.add('hidden');
+    
     Promise.all([
         new Promise(resolve => carregarAlunosGlobal(res => resolve(res))),
-        fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
-        fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
+        buscarNotasDoBanco(),
+        buscarPesosDoBanco()
     ]).then(([alunos, notas, pesos]) => {
         notasJaLancadasGlobal = notas; 
         pesosSalvosGlobal = pesos;
@@ -81,8 +134,7 @@ function configurarFormNotas() {
     
     let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
     
-    // Se não for admin e houver restrição específica de série cadastrada na planilha
-    if (dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODOS') {
+    if (typeof dadosEscopoUsuario !== 'undefined' && dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODOS') {
         let seriesPermitidas = dadosEscopoUsuario.serieEscopo.split(',').map(s => s.trim());
         seriesDisponiveis = seriesDisponiveis.filter(s => seriesPermitidas.includes(s));
     }
@@ -94,10 +146,37 @@ function configurarFormNotas() {
         selSerie.appendChild(o); 
     });
     
-    // Atualiza turmas e disciplinas mantendo a integridade dos seletores
     atualizarTurmasDinamicas();
     atualizarDisciplinasPorSerie();
     atualizarPainelPesosPacotes();
+}
+
+function atualizarTurmasDinamicas() {
+    const serieSelecionada = document.getElementById('nota-serie').value;
+    const selTurma = document.getElementById('nota-turma');
+    if (!selTurma) return;
+    
+    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+    if (!serieSelecionada) return;
+    
+    let turmasDaSerie = [...new Set(
+        listaDeAlunos
+            .filter(a => a.serie === serieSelecionada && a.turma)
+            .map(a => a.turma)
+    )].filter(Boolean);
+    
+    turmasDaSerie.sort();
+    
+    if(turmasDaSerie.length === 0) {
+        let o = document.createElement('option');
+        o.value = "Única"; o.text = "Única";
+        selTurma.appendChild(o);
+    } else {
+        turmasDaSerie.forEach(t => {
+            let o = document.createElement('option');
+            o.value = t; o.text = t; selTurma.appendChild(o);
+        });
+    }
 }
 
 function atualizarDisciplinasPorSerie() {
@@ -108,8 +187,7 @@ function atualizarDisciplinasPorSerie() {
     
     let disciplinasDisponiveis = MATRIZ_CURRICULAR[serie];
     
-    // Se não for admin e houver restrição de matéria cadastrada na planilha
-    if (dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODOS') {
+    if (typeof dadosEscopoUsuario !== 'undefined' && dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODOS') {
         let materiasPermitidas = dadosEscopoUsuario.materiaEscopo.split(',').map(m => m.trim());
         disciplinasDisponiveis = disciplinasDisponiveis.filter(d => materiasPermitidas.includes(d));
     }
@@ -130,12 +208,16 @@ function atualizarPainelPesosPacotes() {
     const eixo = document.getElementById('nota-eixo').value;
     const container = document.getElementById('container-pesos-pacotes');
     container.innerHTML = "";
+    
     let pacotes = eixo === 'continuas' ? ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'] : eixo === 'bimestrais' ? ['B1', 'B2', 'B3', 'B4'] : ['R1', 'R2'];
     let configSalva = pesosSalvosGlobal.find(p => p.bimestre === bimestre && p.serie === serie && p.turma === turma && p.disciplina === disciplina && p.eixo === eixo);
+    
     let pesosObj = {};
     if (configSalva && configSalva.pesosJson) { try { pesosObj = JSON.parse(configSalva.pesosJson); } catch(e){} }
+    
     const selPacoteAlvo = document.getElementById('atividade-pacote-alvo');
     selPacoteAlvo.innerHTML = "";
+    
     pacotes.forEach((p, idx) => {
         let valorPadrao = pesosObj[p] !== undefined ? pesosObj[p] : (idx === 0 && Object.keys(pesosObj).length === 0 ? 100 : 0);
         let div = document.createElement('div');
@@ -161,7 +243,7 @@ function calcularSomaPesosPacotes() {
     }
 }
 
-function validarEAvancarParaLancamento() {
+async function validarEAvancarParaLancamento() {
     const serie = document.getElementById('nota-serie').value;
     const turma = document.getElementById('nota-turma').value;
     const disciplina = document.getElementById('nota-disciplina').value;
@@ -181,10 +263,9 @@ function validarEAvancarParaLancamento() {
     });
     if (soma !== 100) { alert("A soma dos pesos deve ser exatamente 100%."); return; }
 
-    fetch(API_URL, {
-        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modulo: 'salvar_pesos', emailUsuario: usuarioLogado, bimestre, serie, turma, disciplina, eixo, pesos: pesosConfigurados })
-    });
+    // Salva pesos no Supabase
+    await salvarPesosNoBancoSupabase(bimestre, serie, turma, disciplina, eixo, pesosConfigurados);
+    
     gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade);
 }
 
@@ -251,43 +332,25 @@ function salvarNotasEmLote() {
         }
     });
 
-    if(lancamentos.length === 0) { alert("Insira ao menos uma nota."); btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false; return; }
+    if(lancamentos.length === 0) { 
+        alert("Insira ao menos uma nota."); 
+        btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false; return; 
+    }
 
-    fetch(API_URL, {
-        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modulo: 'notas', emailUsuario: usuarioLogado, lancamentos: lancamentos })
-    }).then(() => {
-        alert("Notas salvas com sucesso!");
+    salvarNotasNoBancoSupabase(lancamentos).then(() => {
+        alert("Notas salvas com sucesso no Supabase!");
         btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
         carregarDadosParaNotas();
-    }).catch(() => {
-        alert("Erro ao salvar."); btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
+    }).catch(err => {
+        alert("Erro ao salvar: " + err.message); 
+        btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
     });
 }
-async function salvarNotasNoBanco(lancamentosArray) {
-    // lancamentosArray é a lista de notas gerada na tela do professor
-    const dadosFormatados = lancamentosArray.map(l => ({
-        usuario: usuarioLogado,
-        serie: l.serie,
-        turma: l.turma,
-        disciplina: l.disciplina,
-        trimestre: l.bimestre,
-        pacote: l.pacote,
-        atividade: l.nomeAtividade,
-        ra: l.ra,
-        nome: l.nome,
-        nota: l.nota
-    }));
 
-    const { error } = await _supabase.from('notas').upsert(dadosFormatados);
+// ==========================================
+// MATRIZ ANALÍTICA
+// ==========================================
 
-    if (error) {
-        alert("Erro ao salvar notas: " + error.message);
-    } else {
-        alert("Notas salvas com sucesso no Supabase!");
-    }
-}
-// Matriz Analítica
 function abrirTelaFiltroMatrizAnalitica() {
     document.getElementById('submenu-notas').classList.add('hidden');
     document.getElementById('modulo-exibicao-matriz').classList.add('hidden');
@@ -315,7 +378,8 @@ function atualizarDisciplinasMatriz() {
     selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
     if(!serie || !MATRIZ_CURRICULAR[serie]) return;
     let disc = MATRIZ_CURRICULAR[serie];
-    if (dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
+    
+    if (typeof dadosEscopoUsuario !== 'undefined' && dadosEscopoUsuario.perfil === 'professor' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo !== 'Todas') {
         disc = [dadosEscopoUsuario.materiaEscopo];
     }
     disc.forEach(d => { let o = document.createElement('option'); o.value = d; o.text = d; selDisc.appendChild(o); });
@@ -335,8 +399,8 @@ function gerarMatrizAnaliticaCompleta() {
     document.getElementById('titulo-matriz-analitica').innerText = `MATRIZ ANALÍTICA | ${disciplina} | ${serie} (${turma}) - ${bimestre}`;
 
     Promise.all([
-        fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
-        fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
+        buscarNotasDoBanco(),
+        buscarPesosDoBanco()
     ]).then(([notas, pesos]) => {
         notasJaLancadasGlobal = notas; pesosSalvosGlobal = pesos;
         document.getElementById('carregando-matriz').classList.add('hidden');
@@ -426,7 +490,10 @@ function gerarMatrizAnaliticaCompleta() {
     });
 }
 
-// Boletim Individual
+// ==========================================
+// BOLETIM INDIVIDUAL
+// ==========================================
+
 function abrirTelaFiltroBoletimAluno() {
     document.getElementById('submenu-notas').classList.add('hidden');
     document.getElementById('modulo-exibicao-boletim-aluno').classList.add('hidden');
@@ -462,8 +529,8 @@ function gerarBoletimIndividualAluno() {
     document.getElementById('titulo-boletim-aluno').innerText = `BOLETIM ESCOLAR 2026 - ${alunoObj.nome} (${serie})`;
 
     Promise.all([
-        fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
-        fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
+        buscarNotasDoBanco(),
+        buscarPesosDoBanco()
     ]).then(([notas, pesos]) => {
         notasJaLancadasGlobal = notas; pesosSalvosGlobal = pesos;
         document.getElementById('carregando-boletim-aluno').classList.add('hidden');
@@ -497,7 +564,10 @@ function gerarBoletimIndividualAluno() {
     });
 }
 
-// Boletim Consolidado
+// ==========================================
+// BOLETIM CONSOLIDADO DA TURMA
+// ==========================================
+
 function abrirTelaFiltroBoletimTurma() {
     document.getElementById('submenu-notas').classList.add('hidden');
     document.getElementById('modulo-exibicao-boletim-turma').classList.add('hidden');
@@ -532,8 +602,8 @@ function gerarBoletimConsolidadoTurma() {
     document.getElementById('titulo-boletim-turma-consolidado').innerText = `BOLETIM CONSOLIDADO | ${serie} (${turma}) - ${bimestreRef}`;
 
     Promise.all([
-        fetch(API_URL + '?acao=buscarNotasLancadas').then(res => res.json()),
-        fetch(API_URL + '?acao=buscarPesosConfigurados').then(res => res.json())
+        buscarNotasDoBanco(),
+        buscarPesosDoBanco()
     ]).then(([notas, pesos]) => {
         notasJaLancadasGlobal = notas; pesosSalvosGlobal = pesos;
         document.getElementById('carregando-boletim-turma').classList.add('hidden');
@@ -617,31 +687,4 @@ function calcularMediaBimestralAlunoDisc(notas, pesos, bim, serie, turma, disc, 
         return calculada.toFixed(1);
     }
     return "-";
-}
-
-function atualizarTurmasDinamicas() {
-    const serieSelecionada = document.getElementById('nota-serie').value;
-    const selTurma = document.getElementById('nota-turma');
-    
-    if (!selTurma) return; // Proteção caso o elemento não exista na tela
-    
-    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-    
-    if (!serieSelecionada) return;
-    
-    // Filtra os alunos da série selecionada que possuem turma cadastrada
-    let turmasDaSerie = [...new Set(
-        listaDeAlunos
-            .filter(a => a.serie === serieSelecionada && a.turma)
-            .map(a => a.turma)
-    )].filter(Boolean);
-    
-    turmasDaSerie.sort();
-    
-    turmasDaSerie.forEach(t => {
-        let o = document.createElement('option');
-        o.value = t;
-        o.text = t;
-        selTurma.appendChild(o);
-    });
 }

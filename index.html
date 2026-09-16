@@ -6,6 +6,7 @@
     <title>Portal de Gestão Escolar - Colégio Palmares</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -326,6 +327,21 @@
 </div>
 
 <!-- CARREGAMENTO DOS MÓDULOS JS SEPARADOS -->
+<script src="js/app.js"></script>
+<script src="js/saidas.js"></script>
+<script src="js/frequencia.js"></script>
+<script src="js/ocorrencias.js"></script>
+<script src="js/notas.js"></script>
+
+    <script>
+    // Configure suas chaves do Supabase aqui
+    const SUPABASE_URL = 'https://wngloiajewzhevkifnfp.supabase.co/rest/v1/';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduZ2xvaWFqZXd6aGV2a2lmbmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODk3NzQsImV4cCI6MjEwNTA2NTc3NH0.A-_E2afJp5aYYFqLVoaS7DigOhH0tFE0mMPKUtLmgYk
+';
+    const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+
+<!-- A chamada para os seus arquivos modulares deve vir logo abaixo da configuração -->
 <script src="js/app.js"></script>
 <script src="js/saidas.js"></script>
 <script src="js/frequencia.js"></script>

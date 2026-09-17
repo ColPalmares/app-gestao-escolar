@@ -35,10 +35,76 @@
             <button id="btn-mod-frequencia" class="menu-btn hidden" onclick="abrirMenuFrequencia()">Controle de Frequência / Faltas</button>
             <button id="btn-mod-ocorrencias" class="menu-btn hidden" onclick="abrirMenuOcorrencias()">Registro de Ocorrências</button>
             <button id="btn-mod-notas" class="menu-btn hidden" onclick="abrirMenuNotas()">Módulo de Notas & Boletins</button>
+            <button id="btn-mod-cadastros" class="menu-btn" onclick="abrirMenuCadastros()" style="display: block; background-color: #333;">⚙️ Configurações (Turmas, Disciplinas e Anos)</button>
+
             <p id="sem-acesso" class="hidden" style="color: dimgray; text-align: center; font-style: italic;">Você não possui módulos liberados no momento.</p>
         </div>
     </div>
+<!-- MÓDULO DE CADASTROS (CONFIGURAÇÕES) -->
+    <div id="modulo-cadastros" class="hidden">
+        <h2>Gestão de Cadastros Oficiais</h2>
+        
+        <!-- CADASTRO DE ANOS LETIVOS -->
+        <div style="background: #eef4f8; border: 1px solid #004D93; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #004D93; margin-top: 0; font-size: 15px;">1. Ano Letivo</h3>
+            <div class="form-group">
+                <label>Ano (Ex: 2027):</label>
+                <input type="number" id="cad-ano" placeholder="2027">
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="cad-ano-ativo"> Definir como Ano Vigente (Ativo)</label>
+            </div>
+            <button onclick="salvarAnoLetivo()">Adicionar Ano</button>
+            <div style="overflow-x: auto; margin-top: 10px;">
+                <table style="width: 100%; font-size: 12px;">
+                    <thead><tr><th>Ano</th><th>Status</th></tr></thead>
+                    <tbody id="lista-anos"></tbody>
+                </table>
+            </div>
+        </div>
 
+        <!-- CADASTRO DE TURMAS -->
+        <div style="background: #f1f8f6; border: 1px solid #016552; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #016552; margin-top: 0; font-size: 15px;">2. Turmas</h3>
+            <div class="form-group">
+                <label>Série / Ano (Ex: 1º Ano, 2ª Série):</label>
+                <input type="text" id="cad-turma-serie" placeholder="Ex: 1º Ano">
+            </div>
+            <div class="form-group">
+                <label>Nome da Turma (Ex: A, B, Única):</label>
+                <input type="text" id="cad-turma-nome" placeholder="Ex: A">
+            </div>
+            <button onclick="salvarTurma()" style="background-color: #016552;">Adicionar Turma</button>
+            <div style="overflow-x: auto; margin-top: 10px;">
+                <table style="width: 100%; font-size: 12px;">
+                    <thead><tr><th>Série</th><th>Turma</th></tr></thead>
+                    <tbody id="lista-turmas"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CADASTRO DE DISCIPLINAS -->
+        <div style="background: #fff3cd; border: 1px solid #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #856404; margin-top: 0; font-size: 15px;">3. Disciplinas (Matriz Curricular)</h3>
+            <div class="form-group">
+                <label>Nome da Disciplina:</label>
+                <input type="text" id="cad-disc-nome" placeholder="Ex: Tecnologia e suas aplicações">
+            </div>
+            <div class="form-group">
+                <label>Área de Conhecimento (Opcional):</label>
+                <input type="text" id="cad-disc-area" placeholder="Ex: Exatas, Linguagens...">
+            </div>
+            <button onclick="salvarDisciplina()" style="background-color: #d39e00; color: #000;">Adicionar Disciplina</button>
+            <div style="overflow-x: auto; margin-top: 10px;">
+                <table style="width: 100%; font-size: 12px;">
+                    <thead><tr><th>Disciplina</th><th>Área</th></tr></thead>
+                    <tbody id="lista-disciplinas"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <button class="voltar-btn" onclick="voltarAoMenuPrincipal()">Voltar ao Menu Principal</button>
+    </div>
     <!-- SUBMENUS -->
     <div id="submenu-saida" class="hidden">
         <h2>Autorização de Saída</h2>
@@ -256,7 +322,7 @@
 
         <button class="voltar-btn" onclick="voltarSubmenuNotas()">Voltar ao Menu</button>
     </div>
-
+    
     <!-- TELA DE FILTRO PARA MATRIZ ANALÍTICA -->
     <div id="modulo-filtro-matriz" class="hidden">
         <h2>Matriz Analítica Detalhada por Atividade</h2>
@@ -332,7 +398,7 @@
 <script src="js/frequencia.js"></script>
 <script src="js/ocorrencias.js"></script>
 <script src="js/notas.js"></script>
-
+<script src="js/cadastros.js"></script>
     <script>
     // Configure suas chaves do Supabase aqui
     const SUPABASE_URL = 'https://wngloiajewzhevkifnfp.supabase.co/rest/v1/';

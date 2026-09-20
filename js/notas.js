@@ -310,43 +310,71 @@ function voltarParaConfigPesos() {
     document.getElementById('form-config-notas').classList.remove('hidden');
 }
 
-function salvarNotasEmLote() {
-    const btn = document.getElementById('btn-salvar-notas');
-    btn.innerText = "Salvando..."; btn.disabled = true;
+async function salvarNotasEmLote() {
     const bimestre = document.getElementById('nota-bimestre').value;
     const serie = document.getElementById('nota-serie').value;
     const turma = document.getElementById('nota-turma').value;
     const disciplina = document.getElementById('nota-disciplina').value;
     const eixo = document.getElementById('nota-eixo').value;
+    const pacote = document.getElementById('atividade-pacote-alvo').value;
+    const nomeAtividade = document.getElementById('atividade-nome').value;
+    const pesoAtividade = parseFloat(document.getElementById('atividade-peso').value) || 1;
 
-    let lancamentos = [];
-    document.querySelectorAll('.input-nota').forEach(inp => {
-        let notaVal = inp.value.trim();
-        if(notaVal !== "") {
-            lancamentos.push({
-                bimestre, serie, turma, disciplina, eixo,
-                pacote: inp.getAttribute('data-pacote'),
-                nomeAtividade: inp.getAttribute('data-atividade'),
-                pesoAtividade: parseFloat(inp.getAttribute('data-pesoa')) || 1,
-                nome: inp.getAttribute('data-nome'), ra: inp.getAttribute('data-ra'),
-                nota: parseFloat(notaVal)
+    if(!bimestre || !serie || !turma || !disciplina || !pacote || !nomeAtividade) {
+        alert("Preencha todos os campos da configuração antes de salvar!");
+        return;
+    }
+
+    const inputsNota = document.querySelectorAll('.input-nota-aluno');
+    const notasParaSalvar = [];
+
+    inputsNota.forEach(input => {
+        const ra = input.getAttribute('data-ra');
+        const valorNota = parseFloat(input.value);
+
+        // Só empacota se o professor digitou uma nota válida (ignora campos em branco)
+        if (!isNaN(valorNota)) {
+            notasParaSalvar.push({
+                ra: ra,
+                bimestre: bimestre,
+                serie: serie,
+                turma: turma,
+                disciplina: disciplina,
+                eixo: eixo,
+                pacote: pacote,
+                atividade_nome: nomeAtividade,
+                peso: pesoAtividade,
+                nota: valorNota,
+                data_registro: new Date().toISOString()
             });
         }
     });
 
-    if(lancamentos.length === 0) { 
-        alert("Insira ao menos uma nota."); 
-        btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false; return; 
+    if (notasParaSalvar.length === 0) {
+        alert("Nenhuma nota válida foi digitada para salvar.");
+        return;
     }
 
-    salvarNotasNoBancoSupabase(lancamentos).then(() => {
-        alert("Notas salvas com sucesso no Supabase!");
-        btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
-        carregarDadosParaNotas();
-    }).catch(err => {
-        alert("Erro ao salvar: " + err.message); 
-        btn.innerText = "Salvar Notas da Atividade"; btn.disabled = false;
-    });
+    // Desativa o botão temporariamente para evitar duplo clique
+    const btnSalvar = document.getElementById('btn-salvar-notas');
+    btnSalvar.disabled = true;
+    btnSalvar.textContent = "Salvando...";
+
+    // Envio para a tabela de notas usando upsert (atualiza se já existir)
+    const { error } = await window._supabase
+        .from('notas')
+        .upsert(notasParaSalvar);
+
+    btnSalvar.disabled = false;
+    btnSalvar.textContent = "Salvar Notas da Atividade";
+
+    if (error) {
+        console.error("Erro detalhado do banco:", error);
+        alert("Falha ao salvar no banco de dados: " + error.message);
+    } else {
+        alert("✅ Notas salvas com sucesso no banco de dados!");
+        voltarParaConfigPesos();
+    }
 }
 
 // ==========================================

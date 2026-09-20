@@ -179,25 +179,27 @@ async function atualizarTurmasDinamicas() {
     }
 }
 
-function atualizarDisciplinasPorSerie() {
-    const serie = document.getElementById('nota-serie').value;
-    const selDisc = document.getElementById('nota-disciplina');
-    selDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
-    if(!serie || !MATRIZ_CURRICULAR[serie]) return;
-    
-    let disciplinasDisponiveis = MATRIZ_CURRICULAR[serie];
-    
-    if (typeof dadosEscopoUsuario !== 'undefined' && dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.materiaEscopo && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.materiaEscopo.toUpperCase() !== 'TODOS') {
-        let materiasPermitidas = dadosEscopoUsuario.materiaEscopo.split(',').map(m => m.trim());
-        disciplinasDisponiveis = disciplinasDisponiveis.filter(d => materiasPermitidas.includes(d));
+// Atualiza as disciplinas com base na tabela nova do banco
+async function atualizarDisciplinasPorSerie() {
+    const selectDisc = document.getElementById('nota-disciplina');
+    selectDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
+
+    // Busca todas as disciplinas cadastradas na interface
+    const { data, error } = await window._supabase
+        .from('disciplinas')
+        .select('nome')
+        .order('nome');
+
+    if (error) {
+        console.error("Erro ao buscar disciplinas:", error);
+        return;
     }
-    
-    disciplinasDisponiveis.forEach(d => { 
-        let o = document.createElement('option'); 
-        o.value = d; 
-        o.text = d; 
-        selDisc.appendChild(o); 
-    });
+
+    if (data) {
+        data.forEach(d => {
+            selectDisc.innerHTML += `<option value="${d.nome}">${d.nome}</option>`;
+        });
+    }
 }
 
 function atualizarPainelPesosPacotes() {

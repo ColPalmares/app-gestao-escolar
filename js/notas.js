@@ -151,30 +151,30 @@ function configurarFormNotas() {
     atualizarPainelPesosPacotes();
 }
 
-function atualizarTurmasDinamicas() {
-    const serieSelecionada = document.getElementById('nota-serie').value;
-    const selTurma = document.getElementById('nota-turma');
-    if (!selTurma) return;
+// Atualiza as turmas com base na tabela nova do banco
+async function atualizarTurmasDinamicas() {
+    const serie = document.getElementById('nota-serie').value;
+    const selectTurma = document.getElementById('nota-turma');
     
-    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-    if (!serieSelecionada) return;
-    
-    let turmasDaSerie = [...new Set(
-        listaDeAlunos
-            .filter(a => a.serie === serieSelecionada && a.turma)
-            .map(a => a.turma)
-    )].filter(Boolean);
-    
-    turmasDaSerie.sort();
-    
-    if(turmasDaSerie.length === 0) {
-        let o = document.createElement('option');
-        o.value = "Única"; o.text = "Única";
-        selTurma.appendChild(o);
-    } else {
-        turmasDaSerie.forEach(t => {
-            let o = document.createElement('option');
-            o.value = t; o.text = t; selTurma.appendChild(o);
+    // Reseta o campo
+    selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+    if (!serie) return;
+
+    // Busca as turmas correspondentes à série escolhida
+    const { data, error } = await window._supabase
+        .from('turmas')
+        .select('nome')
+        .eq('serie', serie)
+        .order('nome');
+
+    if (error) {
+        console.error("Erro ao buscar turmas:", error);
+        return;
+    }
+
+    if (data) {
+        data.forEach(t => {
+            selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
         });
     }
 }
@@ -363,13 +363,30 @@ function abrirTelaFiltroMatrizAnalitica() {
 }
 
 function atualizarTurmasMatrizDinamica() {
-    const serie = document.getElementById('matriz-serie').value;
-    const selTurma = document.getElementById('matriz-turma');
-    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-    if(!serie) return;
-    [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Única"))].filter(Boolean).forEach(t => {
-        let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o);
-    });
+    const serie = document.getElementById('nota-serie').value;
+    const selectTurma = document.getElementById('nota-turma');
+    
+    // Reseta o campo
+    selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+    if (!serie) return;
+
+    // Busca as turmas correspondentes à série escolhida
+    const { data, error } = await window._supabase
+        .from('turmas')
+        .select('nome')
+        .eq('serie', serie)
+        .order('nome');
+
+    if (error) {
+        console.error("Erro ao buscar turmas:", error);
+        return;
+    }
+
+    if (data) {
+        data.forEach(t => {
+            selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
+        });
+    }
 }
 
 function atualizarDisciplinasMatriz() {
@@ -580,13 +597,30 @@ function abrirTelaFiltroBoletimTurma() {
 }
 
 function atualizarTurmasConsolidadoDinamicas() {
-    const serie = document.getElementById('turma-filtro-serie').value;
-    const selTurma = document.getElementById('turma-filtro-sala');
-    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
-    if(!serie) return;
-    [...new Set(listaDeAlunos.filter(a => a.serie === serie).map(a => a.turma || "Única"))].filter(Boolean).forEach(t => {
-        let o = document.createElement('option'); o.value = t; o.text = t; selTurma.appendChild(o);
-    });
+    const serie = document.getElementById('nota-serie').value;
+    const selectTurma = document.getElementById('nota-turma');
+    
+    // Reseta o campo
+    selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+    if (!serie) return;
+
+    // Busca as turmas correspondentes à série escolhida
+    const { data, error } = await window._supabase
+        .from('turmas')
+        .select('nome')
+        .eq('serie', serie)
+        .order('nome');
+
+    if (error) {
+        console.error("Erro ao buscar turmas:", error);
+        return;
+    }
+
+    if (data) {
+        data.forEach(t => {
+            selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
+        });
+    }
 }
 
 function gerarBoletimConsolidadoTurma() {

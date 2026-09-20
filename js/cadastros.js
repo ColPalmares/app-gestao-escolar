@@ -80,3 +80,86 @@ async function salvarDisciplina() {
         carregarListasCadastros(); 
     }
 }
+
+
+// ==========================================
+// GESTÃO DE ALUNOS
+// ==========================================
+
+function abrirMenuAlunos() {
+    document.getElementById('tela-menu').classList.add('hidden');
+    document.getElementById('modulo-alunos').classList.remove('hidden');
+    carregarSeriesCadastroAluno();
+}
+
+async function carregarSeriesCadastroAluno() {
+    const selSerie = document.getElementById('cad-aluno-serie');
+    selSerie.innerHTML = '<option value="">Selecione a série...</option>';
+    
+    // Puxa as séries únicas da tabela de turmas
+    const { data, error } = await window._supabase.from('turmas').select('serie');
+    if (data) {
+        const seriesUnicas = [...new Set(data.map(t => t.serie.trim()))];
+        seriesUnicas.forEach(s => {
+            selSerie.innerHTML += `<option value="${s}">${s}</option>`;
+        });
+    }
+}
+
+async function atualizarTurmasCadastroAluno() {
+    const serie = document.getElementById('cad-aluno-serie').value;
+    const selTurma = document.getElementById('cad-aluno-turma');
+    
+    selTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+    if (!serie) return;
+
+    const { data, error } = await window._supabase.from('turmas').select('*').eq('serie', serie).order('nome');
+    if (data) {
+        data.forEach(t => {
+            selTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
+        });
+    }
+}
+
+async function salvarAluno() {
+    const ra = document.getElementById('cad-aluno-ra').value.trim();
+    const nome = document.getElementById('cad-aluno-nome').value.trim();
+    const serie = document.getElementById('cad-aluno-serie').value;
+    const turma = document.getElementById('cad-aluno-turma').value;
+
+    if (!ra || !nome || !serie || !turma) {
+        alert("Preencha todos os campos, incluindo Série e Turma!");
+        return;
+    }
+
+    const btnSalvar = document.querySelector('#modulo-alunos button');
+    btnSalvar.disabled = true;
+    btnSalvar.textContent = "Salvando...";
+
+    // Upsert: Se o RA já existir, ele atualiza a turma. Se for RA novo, ele cria o aluno.
+    const { error } = await window._supabase.from('alunos').upsert([{
+        ra: ra,
+        nome: nome,
+        serie: serie,
+        turma: turma
+    }], { onConflict: 'ra' });
+
+    btnSalvar.disabled = false;
+    btnSalvar.textContent = "Salvar Aluno";
+
+    if (error) {
+        console.error("Erro ao salvar aluno:", error);
+        alert("Erro ao salvar aluno: " + error.message);
+    } else {
+        alert("✅ Aluno salvo com sucesso!");
+        document.getElementById('cad-aluno-ra').value = "";
+        document.getElementById('cad-aluno-nome').value = "";
+        document.getElementById('cad-aluno-serie').value = "";
+        document.getElementById('cad-aluno-turma').innerHTML = '<option value="">Selecione a turma...</option>';
+        
+        // Atualiza a lista global em cache
+        if (typeof carregarAlunosGlobal === 'function') {
+            carregarAlunosGlobal(() => console.log("Lista recarregada."));
+        }
+    }
+}

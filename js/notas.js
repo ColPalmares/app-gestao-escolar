@@ -43,7 +43,7 @@ function obterRegraPesos(serie, disciplina) {
 // ==========================================
 
 async function buscarPesosDoBanco() {
-    const { data, error } = await _supabase.from('config_pesos').select('*');
+    const { data, error } = await window._supabase.from('config_pesos').select('*');
     if (error) { console.error("Erro ao buscar pesos:", error); return []; }
     return data.map(l => ({
         bimestre: l.bimestre, serie: l.serie, turma: l.turma, 
@@ -52,7 +52,7 @@ async function buscarPesosDoBanco() {
 }
 
 async function buscarNotasDoBanco() {
-    const { data, error } = await _supabase.from('notas').select('*');
+    const { data, error } = await window._supabase.from('notas').select('*');
     if (error) { console.error("Erro ao buscar notas:", error); return []; }
     return data.map(l => ({
         bimestre: l.trimestre, serie: l.serie, turma: l.turma, 
@@ -63,20 +63,20 @@ async function buscarNotasDoBanco() {
 }
 
 async function salvarPesosNoBancoSupabase(bimestre, serie, turma, disciplina, eixo, pesos) {
-    await _supabase.from('config_pesos').delete().match({ bimestre, serie, turma, disciplina, eixo });
-    await _supabase.from('config_pesos').insert([{
+    await window._supabase.from('config_pesos').delete().match({ bimestre, serie, turma, disciplina, eixo });
+    await window._supabase.from('config_pesos').insert([{
         bimestre, serie, turma, disciplina, eixo, pesos_json: JSON.stringify(pesos)
     }]);
 }
 
 async function salvarNotasNoBancoSupabase(lancamentos) {
     for (let l of lancamentos) {
-        await _supabase.from('notas').delete().match({ 
+        await window._supabase.from('notas').delete().match({ 
             trimestre: l.bimestre, serie: l.serie, turma: l.turma, 
             disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote, 
             atividade: l.nomeAtividade, ra: String(l.ra) 
         });
-        await _supabase.from('notas').insert([{
+        await window._supabase.from('notas').insert([{
             usuario: typeof usuarioLogado !== 'undefined' && usuarioLogado ? usuarioLogado : 'Teste Aberto',
             trimestre: l.bimestre, serie: l.serie, turma: l.turma,
             disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote,
@@ -156,27 +156,17 @@ async function atualizarTurmasDinamicas() {
     const serie = document.getElementById('nota-serie').value;
     const selectTurma = document.getElementById('nota-turma');
     
-    // Reseta o campo
     selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
     if (!serie) return;
 
-    // Busca as turmas correspondentes à série escolhida
     const { data, error } = await window._supabase
         .from('turmas')
         .select('nome')
         .eq('serie', serie)
         .order('nome');
 
-    if (error) {
-        console.error("Erro ao buscar turmas:", error);
-        return;
-    }
-
-    if (data) {
-        data.forEach(t => {
-            selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
-        });
-    }
+    if (error) { console.error("Erro ao buscar turmas:", error); return; }
+    if (data) data.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
 }
 
 // Atualiza as disciplinas com base na tabela nova do banco
@@ -184,22 +174,13 @@ async function atualizarDisciplinasPorSerie() {
     const selectDisc = document.getElementById('nota-disciplina');
     selectDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
 
-    // Busca todas as disciplinas cadastradas na interface
     const { data, error } = await window._supabase
         .from('disciplinas')
         .select('nome')
         .order('nome');
 
-    if (error) {
-        console.error("Erro ao buscar disciplinas:", error);
-        return;
-    }
-
-    if (data) {
-        data.forEach(d => {
-            selectDisc.innerHTML += `<option value="${d.nome}">${d.nome}</option>`;
-        });
-    }
+    if (error) { console.error("Erro ao buscar disciplinas:", error); return; }
+    if (data) data.forEach(d => selectDisc.innerHTML += `<option value="${d.nome}">${d.nome}</option>`);
 }
 
 function atualizarPainelPesosPacotes() {
@@ -265,7 +246,6 @@ async function validarEAvancarParaLancamento() {
     });
     if (soma !== 100) { alert("A soma dos pesos deve ser exatamente 100%."); return; }
 
-    // Salva pesos no Supabase
     await salvarPesosNoBancoSupabase(bimestre, serie, turma, disciplina, eixo, pesosConfigurados);
     
     gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo, pacoteAlvo, nomeAtividade, pesoAtividade);
@@ -291,7 +271,7 @@ function gerarTabelaLancamentoAtividade(bimestre, serie, turma, disciplina, eixo
             <td>${aluno.ra}</td>
             <td><strong>${aluno.nome}</strong></td>
             <td>${aluno.serie} (${turma})</td>
-            <td><input type="number" min="0" max="100" step="1" class="input-nota" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${pacoteAlvo}" data-atividade="${nomeAtividade}" data-pesoa="${pesoAtividade}" value="${notaExistente}" placeholder="0-100" oninput="validarNotaLimite(this)"></td>
+            <td><input type="number" min="0" max="100" step="1" class="input-nota input-nota-aluno" data-nome="${aluno.nome}" data-ra="${aluno.ra}" data-pacote="${pacoteAlvo}" data-atividade="${nomeAtividade}" data-pesoa="${pesoAtividade}" value="${notaExistente}" placeholder="0-100" oninput="validarNotaLimite(this)"></td>
         `;
         corpo.appendChild(tr);
     });
@@ -332,20 +312,18 @@ async function salvarNotasEmLote() {
         const ra = input.getAttribute('data-ra');
         const valorNota = parseFloat(input.value);
 
-        // Só empacota se o professor digitou uma nota válida (ignora campos em branco)
         if (!isNaN(valorNota)) {
             notasParaSalvar.push({
-                ra: ra,
-                bimestre: bimestre,
+                ra: String(ra),
+                trimestre: bimestre,
                 serie: serie,
                 turma: turma,
                 disciplina: disciplina,
                 eixo: eixo,
                 pacote: pacote,
-                atividade_nome: nomeAtividade,
-                peso: pesoAtividade,
-                nota: valorNota,
-                data_registro: new Date().toISOString()
+                atividade: nomeAtividade,
+                peso_atividade: pesoAtividade,
+                nota: valorNota
             });
         }
     });
@@ -355,15 +333,11 @@ async function salvarNotasEmLote() {
         return;
     }
 
-    // Desativa o botão temporariamente para evitar duplo clique
     const btnSalvar = document.getElementById('btn-salvar-notas');
     btnSalvar.disabled = true;
     btnSalvar.textContent = "Salvando...";
 
-    // Envio para a tabela de notas usando upsert (atualiza se já existir)
-    const { error } = await window._supabase
-        .from('notas')
-        .upsert(notasParaSalvar);
+    const { error } = await window._supabase.from('notas').upsert(notasParaSalvar, { onConflict: 'ra,trimestre,serie,turma,disciplina,eixo,pacote,atividade' });
 
     btnSalvar.disabled = false;
     btnSalvar.textContent = "Salvar Notas da Atividade";
@@ -392,31 +366,16 @@ function abrirTelaFiltroMatrizAnalitica() {
     });
 }
 
-function atualizarTurmasMatrizDinamica() {
-    const serie = document.getElementById('nota-serie').value;
-    const selectTurma = document.getElementById('nota-turma');
+async function atualizarTurmasMatrizDinamica() {
+    const serie = document.getElementById('matriz-serie').value;
+    const selectTurma = document.getElementById('matriz-turma');
     
-    // Reseta o campo
     selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
     if (!serie) return;
 
-    // Busca as turmas correspondentes à série escolhida
-    const { data, error } = await window._supabase
-        .from('turmas')
-        .select('nome')
-        .eq('serie', serie)
-        .order('nome');
-
-    if (error) {
-        console.error("Erro ao buscar turmas:", error);
-        return;
-    }
-
-    if (data) {
-        data.forEach(t => {
-            selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
-        });
-    }
+    const { data, error } = await window._supabase.from('turmas').select('nome').eq('serie', serie).order('nome');
+    if (error) { console.error("Erro ao buscar turmas:", error); return; }
+    if (data) data.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
 }
 
 function atualizarDisciplinasMatriz() {
@@ -626,31 +585,16 @@ function abrirTelaFiltroBoletimTurma() {
     });
 }
 
-function atualizarTurmasConsolidadoDinamicas() {
-    const serie = document.getElementById('nota-serie').value;
-    const selectTurma = document.getElementById('nota-turma');
+async function atualizarTurmasConsolidadoDinamicas() {
+    const serie = document.getElementById('turma-filtro-serie').value;
+    const selectTurma = document.getElementById('turma-filtro-sala');
     
-    // Reseta o campo
     selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
     if (!serie) return;
 
-    // Busca as turmas correspondentes à série escolhida
-    const { data, error } = await window._supabase
-        .from('turmas')
-        .select('nome')
-        .eq('serie', serie)
-        .order('nome');
-
-    if (error) {
-        console.error("Erro ao buscar turmas:", error);
-        return;
-    }
-
-    if (data) {
-        data.forEach(t => {
-            selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
-        });
-    }
+    const { data, error } = await window._supabase.from('turmas').select('nome').eq('serie', serie).order('nome');
+    if (error) { console.error("Erro ao buscar turmas:", error); return; }
+    if (data) data.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
 }
 
 function gerarBoletimConsolidadoTurma() {

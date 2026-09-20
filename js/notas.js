@@ -151,22 +151,25 @@ function configurarFormNotas() {
     atualizarPainelPesosPacotes();
 }
 
-// Atualiza as turmas com base na tabela nova do banco
+// Atualiza as turmas com base na tabela nova do banco - Lançamento de Notas
 async function atualizarTurmasDinamicas() {
-    const serie = document.getElementById('nota-serie').value;
+    const serie = document.getElementById('nota-serie').value.trim();
     const selectTurma = document.getElementById('nota-turma');
     
     selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
     if (!serie) return;
 
-    const { data, error } = await window._supabase
-        .from('turmas')
-        .select('nome')
-        .eq('serie', serie)
-        .order('nome');
-
+    const { data, error } = await window._supabase.from('turmas').select('*').order('nome');
     if (error) { console.error("Erro ao buscar turmas:", error); return; }
-    if (data) data.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
+
+    if (data) {
+        const turmasDaSerie = data.filter(t => t.serie.trim() === serie);
+        if(turmasDaSerie.length === 0) {
+            selectTurma.innerHTML += `<option value="">⚠️ Nenhuma turma para ${serie}</option>`;
+        } else {
+            turmasDaSerie.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
+        }
+    }
 }
 
 // Atualiza as disciplinas com base na tabela nova do banco
@@ -366,16 +369,25 @@ function abrirTelaFiltroMatrizAnalitica() {
     });
 }
 
+// Atualiza turmas na Matriz Analítica
 async function atualizarTurmasMatrizDinamica() {
-    const serie = document.getElementById('matriz-serie').value;
+    const serie = document.getElementById('matriz-serie').value.trim();
     const selectTurma = document.getElementById('matriz-turma');
     
     selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
     if (!serie) return;
 
-    const { data, error } = await window._supabase.from('turmas').select('nome').eq('serie', serie).order('nome');
+    const { data, error } = await window._supabase.from('turmas').select('*').order('nome');
     if (error) { console.error("Erro ao buscar turmas:", error); return; }
-    if (data) data.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
+
+    if (data) {
+        const turmasDaSerie = data.filter(t => t.serie.trim() === serie);
+        if(turmasDaSerie.length === 0) {
+            selectTurma.innerHTML += `<option value="">⚠️ Nenhuma turma para ${serie}</option>`;
+        } else {
+            turmasDaSerie.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
+        }
+    }
 }
 
 function atualizarDisciplinasMatriz() {
@@ -585,16 +597,25 @@ function abrirTelaFiltroBoletimTurma() {
     });
 }
 
+// Atualiza turmas no Boletim Consolidado
 async function atualizarTurmasConsolidadoDinamicas() {
-    const serie = document.getElementById('turma-filtro-serie').value;
+    const serie = document.getElementById('turma-filtro-serie').value.trim();
     const selectTurma = document.getElementById('turma-filtro-sala');
     
     selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
     if (!serie) return;
 
-    const { data, error } = await window._supabase.from('turmas').select('nome').eq('serie', serie).order('nome');
+    const { data, error } = await window._supabase.from('turmas').select('*').order('nome');
     if (error) { console.error("Erro ao buscar turmas:", error); return; }
-    if (data) data.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
+
+    if (data) {
+        const turmasDaSerie = data.filter(t => t.serie.trim() === serie);
+        if(turmasDaSerie.length === 0) {
+            selectTurma.innerHTML += `<option value="">⚠️ Nenhuma turma para ${serie}</option>`;
+        } else {
+            turmasDaSerie.forEach(t => selectTurma.innerHTML += `<option value="${t.nome}">${t.nome}</option>`);
+        }
+    }
 }
 
 function gerarBoletimConsolidadoTurma() {

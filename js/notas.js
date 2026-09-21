@@ -55,7 +55,8 @@ async function buscarNotasDoBanco() {
     const { data, error } = await window._supabase.from('notas').select('*');
     if (error) { console.error("Erro ao buscar notas:", error); return []; }
     return data.map(l => ({
-        bimestre: l.trimestre, serie: l.serie, turma: l.turma, 
+        bimestre: l.bimestre, // Corrigido de trimestre para bimestre
+        serie: l.serie, turma: l.turma, 
         disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote, 
         nomeAtividade: l.atividade, pesoAtividade: l.peso_atividade, 
         ra: l.ra, nome: l.nome, nota: l.nota

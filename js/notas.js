@@ -369,10 +369,18 @@ function abrirTelaFiltroMatrizAnalitica() {
     document.getElementById('submenu-notas').classList.add('hidden');
     document.getElementById('modulo-exibicao-matriz').classList.add('hidden');
     document.getElementById('modulo-filtro-matriz').classList.remove('hidden');
-    carregarAlunosGlobal(alunos => {
+    
+    carregarAlunosGlobal(async alunos => {
         const selSerie = document.getElementById('matriz-serie');
         selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-        [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+        
+        // Busca as séries da tabela de turmas
+        const { data } = await window._supabase.from('turmas').select('serie');
+        if(data) {
+            [...new Set(data.map(t => t.serie.trim()))].filter(Boolean).forEach(s => { 
+                let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); 
+            });
+        }
     });
 }
 
@@ -523,10 +531,18 @@ function abrirTelaFiltroBoletimAluno() {
     document.getElementById('submenu-notas').classList.add('hidden');
     document.getElementById('modulo-exibicao-boletim-aluno').classList.add('hidden');
     document.getElementById('modulo-filtro-boletim-aluno').classList.remove('hidden');
-    carregarAlunosGlobal(alunos => {
+    
+    carregarAlunosGlobal(async alunos => {
         const selSerie = document.getElementById('aluno-filtro-serie');
         selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-        [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+        
+        // Busca as séries da tabela de turmas
+        const { data } = await window._supabase.from('turmas').select('serie');
+        if(data) {
+            [...new Set(data.map(t => t.serie.trim()))].filter(Boolean).forEach(s => { 
+                let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); 
+            });
+        }
     });
 }
 
@@ -597,10 +613,18 @@ function abrirTelaFiltroBoletimTurma() {
     document.getElementById('submenu-notas').classList.add('hidden');
     document.getElementById('modulo-exibicao-boletim-turma').classList.add('hidden');
     document.getElementById('modulo-filtro-boletim-turma').classList.remove('hidden');
-    carregarAlunosGlobal(alunos => {
+    
+    carregarAlunosGlobal(async alunos => {
         const selSerie = document.getElementById('turma-filtro-serie');
         selSerie.innerHTML = '<option value="">Selecione a série...</option>';
-        [...new Set(alunos.map(a => a.serie))].filter(Boolean).forEach(s => { let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); });
+        
+        // Busca as séries da tabela de turmas
+        const { data } = await window._supabase.from('turmas').select('serie');
+        if(data) {
+            [...new Set(data.map(t => t.serie.trim()))].filter(Boolean).forEach(s => { 
+                let o = document.createElement('option'); o.value = s; o.text = s; selSerie.appendChild(o); 
+            });
+        }
     });
 }
 

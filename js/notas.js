@@ -124,7 +124,7 @@ function carregarDadosParaNotas() {
     });
 }
 
-function configurarFormNotas() {
+async function configurarFormNotas() {
     document.getElementById('carregando-alunos-notas').classList.add('hidden');
     document.getElementById('form-config-notas').classList.remove('hidden');
     document.getElementById('container-tabela-notas').classList.add('hidden');
@@ -132,8 +132,14 @@ function configurarFormNotas() {
     const selSerie = document.getElementById('nota-serie');
     selSerie.innerHTML = '<option value="">Selecione a série...</option>';
     
-    let seriesDisponiveis = [...new Set(listaDeAlunos.map(a => a.serie))].filter(Boolean);
+    // NOVO: Busca as séries direto da tabela de turmas
+    const { data } = await window._supabase.from('turmas').select('serie');
+    let seriesDisponiveis = [];
+    if (data) {
+        seriesDisponiveis = [...new Set(data.map(t => t.serie.trim()))].filter(Boolean);
+    }
     
+    // Filtro para permissões de usuários (caso não seja admin)
     if (typeof dadosEscopoUsuario !== 'undefined' && dadosEscopoUsuario.perfil !== 'admin' && dadosEscopoUsuario.serieEscopo && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODAS' && dadosEscopoUsuario.serieEscopo.toUpperCase() !== 'TODOS') {
         let seriesPermitidas = dadosEscopoUsuario.serieEscopo.split(',').map(s => s.trim());
         seriesDisponiveis = seriesDisponiveis.filter(s => seriesPermitidas.includes(s));

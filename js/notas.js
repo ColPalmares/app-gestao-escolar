@@ -319,7 +319,7 @@ async function salvarNotasEmLote() {
         if (!isNaN(valorNota)) {
             notasParaSalvar.push({
                 ra: String(ra),
-                trimestre: bimestre,
+                bimestre: bimestre, // Corrigido de trimestre para bimestre
                 serie: serie,
                 turma: turma,
                 disciplina: disciplina,
@@ -341,7 +341,7 @@ async function salvarNotasEmLote() {
     btnSalvar.disabled = true;
     btnSalvar.textContent = "Salvando...";
 
-    const { error } = await window._supabase.from('notas').upsert(notasParaSalvar, { onConflict: 'ra,trimestre,serie,turma,disciplina,eixo,pacote,atividade' });
+    const { error } = await window._supabase.from('notas').upsert(notasParaSalvar, { onConflict: 'ra,bimestre,serie,turma,disciplina,eixo,pacote,atividade' });
 
     btnSalvar.disabled = false;
     btnSalvar.textContent = "Salvar Notas da Atividade";
@@ -354,7 +354,6 @@ async function salvarNotasEmLote() {
         voltarParaConfigPesos();
     }
 }
-
 // ==========================================
 // MATRIZ ANALÍTICA
 // ==========================================

@@ -55,8 +55,7 @@ async function buscarNotasDoBanco() {
     const { data, error } = await window._supabase.from('notas').select('*');
     if (error) { console.error("Erro ao buscar notas:", error); return []; }
     return data.map(l => ({
-        bimestre: l.bimestre, // Corrigido de trimestre para bimestre
-        serie: l.serie, turma: l.turma, 
+        bimestre: l.bimestre, serie: l.serie, turma: l.turma, 
         disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote, 
         nomeAtividade: l.atividade, pesoAtividade: l.peso_atividade, 
         ra: l.ra, nome: l.nome, nota: l.nota
@@ -73,13 +72,13 @@ async function salvarPesosNoBancoSupabase(bimestre, serie, turma, disciplina, ei
 async function salvarNotasNoBancoSupabase(lancamentos) {
     for (let l of lancamentos) {
         await window._supabase.from('notas').delete().match({ 
-            trimestre: l.bimestre, serie: l.serie, turma: l.turma, 
+            bimestre: l.bimestre, serie: l.serie, turma: l.turma, 
             disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote, 
             atividade: l.nomeAtividade, ra: String(l.ra) 
         });
         await window._supabase.from('notas').insert([{
             usuario: typeof usuarioLogado !== 'undefined' && usuarioLogado ? usuarioLogado : 'Teste Aberto',
-            trimestre: l.bimestre, serie: l.serie, turma: l.turma,
+            bimestre: l.bimestre, serie: l.serie, turma: l.turma,
             disciplina: l.disciplina, eixo: l.eixo, pacote: l.pacote,
             atividade: l.nomeAtividade, peso_atividade: l.pesoAtividade,
             ra: String(l.ra), nome: l.nome, nota: l.nota
@@ -319,7 +318,7 @@ async function salvarNotasEmLote() {
         if (!isNaN(valorNota)) {
             notasParaSalvar.push({
                 ra: String(ra),
-                bimestre: bimestre, // Corrigido de trimestre para bimestre
+                bimestre: bimestre, // Corrigido para bimestre
                 serie: serie,
                 turma: turma,
                 disciplina: disciplina,
@@ -341,6 +340,7 @@ async function salvarNotasEmLote() {
     btnSalvar.disabled = true;
     btnSalvar.textContent = "Salvando...";
 
+    // Ajustado também o conflito para usar "bimestre"
     const { error } = await window._supabase.from('notas').upsert(notasParaSalvar, { onConflict: 'ra,bimestre,serie,turma,disciplina,eixo,pacote,atividade' });
 
     btnSalvar.disabled = false;
@@ -354,6 +354,7 @@ async function salvarNotasEmLote() {
         voltarParaConfigPesos();
     }
 }
+
 // ==========================================
 // MATRIZ ANALÍTICA
 // ==========================================
